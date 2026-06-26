@@ -147,13 +147,16 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 
 == Screenshots ==
 
-1. Folder sidebar in the WordPress Media Library — unlimited nested folders with colour coding.
-2. Right-click context menu — rename, delete, lock, download ZIP, import ZIP, and more.
-3. Folder colour picker — visually organise at a glance.
+1. Dashboard of PixelVault — All features at a glance.
+2. Folder sidebar in the WordPress Media Library — unlimited nested folders with colour coding.
+3. Right-click context menu — rename, delete, lock, download ZIP, import ZIP, and more.
 4. Storage Analytics — per-folder breakdown, file-type chart, and top-10 largest files.
 5. Import from another plugin — one-click migration from FileBird, Real Media Library, WP Media Folder, and Enhanced Media Library.
 6. Media Usage Map — see every post and page that references a file.
 7. Bulk Alt Text Editor — batch-edit missing alt text across your entire library.
+8. Import Existing Media — auto-organize your existing media into folders by a chosen rule (By Year, By Month, By File Type)
+9. Media Replace — Swap any media file in-place, keeping the same URL and post ID.
+10. Folder Permissions — Control which roles can perform folder actions. Administrators always have full access.
 
 == Changelog ==
 
