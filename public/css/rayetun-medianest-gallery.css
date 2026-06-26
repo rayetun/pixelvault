@@ -1,0 +1,148 @@
+/* ================================================================
+   Rayetun MediaNest — Gallery Frontend Styles
+   ================================================================ */
+
+/* ── Grid Layout ── */
+.rmn-gallery {
+	display: grid;
+	grid-template-columns: repeat(var(--rmn-cols, 3), 1fr);
+	gap: var(--rmn-gap, 12px);
+	margin: 1.5em 0;
+}
+.rmn-gallery-item {
+	margin: 0;
+	overflow: hidden;
+	border-radius: 6px;
+	position: relative;
+	background: #f3f4f6;
+}
+.rmn-gallery-item img {
+	width: 100%;
+	height: 220px;
+	object-fit: cover;
+	display: block;
+	transition: transform .35s ease;
+}
+.rmn-gallery-item:hover img { transform: scale(1.05); }
+.rmn-gallery-item a { display: block; overflow: hidden; }
+
+/* ── Captions ── */
+.rmn-gallery-caption {
+	position: absolute;
+	bottom: 0; left: 0; right: 0;
+	background: linear-gradient(0deg, rgba(0,0,0,.65) 0%, transparent 100%);
+	color: #fff;
+	padding: 24px 12px 10px;
+	font-size: 13px;
+	line-height: 1.4;
+	transform: translateY(100%);
+	transition: transform .25s ease;
+}
+.rmn-gallery-item:hover .rmn-gallery-caption { transform: translateY(0); }
+
+/* ── Aspect ratio variants ── */
+.rmn-gallery.is-square .rmn-gallery-item img { height: auto; aspect-ratio: 1/1; }
+.rmn-gallery.is-landscape .rmn-gallery-item img { height: auto; aspect-ratio: 16/9; }
+.rmn-gallery.is-portrait .rmn-gallery-item img { height: auto; aspect-ratio: 3/4; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+	.rmn-gallery { grid-template-columns: repeat(min(var(--rmn-cols,3), 2), 1fr); }
+}
+@media (max-width: 480px) {
+	.rmn-gallery { grid-template-columns: 1fr 1fr; }
+}
+
+/* ================================================================
+   Lightbox
+   ================================================================ */
+.rmn-lb {
+	position: fixed;
+	inset: 0;
+	z-index: 999999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0,0,0,0);
+	transition: background .25s;
+	cursor: zoom-out;
+}
+.rmn-lb.is-open { background: rgba(0,0,0,.92); }
+.rmn-lb-inner {
+	position: relative;
+	max-width: 90vw;
+	max-height: 90vh;
+	cursor: default;
+	opacity: 0;
+	transform: scale(.96);
+	transition: opacity .22s, transform .22s;
+}
+.rmn-lb.is-open .rmn-lb-inner { opacity: 1; transform: scale(1); }
+.rmn-lb-img {
+	max-width: 90vw;
+	max-height: 85vh;
+	display: block;
+	border-radius: 4px;
+	box-shadow: 0 20px 60px rgba(0,0,0,.6);
+	object-fit: contain;
+}
+.rmn-lb-caption {
+	text-align: center;
+	color: rgba(255,255,255,.75);
+	font-size: 13px;
+	margin-top: 10px;
+	padding: 0 20px;
+}
+.rmn-lb-close {
+	position: fixed;
+	top: 18px; right: 22px;
+	background: none;
+	border: none;
+	color: rgba(255,255,255,.8);
+	font-size: 32px;
+	line-height: 1;
+	cursor: pointer;
+	padding: 4px;
+	z-index: 1;
+	transition: color .15s;
+}
+.rmn-lb-close:hover { color: #fff; }
+.rmn-lb-nav {
+	position: fixed;
+	top: 50%; transform: translateY(-50%);
+	background: rgba(255,255,255,.12);
+	border: none;
+	color: #fff;
+	font-size: 24px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background .15s;
+	z-index: 1;
+}
+.rmn-lb-nav:hover { background: rgba(255,255,255,.25); }
+.rmn-lb-prev { left: 16px; }
+.rmn-lb-next { right: 16px; }
+.rmn-lb-counter {
+	position: fixed;
+	bottom: 16px; left: 50%; transform: translateX(-50%);
+	color: rgba(255,255,255,.5);
+	font-size: 12px;
+	letter-spacing: .05em;
+}
+.rmn-lb-dots {
+	display: flex; gap: 6px; align-items: center;
+	position: fixed;
+	bottom: 14px; left: 50%; transform: translateX(-50%);
+}
+.rmn-lb-dot {
+	width: 6px; height: 6px;
+	border-radius: 50%;
+	background: rgba(255,255,255,.3);
+	transition: background .15s, transform .15s;
+}
+.rmn-lb-dot.is-active { background: #fff; transform: scale(1.3); }

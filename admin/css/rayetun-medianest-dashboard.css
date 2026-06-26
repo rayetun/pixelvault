@@ -1,0 +1,127 @@
+/**
+ * MediaNest — WordPress Dashboard Widget styles.
+ * Loaded only on wp-admin/index.php (the WP dashboard page).
+ *
+ * @package RayetunMediaNest
+ */
+
+/* ── Container ──────────────────────────────────────────────────────────── */
+.rmn-dw { font-size: 13px; line-height: 1.5; }
+
+/* ── Stat row ───────────────────────────────────────────────────────────── */
+.rmn-dw-stats {
+	display: flex;
+	border: 1px solid #e5e7eb;
+	border-radius: 10px;
+	overflow: hidden;
+	margin-bottom: 16px;
+}
+.rmn-dw-stat {
+	flex: 1;
+	padding: 12px 8px;
+	text-align: center;
+	border-right: 1px solid #e5e7eb;
+}
+.rmn-dw-stat:last-child { border-right: none; }
+
+.rmn-dw-val {
+	display: block;
+	font-size: 17px;
+	font-weight: 700;
+	color: #1e1b4b;
+	line-height: 1.2;
+}
+.rmn-dw-lbl {
+	display: block;
+	font-size: 10px;
+	color: #9ca3af;
+	margin-top: 2px;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+}
+
+/* ── File-type bars ──────────────────────────────────────────────────────── */
+.rmn-dw-types {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	margin-bottom: 16px;
+}
+.rmn-dw-type-row {
+	display: grid;
+	grid-template-columns: 48px 1fr 46px;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+}
+.rmn-dw-type-name {
+	font-weight: 600;
+	color: #374151;
+	white-space: nowrap;
+}
+.rmn-dw-type-bar {
+	height: 6px;
+	background: #f3f4f6;
+	border-radius: 99px;
+	overflow: hidden;
+}
+.rmn-dw-type-fill {
+	height: 100%;
+	background: #4f46e5;
+	border-radius: 99px;
+}
+.rmn-dw-type-size {
+	font-size: 11px;
+	color: #6b7280;
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* ── Top files ──────────────────────────────────────────────────────────── */
+.rmn-dw-top { margin-bottom: 14px; }
+
+.rmn-dw-top-title {
+	font-size: 10px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .05em;
+	color: #9ca3af;
+	margin-bottom: 8px;
+}
+.rmn-dw-top-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 5px 0;
+	border-bottom: 1px solid #f3f4f6;
+}
+.rmn-dw-top-row:last-child { border-bottom: none; }
+
+.rmn-dw-top-name {
+	font-size: 12px;
+	color: #374151;
+	text-decoration: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 200px;
+}
+.rmn-dw-top-name:hover { color: #4f46e5; text-decoration: underline; }
+
+.rmn-dw-top-size {
+	font-size: 11px;
+	color: #6b7280;
+	white-space: nowrap;
+	margin-left: 10px;
+	flex-shrink: 0;
+}
+
+/* ── Footer link ────────────────────────────────────────────────────────── */
+.rmn-dw-footer { margin-top: 12px; text-align: right; }
+.rmn-dw-footer a {
+	font-size: 12px;
+	color: #4f46e5;
+	text-decoration: none;
+	font-weight: 500;
+}
+.rmn-dw-footer a:hover { text-decoration: underline; }

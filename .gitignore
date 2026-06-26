@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# Dependencies / build
+node_modules/
+vendor/composer/
+composer.lock
+package-lock.json
+
+# Distribution artifacts
+pixelvault.zip
+*.zip

@@ -1,0 +1,35 @@
+name: Deploy to WordPress.org
+
+# Publish to the WordPress.org SVN repository whenever a GitHub Release is published.
+# The release tag (e.g. "1.0.1") becomes the SVN tag, and trunk is updated to match.
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    name: Deploy new release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: WordPress Plugin Deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: pixelvault
+        with:
+          # Use the release tag name as the plugin version / SVN tag.
+          generate-zip: true
+
+      - name: Upload release ZIP as a GitHub asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ github.workspace }}/pixelvault.zip
+          asset_name: pixelvault.zip
+          asset_content_type: application/zip
