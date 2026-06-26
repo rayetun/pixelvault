@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  
+  <defs>
+    <linearGradient id="avBody" x1="40" y1="48" x2="216" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366f1"></stop><stop offset="0.5" stop-color="#4f46e5"></stop><stop offset="1" stop-color="#4338ca"></stop>
+    </linearGradient>
+    <linearGradient id="avFront" x1="40" y1="110" x2="200" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6d6bf2"></stop><stop offset="1" stop-color="#4f46e5"></stop>
+    </linearGradient>
+    <linearGradient id="avGloss" x1="60" y1="110" x2="170" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.26"></stop><stop offset="1" stop-color="#ffffff" stop-opacity="0"></stop>
+    </linearGradient>
+    <linearGradient id="avBadge" x1="156" y1="160" x2="200" y2="208" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="1" stop-color="#e0e7ff"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="40" y="92" width="176" height="120" rx="26" fill="url(#avBody)"></rect>
+  <g style="animation: pvDive 3.6s cubic-bezier(.5,.05,.3,1) infinite; animation-delay:0s">
+    <g transform="translate(74 52) rotate(-12 28 28)">
+      <rect width="56" height="56" rx="9" fill="#ffffff"></rect>
+      <rect width="56" height="56" rx="9" fill="none" stroke="#c7d2fe" stroke-width="1.2" opacity="0.6"></rect>
+      <circle cx="17" cy="17" r="5" fill="#818cf8"></circle>
+      <path d="M8 46 L23 27 L35 46 Z" fill="#6366f1"></path>
+      <path d="M27 46 L39 31 L50 46 Z" fill="#a5b4fc"></path>
+    </g>
+  </g>
+  <g style="animation: pvDive 3.6s cubic-bezier(.5,.05,.3,1) infinite; animation-delay:0.6s">
+    <g transform="translate(100 40) rotate(0 28 28)">
+      <rect width="56" height="56" rx="9" fill="#ffffff"></rect>
+      <rect width="56" height="56" rx="9" fill="none" stroke="#c7d2fe" stroke-width="1.2" opacity="0.6"></rect>
+      <circle cx="17" cy="17" r="5" fill="#818cf8"></circle>
+      <path d="M8 46 L23 27 L35 46 Z" fill="#6366f1"></path>
+      <path d="M27 46 L39 31 L50 46 Z" fill="#a5b4fc"></path>
+    </g>
+  </g>
+  <g style="animation: pvDive 3.6s cubic-bezier(.5,.05,.3,1) infinite; animation-delay:0.3s">
+    <g transform="translate(126 52) rotate(12 28 28)">
+      <rect width="56" height="56" rx="9" fill="#ffffff"></rect>
+      <rect width="56" height="56" rx="9" fill="none" stroke="#c7d2fe" stroke-width="1.2" opacity="0.6"></rect>
+      <circle cx="17" cy="17" r="5" fill="#818cf8"></circle>
+      <path d="M8 46 L23 27 L35 46 Z" fill="#6366f1"></path>
+      <path d="M27 46 L39 31 L50 46 Z" fill="#a5b4fc"></path>
+    </g>
+  </g>
+  <path d="M40 132 C40 118 51 110 64 110 H100 L112 122 H192 C205 122 216 130 216 144 V186 C216 200 205 212 192 212 H64 C51 212 40 200 40 186 Z" fill="url(#avFront)"></path>
+  <path d="M40 132 C40 118 51 110 64 110 H100 L112 122 H192 C205 122 216 130 216 144 V186 C216 200 205 212 192 212 H64 C51 212 40 200 40 186 Z" fill="url(#avGloss)"></path>
+  <circle cx="178" cy="184" r="26" fill="url(#avBadge)"></circle>
+  <circle cx="178" cy="184" r="26" stroke="#c7d2fe" stroke-width="1.5" fill="none" opacity="0.7"></circle>
+  <circle cx="178" cy="178" r="8" fill="#4f46e5"></circle>
+  <path d="M174 182 H182 L185 198 H171 Z" fill="#4f46e5"></path>
+</svg>
