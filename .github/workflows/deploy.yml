@@ -1,10 +1,12 @@
 name: Deploy to WordPress.org
 
-# Publish to the WordPress.org SVN repository whenever a GitHub Release is published.
-# The release tag (e.g. "1.0.1") becomes the SVN tag, and trunk is updated to match.
 on:
   release:
     types: [published]
+
+# Add these lines right here 👇
+permissions:
+  contents: write
 
 jobs:
   deploy:
@@ -21,7 +23,6 @@ jobs:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: pixelvault
         with:
-          # Use the release tag name as the plugin version / SVN tag.
           generate-zip: true
 
       - name: Upload release ZIP as a GitHub asset
