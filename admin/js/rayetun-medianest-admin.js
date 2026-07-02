@@ -32,10 +32,13 @@
 		showNewFolder: false, showSubfolderFor: null,
 		bulkMode: false, selectedIds: [],
 		smartFolders: [],
+		starred: ( cfg.starred || [] ).map( function ( x ) { return parseInt( x, 10 ); } ),
 		sortBy: DEFAULT_SORT, /* seeded from Settings → default_sort */
 		compactMode: false,
 		focusedFolderId: null, /* manual | az | za | count_desc | count_asc */
 	};
+
+	function isStarred( tid ) { return state.starred.indexOf( parseInt( tid, 10 ) ) !== -1; }
 
 	/* Restore from localStorage */
 	try {
@@ -129,10 +132,23 @@
 
 	/* ── REST ── */
 	function apiFetch( path, opts ) {
-		return fetch( cfg.restUrl + path, Object.assign( {
-			headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.restNonce }
-		}, opts || {} ) ).then( function(r) {
-			if ( !r.ok ) return r.json().catch(function(){return{};}).then(function(b){throw new Error(b.message||'Error');});
+		opts = opts || {};
+		var method  = ( opts.method || 'GET' ).toUpperCase();
+		var headers = { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.restNonce };
+
+		/* Some hosts (ModSecurity) and security plugins block the DELETE/PUT/PATCH
+		   HTTP verbs to the REST API, returning a 403. Tunnel them through POST with
+		   the X-HTTP-Method-Override header, which WordPress core routes as the real
+		   method internally. */
+		if ( method === 'DELETE' || method === 'PUT' || method === 'PATCH' ) {
+			headers['X-HTTP-Method-Override'] = method;
+			opts.method = 'POST';
+		}
+		if ( opts.headers ) { for ( var k in opts.headers ) { headers[ k ] = opts.headers[ k ]; } }
+		opts.headers = headers;
+
+		return fetch( cfg.restUrl + path, opts ).then( function(r) {
+			if ( !r.ok ) return r.json().catch(function(){return{};}).then(function(b){throw new Error(b.message||('Request failed ('+r.status+')'));});
 			return r.json();
 		} );
 	}
@@ -191,6 +207,15 @@
 
 	function apiReorder( orderedIds ) {
 		return apiFetch('/folders/reorder',{method:'POST',body:JSON.stringify({order:orderedIds})});
+	}
+
+	function apiStar(tid,starred){
+		tid=parseInt(tid,10);
+		/* Optimistic local update */
+		if(starred){ if(state.starred.indexOf(tid)===-1)state.starred.push(tid); }
+		else{ state.starred=state.starred.filter(function(x){return x!==tid;}); }
+		return apiFetch('/folders/'+tid+'/star',{method:'POST',body:JSON.stringify({starred:!!starred})})
+			.then(function(res){ if(res&&Array.isArray(res.ids)){state.starred=res.ids.map(function(x){return parseInt(x,10);});} });
 	}
 
 	/* ── Alt Text Editor API helpers ─────────────────────────── */
@@ -556,6 +581,15 @@
 			var aid=parseInt(att.dataset.id,10);if(isNaN(aid))return;
 			var menu=el('div',{className:'rayetun-mn-img-menu'});
 
+			/* Helper add-ons use to build a menu item (returns a DOM node to append). */
+			function mkImgItem(iconHtml,label,cls,fn){
+				var b=el('button',{className:'rayetun-mn-img-menu-item'+(cls?' '+cls:'')});
+				b.innerHTML=(iconHtml||'')+'<span></span>';
+				b.querySelector('span').textContent=label;
+				b.addEventListener('click',function(ev){ev.stopPropagation();closeImgMenu();fn();});
+				return b;
+			}
+
 			/* "Remove from [folder]" appears at the top when viewing a specific folder */
 			if(state.activeFolderId&&state.activeFolderId!=='uncategorized'){
 				var curFolder=fnd(state.activeFolderId);
@@ -580,6 +614,13 @@
 				usageBtn.addEventListener('click',function(ev){ev.stopPropagation();closeImgMenu();showUsageModal(aid);});
 				menu.appendChild(usageBtn);
 			}
+
+			/* Extension point: add-ons (PixelVault Pro) inject image action items here.
+			   Usage: wp.hooks.addAction('pixelvault.imageContextMenu','my-addon',function(menu,attachmentId,helpers){
+			              menu.appendChild( helpers.addItem(iconSvg,'Label','',function(){ ... }) );
+			          }); */
+			if(window.wp&&wp.hooks){wp.hooks.doAction('pixelvault.imageContextMenu',menu,aid,{addItem:mkImgItem});}
+
 			menu.appendChild(el('div',{className:'rayetun-mn-img-menu-sep'}));
 
 			menu.appendChild(el('div',{className:'rayetun-mn-img-menu-title'},'Add to folder:'));
@@ -600,8 +641,12 @@
 				});})(tree,0);
 			}
 			document.body.appendChild(menu);imgMenu=menu;
-			var vw=window.innerWidth,vh=window.innerHeight,left=e.clientX,top=e.clientY;
-			if(left+215>vw)left=vw-220;if(top+200>vh)top=vh-205;
+			/* Measure actual size so the menu always fits the viewport. */
+			var vw=window.innerWidth,vh=window.innerHeight;
+			var mw=menu.offsetWidth||215,mh=menu.offsetHeight||200;
+			var left=e.clientX,top=e.clientY;
+			if(left+mw>vw)left=Math.max(4,vw-mw-8);
+			if(top+mh>vh)top=Math.max(4,vh-mh-8);
 			menu.style.left=left+'px';menu.style.top=top+'px';
 		});
 		document.addEventListener('click',closeImgMenu);
@@ -625,6 +670,16 @@
 		menu.appendChild(mkI(II.rename,'Rename',isLocked?'is-disabled':'',function(){if(!isLocked)startRename(folder);}));
 		// New subfolder — always allowed
 		menu.appendChild(mkI(II.sub,'New subfolder','',function(){state.showSubfolderFor=tid;state.expanded[tid]=true;render();}));
+		// Star / Unstar — per-user favourite, pinned to top of sidebar
+		var _isStar=isStarred(tid);
+		menu.appendChild(mkI(
+			_isStar
+				?'<svg width="15" height="15" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7L12 17.8 5.8 21.2l1.6-7L2 9.5l7.1-.6z"/></svg>'
+				:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7L12 17.8 5.8 21.2l1.6-7L2 9.5l7.1-.6z"/></svg>',
+			_isStar?'Unstar':'Star',
+			'',
+			function(){apiStar(tid,!_isStar).then(function(){render();}).catch(function(e){showToast((e&&e.message)||'Could not update.','error');});}
+		));
 		// Change color — grayed out when locked
 		menu.appendChild(mkI(II.palette,'Change color',isLocked?'is-disabled':'',function(){if(!isLocked){state.colorPickerFor=(state.colorPickerFor===tid)?null:tid;render();}}));
 		// Download — always allowed
@@ -648,11 +703,21 @@
 				function(){apiLock(tid,!isLocked).then(function(){render();}).catch(function(err){showToast((err&&err.message)||'Lock failed.','error');});}
 			));
 		}
+		/* Extension point: add-ons (PixelVault Pro) inject folder action items here.
+		   Usage: wp.hooks.addAction('pixelvault.folderContextMenu','my-addon',function(menu,folder,helpers){
+		              menu.appendChild( helpers.addItem(iconSvg,'Label','',function(){ ... }) );
+		          }); */
+		if(window.wp&&wp.hooks){wp.hooks.doAction('pixelvault.folderContextMenu',menu,folder,{addItem:mkI});}
+
 		document.body.appendChild(menu);activeMenu=menu;
+		/* Measure the actual rendered size so the menu always fits the viewport,
+		   regardless of how many items it has (Star, or add-on-injected items). */
 		var vw=window.innerWidth,vh=window.innerHeight;
+		var mw=menu.offsetWidth||200,mh=menu.offsetHeight||260;
 		var left=fromDots?e.currentTarget.getBoundingClientRect().right+4:e.clientX;
 		var top=fromDots?e.currentTarget.getBoundingClientRect().top:e.clientY;
-		if(left+200>vw)left=vw-210;if(top+260>vh)top=vh-265;
+		if(left+mw>vw)left=Math.max(4,vw-mw-8);
+		if(top+mh>vh)top=Math.max(4,vh-mh-8);
 		menu.style.left=left+'px';menu.style.top=top+'px';
 	}
 
@@ -872,6 +937,14 @@
 		var delBtn  =makeBtn('rayetun-mn-fb-delete','&#x1F5D1; Delete',           'Permanently delete selected files');
 	
 		removeBtn.style.display='none';moveBtn.style.display='none';
+
+		/* Extension point: add-ons (PixelVault Pro) add bulk action buttons here.
+		   Usage: wp.hooks.addAction('pixelvault.bulkActions','my-addon',function(actions,helpers){
+		              var btn=helpers.makeBtn('my-cls','Label','Tooltip');
+		              btn.addEventListener('click',function(){ var ids=helpers.getIds(); ... });
+		          }); */
+		if(window.wp&&wp.hooks){wp.hooks.doAction('pixelvault.bulkActions',actions,{makeBtn:makeBtn,getIds:function(){return bar._ids||[];}});}
+
 		bar.appendChild(actions);
 	
 		var closeBtn=document.createElement('button');
@@ -1086,6 +1159,20 @@
 
 		/* Hover actions */
 		var aw=el('span',{className:'rayetun-mn-row-actions'});
+
+		/* Extension point: add-ons (PixelVault Pro) add inline folder row-action buttons,
+		   shown before the ⋮ options button.
+		   Usage: wp.hooks.addAction('pixelvault.folderRowActions','my-addon',function(aw,folder,helpers){
+		              helpers.addBtn(iconSvg,'Title',function(){ ... });
+		          }); */
+		if(window.wp&&wp.hooks){
+			wp.hooks.doAction('pixelvault.folderRowActions',aw,folder,{addBtn:function(iconHtml,title,fn){
+				var rb=el('button',{className:'rayetun-mn-row-actions-btn','aria-label':title||'',title:title||'',
+					onClick:function(e){e.stopPropagation();fn(e);}});
+				rb.innerHTML=iconHtml||'';aw.appendChild(rb);return rb;
+			}});
+		}
+
 		var db=el('button',{className:'rayetun-mn-row-actions-btn','aria-label':'Options',
 			onClick:function(e){e.stopPropagation();showCtxMenu(e,folder,true);}});
 		db.innerHTML=II.dots;aw.appendChild(db);
@@ -1201,6 +1288,31 @@
 		}
 
 		panel.appendChild(el('div',{className:'rayetun-mn-divider'}));
+
+		/* ── Starred folders (pinned quick-access) ── */
+		if(state.starred.length&&!state.searchQuery){
+			var starFolders=state.starred.map(function(tid){return fnd(tid);}).filter(function(f){return !!f;});
+			if(starFolders.length){
+				var stSec=el('div',{className:'rayetun-mn-starred-section'});
+				stSec.appendChild(el('div',{className:'rayetun-mn-starred-title'},'★ Starred'));
+				starFolders.forEach(function(f){
+					var stid=Number(f.term_id);
+					var sact=state.activeFolderId===stid;
+					var sr=el('div',{className:'rayetun-mn-starred-item'+(sact?' is-active':''),tabindex:'0',role:'treeitem','aria-selected':sact?'true':'false',
+						onClick:function(){setActive(stid);},
+						onKeydown:function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();setActive(stid);}}});
+					sr.innerHTML=iF(f.color||'#f59e0b')+'<span class="rayetun-mn-starred-label"></span>';
+					sr.querySelector('.rayetun-mn-starred-label').textContent=f.name;
+					var unst=el('button',{className:'rayetun-mn-starred-unstar',title:'Unstar','aria-label':'Unstar folder',
+						onClick:function(e){e.stopPropagation();apiStar(stid,false).then(function(){render();}).catch(function(er){showToast((er&&er.message)||'Could not update.','error');});}});
+					unst.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7L12 17.8 5.8 21.2l1.6-7L2 9.5l7.1-.6z"/></svg>';
+					sr.appendChild(unst);
+					stSec.appendChild(sr);
+				});
+				panel.appendChild(stSec);
+				panel.appendChild(el('div',{className:'rayetun-mn-divider'}));
+			}
+		}
 
 		/* ── Smart Folders (collapsible tab) — hidden when feature disabled ── */
 		if(_features.smartFilters!==false&&state.smartFolders&&state.smartFolders.length&&!state.searchQuery){

@@ -104,7 +104,7 @@ class RayetunMediaNest_Import {
 			}
 		}
 
-		do_action( 'rayetun_medianest_attachment_assigned' );
+		do_action( 'rayetun_medianest_media_changed' );
 		return rest_ensure_response( array( 'created' => $created, 'assigned' => $assigned ) );
 	}
 

@@ -279,7 +279,7 @@ class RayetunMediaNest_Importer {
 		}
 
 		if ( $files_assigned > 0 ) {
-			do_action( 'rayetun_medianest_attachment_assigned' );
+			do_action( 'rayetun_medianest_media_changed' );
 		}
 
 		return array(
@@ -380,7 +380,7 @@ class RayetunMediaNest_Importer {
 		}
 
 		if ( $files_assigned > 0 ) {
-			do_action( 'rayetun_medianest_attachment_assigned' );
+			do_action( 'rayetun_medianest_media_changed' );
 		}
 
 		return array(
@@ -492,7 +492,7 @@ class RayetunMediaNest_Importer {
 		}
 
 		if ( $files_assigned > 0 ) {
-			do_action( 'rayetun_medianest_attachment_assigned' );
+			do_action( 'rayetun_medianest_media_changed' );
 		}
 
 		return array(

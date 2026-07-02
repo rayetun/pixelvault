@@ -195,7 +195,7 @@ class RayetunMediaNest_Bulk {
 			if ( ! current_user_can( 'delete_post', $id ) ) { continue; }
 			if ( wp_delete_attachment( $id, true ) ) { $deleted++; }
 		}
-		do_action( 'rayetun_medianest_attachment_assigned' );
+		do_action( 'rayetun_medianest_media_changed' );
 		return rest_ensure_response( array( 'deleted' => $deleted ) );
 	}
 
@@ -211,7 +211,7 @@ class RayetunMediaNest_Bulk {
 			if ( ! current_user_can( 'delete_post', $id ) ) { continue; }
 			if ( wp_delete_attachment( $id, true ) ) { $deleted++; }
 		}
-		do_action( 'rayetun_medianest_attachment_assigned' );
+		do_action( 'rayetun_medianest_media_changed' );
 		wp_send_json_success( array( 'deleted' => $deleted ) );
 	}
 }

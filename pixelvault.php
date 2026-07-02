@@ -3,7 +3,7 @@
  * Plugin Name:       PixelVault — Media Library Folders
  * Plugin URI:        https://wordpress.org/plugins/pixelvault/
  * Description:       Unlimited nested media folders for WordPress. Colour-coded folders, drag and drop, bulk ZIP download, analytics, role permissions, and one-click plugin migration.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            Md Rayhan Uddin
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RAYETUN_MEDIANEST_VERSION',  '1.0.0' );
+define( 'RAYETUN_MEDIANEST_VERSION',  '1.1.0' );
 define( 'RAYETUN_MEDIANEST_DIR',      plugin_dir_path( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_URL',      plugin_dir_url( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_BASENAME', plugin_basename( __FILE__ ) );
@@ -48,6 +48,8 @@ function rayetun_medianest_load_classes() {
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-importer.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-zip-import.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-usage.php';
+	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-starred.php';
+	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-templates.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-permissions.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-settings.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-analytics.php';
@@ -108,14 +110,17 @@ final class RayetunMediaNest {
 		RayetunMediaNest_Counts::register();
 		RayetunMediaNest_Bulk::register();
 		RayetunMediaNest_Query::register();
+		RayetunMediaNest_Starred::register();
+		RayetunMediaNest_Templates::register();
 		RayetunMediaNest_Permissions::register();
 		// Settings must register before feature checks below.
 		RayetunMediaNest_Settings::register();
 
-		// Feature-gated classes — only register() when the feature is enabled.
-		if ( RayetunMediaNest_Settings::get( 'feature_auto_assign', 1 ) ) {
-			RayetunMediaNest_AutoAssign::register();
-		}
+		// Auto-assign always registers its add_attachment listener so the
+		// rayetun_medianest_auto_assign_target filter is always available to add-ons.
+		// The free active-folder behaviour is gated INSIDE the handler by the
+		// feature_auto_assign + auto_assign settings.
+		RayetunMediaNest_AutoAssign::register();
 		if ( RayetunMediaNest_Settings::get( 'feature_import_export', 1 ) ) {
 			RayetunMediaNest_Export::register();
 			RayetunMediaNest_Import::register();

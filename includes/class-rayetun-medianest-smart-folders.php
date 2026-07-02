@@ -36,13 +36,15 @@ class RayetunMediaNest_Smart_Folders {
 		/* Flush counts whenever attachments are added, assigned, moved, or deleted */
 		add_action( 'add_attachment',    array( __CLASS__, 'flush_counts' ) );
 		add_action( 'rayetun_medianest_attachment_assigned', array( __CLASS__, 'flush_counts' ) );
+		add_action( 'rayetun_medianest_attachments_removed', array( __CLASS__, 'flush_counts' ) );
+		add_action( 'rayetun_medianest_media_changed',       array( __CLASS__, 'flush_counts' ) );
 		add_action( 'delete_attachment', array( __CLASS__, 'flush_counts' ) );
 	}
 
 	// ── Folder definitions ────────────────────────────────────────────────────
 
 	public static function get_definitions(): array {
-		return array(
+		$defs = array(
 			'missing_alt' => array(
 				'label'       => __( 'Missing Alt Text', 'pixelvault' ),
 				'icon'        => '&#9888;',   /* ⚠ warning sign */
@@ -68,6 +70,18 @@ class RayetunMediaNest_Smart_Folders {
 				'description' => __( 'Files larger than 1 MB — consider optimising for web.', 'pixelvault' ),
 			),
 		);
+
+		/**
+		 * Filter the registered smart (dynamic) folders.
+		 *
+		 * Add-ons register a custom smart folder by adding an entry keyed by its type slug,
+		 * with 'label', 'icon', and 'description'. To make it functional they must also hook
+		 * `rayetun_medianest_smart_folder_counts` (to provide its count) and
+		 * `rayetun_medianest_smart_folder_query_args` (to filter the media grid when active).
+		 *
+		 * @param array $defs Smart folder definitions keyed by type slug.
+		 */
+		return (array) apply_filters( 'rayetun_medianest_smart_folders', $defs );
 	}
 
 	public static function is_smart_slug( string $value ): bool {
@@ -134,6 +148,14 @@ class RayetunMediaNest_Smart_Folders {
 			'recent'      => self::count_recent(),
 			'large'       => self::count_large(),
 		);
+
+		/**
+		 * Filter smart-folder counts. Add-ons provide counts for their custom types
+		 * keyed by the same type slug they registered via `rayetun_medianest_smart_folders`.
+		 *
+		 * @param array $counts Counts keyed by smart folder type slug.
+		 */
+		$counts = (array) apply_filters( 'rayetun_medianest_smart_folder_counts', $counts );
 
 		wp_cache_set( self::CACHE_KEY, $counts, self::CACHE_GROUP, self::CACHE_TTL );
 		return $counts;
@@ -273,7 +295,15 @@ class RayetunMediaNest_Smart_Folders {
 				);
 				break;
 		}
-		return $args;
+
+		/**
+		 * Filter the WP_Query args applied when a smart folder is active. Add-ons use this
+		 * to filter the media grid for their custom smart folder types.
+		 *
+		 * @param array  $args Query args assembled so far.
+		 * @param string $type Smart folder type slug currently active.
+		 */
+		return (array) apply_filters( 'rayetun_medianest_smart_folder_query_args', $args, $type );
 	}
 
 	// ── Filesize caching ──────────────────────────────────────────────────────

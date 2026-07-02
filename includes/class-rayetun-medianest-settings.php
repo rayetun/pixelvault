@@ -53,6 +53,21 @@ class RayetunMediaNest_Settings {
 	// ── Public getter ─────────────────────────────────────────────────────────
 
 	/**
+	 * Default settings, filterable so add-ons (PixelVault Pro) can register their own
+	 * default option values.
+	 *
+	 * @return array
+	 */
+	public static function get_defaults(): array {
+		/**
+		 * Filter the default settings array.
+		 *
+		 * @param array $defaults Built-in default option values.
+		 */
+		return (array) apply_filters( 'rayetun_medianest_settings_defaults', self::DEFAULTS );
+	}
+
+	/**
 	 * Get a single setting value.
 	 *
 	 * @param string $key      Setting key.
@@ -60,14 +75,15 @@ class RayetunMediaNest_Settings {
 	 * @return mixed
 	 */
 	public static function get( string $key, $fallback = null ) {
+		$defaults = self::get_defaults();
 		$settings = wp_parse_args(
 			(array) get_option( self::OPTION_KEY, array() ),
-			self::DEFAULTS
+			$defaults
 		);
 		if ( array_key_exists( $key, $settings ) ) {
 			return $settings[ $key ];
 		}
-		return null !== $fallback ? $fallback : ( self::DEFAULTS[ $key ] ?? null );
+		return null !== $fallback ? $fallback : ( $defaults[ $key ] ?? null );
 	}
 
 	// ── Registration ──────────────────────────────────────────────────────────
@@ -143,18 +159,20 @@ class RayetunMediaNest_Settings {
 			return;
 		}
 
+		$mn_settings_css = RAYETUN_MEDIANEST_DIR . 'admin/css/rayetun-medianest-settings.css';
 		wp_enqueue_style(
 			'rayetun-medianest-settings',
 			RAYETUN_MEDIANEST_URL . 'admin/css/rayetun-medianest-settings.css',
 			array(),
-			RAYETUN_MEDIANEST_VERSION
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_settings_css ) ? '.' . filemtime( $mn_settings_css ) : '' )
 		);
 
+		$mn_settings_js = RAYETUN_MEDIANEST_DIR . 'admin/js/rayetun-medianest-settings.js';
 		wp_enqueue_script(
 			'rayetun-medianest-settings',
 			RAYETUN_MEDIANEST_URL . 'admin/js/rayetun-medianest-settings.js',
 			array( 'jquery' ),
-			RAYETUN_MEDIANEST_VERSION,
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_settings_js ) ? '.' . filemtime( $mn_settings_js ) : '' ),
 			true
 		);
 
@@ -167,7 +185,7 @@ class RayetunMediaNest_Settings {
 				'restNonce'   => wp_create_nonce( 'wp_rest' ),
 				'nonce'       => wp_create_nonce( 'rayetun_mn_settings' ),
 				'exportNonce' => wp_create_nonce( 'rayetun_medianest_ajax' ),
-				'settings'    => wp_parse_args( (array) get_option( self::OPTION_KEY, array() ), self::DEFAULTS ),
+				'settings'    => wp_parse_args( (array) get_option( self::OPTION_KEY, array() ), self::get_defaults() ),
 				'strings'   => array(
 					'saving'          => __( 'Saving…', 'pixelvault' ),
 					'saved'           => __( 'Saved!', 'pixelvault' ),
@@ -202,7 +220,7 @@ class RayetunMediaNest_Settings {
 		 * The settings JS never submits feature_ keys, so we must read them from the DB
 		 * and write them back unchanged — otherwise every Save Changes call resets them to 0.
 		 */
-		$saved = wp_parse_args( (array) get_option( self::OPTION_KEY, array() ), self::DEFAULTS );
+		$saved = wp_parse_args( (array) get_option( self::OPTION_KEY, array() ), self::get_defaults() );
 
 		$clean = array(
 			'auto_assign'        => ! empty( $raw['auto_assign'] ) ? 1 : 0,
@@ -379,7 +397,7 @@ class RayetunMediaNest_Settings {
 		remove_all_actions( 'all_admin_notices' );
 		remove_all_actions( 'network_admin_notices' );
 
-		$settings = wp_parse_args( (array) get_option( self::OPTION_KEY, array() ), self::DEFAULTS );
+		$settings = wp_parse_args( (array) get_option( self::OPTION_KEY, array() ), self::get_defaults() );
 
 		// Defensive: get_stats() runs DB queries — catch any unexpected error
 		// so a failed query never produces a blank page.
@@ -434,12 +452,29 @@ class RayetunMediaNest_Settings {
 						'tools'       => array( 'icon' => 'tools',       'label' => __( 'Tools', 'pixelvault' ),           'feature' => null ),
 						'permissions' => array( 'icon' => 'permissions', 'label' => __( 'Permissions', 'pixelvault' ),     'feature' => null ),
 					);
+
+					/**
+					 * Filter the settings sidebar tabs.
+					 *
+					 * Add-ons can append tabs. Each entry is keyed by panel ID and is an array of:
+					 *  - 'icon'     string  Built-in icon name (see svg_icon), or
+					 *  - 'icon_svg' string  Raw inline SVG markup (optional, overrides 'icon')
+					 *  - 'label'    string  Tab label
+					 *  - 'feature'  string|null  Option key that hides the tab when falsy (optional)
+					 *
+					 * @param array $tabs     Tab definitions keyed by panel ID.
+					 * @param array $settings Current settings values.
+					 */
+					$tabs = (array) apply_filters( 'rayetun_medianest_settings_tabs', $tabs, $settings );
+
 					foreach ( $tabs as $id => $tab ) :
-						$is_hidden = $tab['feature'] && empty( $settings[ $tab['feature'] ] );
+						$feature_key = $tab['feature'] ?? null;
+						$is_hidden   = $feature_key && empty( $settings[ $feature_key ] );
+						$icon_markup = ! empty( $tab['icon_svg'] ) ? $tab['icon_svg'] : self::svg_icon( $tab['icon'] ?? '' );
 						?>
 						<button class="rayetun-mn-nav-item" data-tab="<?php echo esc_attr( $id ); ?>"<?php echo $is_hidden ? ' style="display:none"' : ''; ?>>
-							<span class="rayetun-mn-nav-icon"><?php echo wp_kses( self::svg_icon( $tab['icon'] ), self::svg_allowed_tags() );?></span>
-							<span class="rayetun-mn-nav-label"><?php echo esc_html( $tab['label'] ); ?></span>
+							<span class="rayetun-mn-nav-icon"><?php echo wp_kses( $icon_markup, self::svg_allowed_tags() );?></span>
+							<span class="rayetun-mn-nav-label"><?php echo esc_html( $tab['label'] ?? '' ); ?></span>
 						</button>
 					<?php endforeach; ?>
 				</nav>
@@ -514,9 +549,22 @@ class RayetunMediaNest_Settings {
 									array( 'key' => 'feature_gallery',           'tab' => '',            'label' => __( 'Folder Gallery', 'pixelvault' ),     'active' => (bool) $settings['feature_gallery'],               'desc' => __( 'Display any folder as a responsive gallery via Gutenberg block or shortcode.', 'pixelvault' ) ),
 									array( 'key' => null,                        'tab' => 'permissions', 'label' => __( 'Role Permissions', 'pixelvault' ),   'active' => true,                                              'desc' => __( 'Control folder access per user role.', 'pixelvault' ) ),
 								);
+
+								/**
+								 * Filter the dashboard "Active Features" cards.
+								 *
+								 * Add-ons can append cards. Each entry: 'key' (option key or null for
+								 * always-on), 'tab' (panel ID to jump to, or ''), 'label', 'active' (bool),
+								 * 'desc'. Cards with a 'key' render a live toggle.
+								 *
+								 * @param array $features Feature card definitions.
+								 * @param array $settings Current settings values.
+								 */
+								$features = (array) apply_filters( 'rayetun_medianest_dashboard_features', $features, $settings );
+
 								foreach ( $features as $f ) :
 									$can_toggle = ! empty( $f['key'] );
-									$is_active  = $f['active'];
+									$is_active  = ! empty( $f['active'] );
 									?>
 									<div class="rayetun-mn-feature-card <?php echo esc_attr( $is_active ? 'is-active' : 'is-inactive' ); ?>"
 										<?php if ( $can_toggle ) : ?>
@@ -800,6 +848,23 @@ class RayetunMediaNest_Settings {
 							</div>
 						</div>
 
+						<!-- ── Folder Templates ── -->
+						<div class="rayetun-mn-tools-section">
+							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'Folder Templates', 'pixelvault' ); ?></h3>
+							<div class="rayetun-mn-info-box" style="margin-bottom:16px">
+								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
+								<div>
+									<p><?php esc_html_e( 'Save your current folder structure as a reusable template, then apply it on this or any site to recreate the same folders in one click. Templates store names, hierarchy, colours, and icons only — never your files.', 'pixelvault' ); ?></p>
+								</div>
+							</div>
+							<div class="rayetun-mn-tools-actions" style="margin-bottom:16px">
+								<input type="text" id="mn-template-name" class="rayetun-mn-number-input" style="width:220px" placeholder="<?php esc_attr_e( 'Template name…', 'pixelvault' ); ?>">
+								<button type="button" class="rayetun-mn-save-btn" id="mn-template-save-btn"><?php esc_html_e( 'Save Current Structure', 'pixelvault' ); ?></button>
+								<span class="rayetun-mn-save-status" id="mn-template-status" aria-live="polite"></span>
+							</div>
+							<div id="mn-template-list" class="rayetun-mn-template-list"></div>
+						</div>
+
 						<!-- ── Import from competitors ── -->
 						<div class="rayetun-mn-tools-section" data-feature-section="feature_competitor_import" <?php echo $settings['feature_competitor_import'] ? '' : 'style="display:none"'; ?>>
 							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'Import from Another Plugin', 'pixelvault' ); ?></h3>
@@ -890,6 +955,19 @@ class RayetunMediaNest_Settings {
 						</div>
 						<?php self::render_save_bar( 'permissions' ); ?>
 					</div><!-- /permissions -->
+
+					<?php
+					/**
+					 * Render custom settings panels (add-ons).
+					 *
+					 * Output one `<div class="rayetun-mn-panel" data-panel="{id}" style="display:none">…</div>`
+					 * per tab registered via the `rayetun_medianest_settings_tabs` filter. Add-ons are
+					 * responsible for escaping their own output.
+					 *
+					 * @param array $settings Current settings values.
+					 */
+					do_action( 'rayetun_medianest_render_settings_panels', $settings );
+					?>
 
 				</div><!-- /content -->
 			</div><!-- /layout -->

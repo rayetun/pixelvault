@@ -27,6 +27,8 @@ class RayetunMediaNest_Counts {
 		add_action( 'set_object_terms',                     array( __CLASS__, 'flush_counts' ) );
 		add_action( 'rayetun_medianest_folder_deleted',     array( __CLASS__, 'flush_counts' ) );
 		add_action( 'rayetun_medianest_attachment_assigned', array( __CLASS__, 'flush_counts' ) );
+		add_action( 'rayetun_medianest_attachments_removed', array( __CLASS__, 'flush_counts' ) );
+		add_action( 'rayetun_medianest_media_changed',       array( __CLASS__, 'flush_counts' ) );
 
 		// REST endpoint for counts.
 		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_route' ) );

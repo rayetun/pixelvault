@@ -34,18 +34,20 @@ class RayetunMediaNest_Admin {
 			return;
 		}
 
+		$mn_admin_css = RAYETUN_MEDIANEST_DIR . 'admin/css/rayetun-medianest-admin.css';
 		wp_enqueue_style(
 			'rayetun-medianest-admin',
 			RAYETUN_MEDIANEST_URL . 'admin/css/rayetun-medianest-admin.css',
 			array(),
-			RAYETUN_MEDIANEST_VERSION
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_admin_css ) ? '.' . filemtime( $mn_admin_css ) : '' )
 		);
 
+		$mn_admin_js = RAYETUN_MEDIANEST_DIR . 'admin/js/rayetun-medianest-admin.js';
 		wp_enqueue_script(
 			'rayetun-medianest-admin',
 			RAYETUN_MEDIANEST_URL . 'admin/js/rayetun-medianest-admin.js',
-			array( 'wp-element', 'wp-api-fetch', 'wp-i18n' ),
-			RAYETUN_MEDIANEST_VERSION,
+			array( 'wp-element', 'wp-api-fetch', 'wp-i18n', 'wp-hooks' ),
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_admin_js ) ? '.' . filemtime( $mn_admin_js ) : '' ),
 			true
 		);
 
@@ -67,6 +69,7 @@ class RayetunMediaNest_Admin {
 					'lockFolders'     => current_user_can( 'manage_options' ),
 					'editOthersMedia' => current_user_can( 'edit_others_posts' ),
 				),
+				'starred'        => RayetunMediaNest_Starred::get_starred(),
 				'settings'       => array(
 					'showCounts'       => (bool) RayetunMediaNest_Settings::get( 'show_counts', 1 ),
 					'defaultSort'      => (string) RayetunMediaNest_Settings::get( 'default_sort', 'manual' ),
@@ -112,18 +115,20 @@ class RayetunMediaNest_Admin {
 	 * Hooked to 'elementor/editor/after_enqueue_scripts'.
 	 */
 	public static function enqueue_elementor_assets() {
+		$mn_admin_css = RAYETUN_MEDIANEST_DIR . 'admin/css/rayetun-medianest-admin.css';
 		wp_enqueue_style(
 			'rayetun-medianest-admin',
 			RAYETUN_MEDIANEST_URL . 'admin/css/rayetun-medianest-admin.css',
 			array(),
-			RAYETUN_MEDIANEST_VERSION
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_admin_css ) ? '.' . filemtime( $mn_admin_css ) : '' )
 		);
 
+		$mn_admin_js = RAYETUN_MEDIANEST_DIR . 'admin/js/rayetun-medianest-admin.js';
 		wp_enqueue_script(
 			'rayetun-medianest-admin',
 			RAYETUN_MEDIANEST_URL . 'admin/js/rayetun-medianest-admin.js',
-			array( 'wp-element', 'wp-api-fetch', 'wp-i18n' ),
-			RAYETUN_MEDIANEST_VERSION,
+			array( 'wp-element', 'wp-api-fetch', 'wp-i18n', 'wp-hooks' ),
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_admin_js ) ? '.' . filemtime( $mn_admin_js ) : '' ),
 			true
 		);
 
@@ -145,6 +150,7 @@ class RayetunMediaNest_Admin {
 					'lockFolders'     => current_user_can( 'manage_options' ),
 					'editOthersMedia' => current_user_can( 'edit_others_posts' ),
 				),
+				'starred'        => RayetunMediaNest_Starred::get_starred(),
 				'settings'       => array(
 					'showCounts'       => (bool) RayetunMediaNest_Settings::get( 'show_counts', 1 ),
 					'defaultSort'      => (string) RayetunMediaNest_Settings::get( 'default_sort', 'manual' ),
@@ -183,18 +189,20 @@ class RayetunMediaNest_Admin {
 			return;
 		}
 
+		$mn_admin_css = RAYETUN_MEDIANEST_DIR . 'admin/css/rayetun-medianest-admin.css';
 		wp_enqueue_style(
 			'rayetun-medianest-admin',
 			RAYETUN_MEDIANEST_URL . 'admin/css/rayetun-medianest-admin.css',
 			array(),
-			RAYETUN_MEDIANEST_VERSION
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_admin_css ) ? '.' . filemtime( $mn_admin_css ) : '' )
 		);
 
+		$mn_admin_js = RAYETUN_MEDIANEST_DIR . 'admin/js/rayetun-medianest-admin.js';
 		wp_enqueue_script(
 			'rayetun-medianest-admin',
 			RAYETUN_MEDIANEST_URL . 'admin/js/rayetun-medianest-admin.js',
-			array( 'wp-element', 'wp-api-fetch', 'wp-i18n' ),
-			RAYETUN_MEDIANEST_VERSION,
+			array( 'wp-element', 'wp-api-fetch', 'wp-i18n', 'wp-hooks' ),
+			RAYETUN_MEDIANEST_VERSION . ( file_exists( $mn_admin_js ) ? '.' . filemtime( $mn_admin_js ) : '' ),
 			true
 		);
 
@@ -216,6 +224,7 @@ class RayetunMediaNest_Admin {
 					'lockFolders'     => current_user_can( 'manage_options' ),
 					'editOthersMedia' => current_user_can( 'edit_others_posts' ),
 				),
+				'starred'        => RayetunMediaNest_Starred::get_starred(),
 				'settings'       => array(
 					'showCounts'       => (bool) RayetunMediaNest_Settings::get( 'show_counts', 1 ),
 					'defaultSort'      => (string) RayetunMediaNest_Settings::get( 'default_sort', 'manual' ),

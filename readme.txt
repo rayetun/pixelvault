@@ -5,7 +5,7 @@ Tags:              media library, media folders, file organizer, media organizer
 Requires at least: 6.2
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.0.0
+Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,17 +91,24 @@ Full REST API and documented action/filter hooks.
 
 **🔌 REST API** — Full CRUD at `/wp-json/rayetun-medianest/v1/folders`. Authenticate with `X-WP-Nonce`.
 
-**⚙️ Action hooks:**
+**⚙️ Action hooks (selection):**
 
-* `medianest_folder_created( $term_id, $folder_id, $args )`
-* `medianest_folder_renamed( $term_id, $new_name )`
-* `medianest_folder_deleted( $term_id, $folder_object )`
-* `medianest_folders_reordered( $ordered_term_ids )`
-* `medianest_attachment_assigned( $attachment_id, $term_ids )`
+* `rayetun_medianest_folder_created( $term_id, $folder_id, $args )`
+* `rayetun_medianest_folder_renamed( $term_id, $new_name )`
+* `rayetun_medianest_folder_moved( $term_id, $new_parent, $old_parent )`
+* `rayetun_medianest_folder_deleted( $term_id, $folder_object )`
+* `rayetun_medianest_folders_reordered( $ordered_term_ids )`
+* `rayetun_medianest_attachment_assigned( $attachment_id, $term_ids, $context )`
 
-**🔧 Filter hooks:**
+**🔧 Filter hooks (selection):**
 
-* `medianest_get_folders( $folders, $post_type )` — modify the folder list before it is returned
+* `rayetun_medianest_get_folders( $folders, $post_type )` — modify the folder list
+* `rayetun_medianest_auto_assign_target( $term_id, $attachment_id )` — override the upload target folder
+* `rayetun_medianest_smart_folders( $defs )` — register custom dynamic folders
+
+**JavaScript hooks** (via `@wordpress/hooks`) let you add items to the folder/image context menus and the bulk-action bar.
+
+A full list of PHP and JavaScript hooks with examples ships in `HOOKS.md` inside the plugin.
 
 == Installation ==
 
@@ -160,6 +167,14 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 
 == Changelog ==
 
+= 1.1.0 =
+* New: ⭐ Starred Folders — mark favourite folders and pin them to the top of the media library sidebar (per user).
+* New: 🗂️ Folder Templates — save your current folder structure as a reusable template and apply it in one click (Settings → Tools).
+* New: Folder Structure Backup — export your folder structure to a JSON file and re-import it on any site.
+* New: Developer hooks — added a full set of PHP actions/filters and JavaScript hooks so add-ons can extend PixelVault. See HOOKS.md.
+* Tweak: Assets now use file-modification-time cache-busting, so updates always load without a hard refresh.
+* Fix: Quick Action cards on the dashboard no longer overlap on some screen widths.
+
 = 🎉 1.0.0 =
 * Initial release.
 * Unlimited nested virtual folders with colour coding and drag-and-drop sidebar.
@@ -190,6 +205,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Adds Starred Folders, Folder Templates, JSON structure backup, and a developer hooks API.
 
 = 1.0.0 =
 Initial release.

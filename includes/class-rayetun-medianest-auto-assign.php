@@ -30,27 +30,37 @@ class RayetunMediaNest_AutoAssign {
 	 * @param int $attachment_id
 	 */
 	public static function assign_on_upload( int $attachment_id ) {
-		// Bail early if auto-assign is disabled in Settings.
-		if ( ! (int) RayetunMediaNest_Settings::get( 'auto_assign', 1 ) ) {
-			return;
-		}
-
 		if ( ! current_user_can( 'upload_files' ) ) {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- sanitized below.
-		$cookie_val = isset( $_COOKIE[ self::COOKIE_NAME ] )
-			? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) )
-			: '';
+		$term_id = 0;
 
-		if ( empty( $cookie_val ) || 'uncategorized' === $cookie_val ) {
-			return; // No active folder — leave uncategorized.
+		// Free behaviour: the active-folder cookie, gated by the auto-assign feature + setting.
+		if ( (int) RayetunMediaNest_Settings::get( 'feature_auto_assign', 1 )
+			&& (int) RayetunMediaNest_Settings::get( 'auto_assign', 1 ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- sanitized below.
+			$cookie_val = isset( $_COOKIE[ self::COOKIE_NAME ] )
+				? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) )
+				: '';
+			if ( ! empty( $cookie_val ) && 'uncategorized' !== $cookie_val ) {
+				$term_id = absint( $cookie_val );
+			}
 		}
 
-		$term_id = absint( $cookie_val );
+		/**
+		 * Filter the target folder for a newly uploaded attachment.
+		 *
+		 * Add-ons (e.g. an auto-assign rules engine) can override or supply a target
+		 * term ID even when no active-folder cookie is set. Return 0 for "no folder".
+		 *
+		 * @param int $term_id       Target folder term ID (0 = none).
+		 * @param int $attachment_id The new attachment ID.
+		 */
+		$term_id = (int) apply_filters( 'rayetun_medianest_auto_assign_target', $term_id, $attachment_id );
+
 		if ( $term_id < 1 ) {
-			return;
+			return; // No target — leave uncategorized.
 		}
 
 		// Verify the folder/term exists in our taxonomy.
@@ -68,6 +78,6 @@ class RayetunMediaNest_AutoAssign {
 			wp_set_object_terms( $attachment_id, $existing, RayetunMediaNest_Taxonomy::TAXONOMY );
 		}
 
-		do_action( 'rayetun_medianest_attachment_assigned', $attachment_id, array( $term_id ) );
+		do_action( 'rayetun_medianest_attachment_assigned', $attachment_id, array( $term_id ), 'auto_assign' );
 	}
 }

@@ -159,7 +159,7 @@ class RayetunMediaNest_Zip_Import {
 		self::cleanup_dir( $extract_dir );
 
 		if ( $imported > 0 ) {
-			do_action( 'rayetun_medianest_attachment_assigned' );
+			do_action( 'rayetun_medianest_media_changed' );
 		}
 
 		return rest_ensure_response( array(

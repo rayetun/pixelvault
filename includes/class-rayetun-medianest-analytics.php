@@ -30,8 +30,9 @@ class RayetunMediaNest_Analytics {
 		add_action( 'add_attachment',    array( __CLASS__, 'flush_cache' ) );
 		add_action( 'delete_attachment', array( __CLASS__, 'flush_cache' ) );
 		add_action( 'edit_attachment',   array( __CLASS__, 'flush_cache' ) );
-		/* Flush analytics cache when a folder is deleted so stale entries disappear immediately */
+		/* Flush analytics cache when a folder is deleted or media changes in bulk */
 		add_action( 'rayetun_medianest_folder_deleted', array( __CLASS__, 'flush_cache' ) );
+		add_action( 'rayetun_medianest_media_changed',  array( __CLASS__, 'flush_cache' ) );
 	}
 
 	// ── REST ──────────────────────────────────────────────────────────────────

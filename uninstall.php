@@ -16,3 +16,8 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-rayetun-medianest-per
 
 RayetunMediaNest_Permissions::revoke_all();
 RayetunMediaNest_DB::drop_all();
+
+// Remove per-user starred-folder meta and folder-template + settings options.
+delete_metadata( 'user', 0, 'rayetun_mn_starred_folders', '', true );
+delete_option( 'rayetun_medianest_folder_templates' );
+delete_option( 'rayetun_medianest_settings' );

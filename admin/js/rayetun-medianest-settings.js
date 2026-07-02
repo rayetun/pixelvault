@@ -29,6 +29,81 @@
 			/* Reset to the Scan button — user can trigger detection manually */
 			toolsLoaded = false; // allow re-detect
 		}
+		if ( tabId === 'tools' ) { loadTemplates(); }
+	} );
+
+	// ── Folder Templates ─────────────────────────────────────────────────────
+
+	function tplRest( path, method, data ) {
+		method = ( method || 'GET' ).toUpperCase();
+		var override = null;
+		var httpMethod = method;
+		// Tunnel DELETE/PUT/PATCH through POST for hosts/WAFs that block those verbs.
+		if ( method === 'DELETE' || method === 'PUT' || method === 'PATCH' ) {
+			override = method;
+			httpMethod = 'POST';
+		}
+		return $.ajax( {
+			url:        REST_URL + path,
+			method:     httpMethod,
+			data:       data ? JSON.stringify( data ) : undefined,
+			contentType:'application/json',
+			beforeSend: function ( xhr ) {
+				xhr.setRequestHeader( 'X-WP-Nonce', REST_NONCE );
+				if ( override ) { xhr.setRequestHeader( 'X-HTTP-Method-Override', override ); }
+			}
+		} );
+	}
+
+	function loadTemplates() {
+		var $list = $( '#mn-template-list' );
+		if ( ! $list.length ) { return; }
+		tplRest( '/templates', 'GET' ).done( function ( items ) {
+			$list.empty();
+			if ( ! items || ! items.length ) {
+				$list.append( $( '<p class="rayetun-mn-template-empty"></p>' ).text( 'No templates saved yet.' ) );
+				return;
+			}
+			items.forEach( function ( t ) {
+				var $row = $( '<div class="rayetun-mn-template-row"></div>' );
+				$( '<span class="rayetun-mn-template-name"></span>' ).text( t.name + ' (' + t.count + ')' ).appendTo( $row );
+				var $apply = $( '<button type="button" class="rayetun-mn-save-btn rayetun-mn-btn-secondary">Apply</button>' );
+				var $del   = $( '<button type="button" class="rayetun-mn-template-del" aria-label="Delete">&times;</button>' );
+				$apply.on( 'click', function () {
+					if ( ! window.confirm( 'Create these folders now?' ) ) { return; }
+					$apply.prop( 'disabled', true ).text( 'Applying…' );
+					tplRest( '/templates/' + encodeURIComponent( t.id ) + '/apply', 'POST' )
+						.done( function ( r ) { $apply.text( ( r && r.message ) ? r.message : 'Done' ); } )
+						.fail( function () { $apply.prop( 'disabled', false ).text( 'Apply' ); } );
+				} );
+				$del.on( 'click', function () {
+					if ( ! window.confirm( 'Delete this template?' ) ) { return; }
+					tplRest( '/templates/' + encodeURIComponent( t.id ), 'DELETE' ).done( loadTemplates );
+				} );
+				$row.append( $apply ).append( $del );
+				$list.append( $row );
+			} );
+		} );
+	}
+
+	$( document ).on( 'click', '#mn-template-save-btn', function () {
+		var $btn = $( this );
+		var name = $.trim( $( '#mn-template-name' ).val() );
+		var $status = $( '#mn-template-status' );
+		if ( ! name ) { $status.text( 'Enter a template name.' ).addClass( 'is-error is-visible' ); return; }
+		$btn.prop( 'disabled', true );
+		$status.removeClass( 'is-error' ).text( 'Saving…' ).addClass( 'is-visible' );
+		tplRest( '/templates', 'POST', { name: name } )
+			.done( function () {
+				$( '#mn-template-name' ).val( '' );
+				$status.text( 'Saved.' );
+				loadTemplates();
+			} )
+			.fail( function ( xhr ) {
+				var m = ( xhr && xhr.responseJSON && xhr.responseJSON.message ) ? xhr.responseJSON.message : 'Save failed.';
+				$status.text( m ).addClass( 'is-error' );
+			} )
+			.always( function () { $btn.prop( 'disabled', false ); } );
 	} );
 
 	// Honour ?tab= URL param (e.g. from the WP dashboard widget "View Full Analytics" link).

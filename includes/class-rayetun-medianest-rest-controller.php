@@ -156,6 +156,16 @@ class RayetunMediaNest_REST_Controller extends WP_REST_Controller {
 			)
 		);
 		if ( is_wp_error( $result ) ) { return $result; }
+
+		/**
+		 * Fires after a folder is created via REST, so add-ons can persist their own
+		 * custom per-folder fields (registered via rayetun_medianest_folder_rest_args).
+		 *
+		 * @param int             $term_id Newly created folder term ID.
+		 * @param WP_REST_Request $request The REST request (read custom params from it).
+		 */
+		do_action( 'rayetun_medianest_folder_meta_save', (int) $result['term_id'], $request );
+
 		return new WP_REST_Response( $result, 201 );
 	}
 
@@ -182,6 +192,16 @@ class RayetunMediaNest_REST_Controller extends WP_REST_Controller {
 			$r = RayetunMediaNest_Folder_Service::update_meta( $term_id, $meta );
 			if ( is_wp_error( $r ) ) { return $r; }
 		}
+
+		/**
+		 * Fires after a folder is updated via REST, so add-ons can persist their own
+		 * custom per-folder fields (registered via rayetun_medianest_folder_rest_args).
+		 * Fires even when only custom fields were sent (no core fields changed).
+		 *
+		 * @param int             $term_id Folder term ID.
+		 * @param WP_REST_Request $request The REST request (read custom params from it).
+		 */
+		do_action( 'rayetun_medianest_folder_meta_save', $term_id, $request );
 
 		return rest_ensure_response( RayetunMediaNest_Folder_Service::get_one( $term_id ) );
 	}
@@ -222,7 +242,7 @@ class RayetunMediaNest_REST_Controller extends WP_REST_Controller {
 	public function reorder_permissions_check( $request ) { return current_user_can( 'manage_options' ); }
 
 	private function get_create_args() {
-		return array(
+		$args = array(
 			'name'          => array( 'required' => true, 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'parent_id'     => array( 'default' => 0, 'type' => 'integer' ),
 			'color'         => array( 'default' => '', 'type' => 'string', 'sanitize_callback' => 'sanitize_hex_color' ),
@@ -232,10 +252,19 @@ class RayetunMediaNest_REST_Controller extends WP_REST_Controller {
 			'write_roles'   => array( 'default' => array(), 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
 			'post_type'     => array( 'default' => 'attachment', 'type' => 'string', 'sanitize_callback' => 'sanitize_key' ),
 		);
+
+		/**
+		 * Filter the REST args accepted when creating a folder. Add-ons register custom
+		 * per-folder fields here (each with its own sanitize_callback). Persist the values
+		 * in the `rayetun_medianest_folder_meta_save` action.
+		 *
+		 * @param array $args Argument definitions keyed by param name.
+		 */
+		return (array) apply_filters( 'rayetun_medianest_folder_rest_args', $args, 'create' );
 	}
 
 	private function get_update_args() {
-		return array(
+		$args = array(
 			'term_id'       => array( 'type' => 'integer' ),
 			'name'          => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'parent_id'     => array( 'type' => 'integer' ),
@@ -245,6 +274,9 @@ class RayetunMediaNest_REST_Controller extends WP_REST_Controller {
 			'allowed_roles' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
 			'write_roles'   => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
 		);
+
+		/** This filter documented in get_create_args(). @param array $args, string $op */
+		return (array) apply_filters( 'rayetun_medianest_folder_rest_args', $args, 'update' );
 	}
 
 	public function lock_folder( $request ) {

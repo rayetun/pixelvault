@@ -183,7 +183,19 @@ class RayetunMediaNest_Folder_Service {
 			return new WP_Error( 'no_data', __( 'No valid fields to update.', 'pixelvault' ), array( 'status' => 400 ) );
 		}
 
-		return RayetunMediaNest_DB::update_folder_meta( $term_id, $sanitized );
+		$result = RayetunMediaNest_DB::update_folder_meta( $term_id, $sanitized );
+
+		if ( ! is_wp_error( $result ) ) {
+			/**
+			 * Fires after a folder's metadata (colour, icon, visibility, roles) is updated.
+			 *
+			 * @param int   $term_id   Folder term ID.
+			 * @param array $sanitized The sanitized fields that were written.
+			 */
+			do_action( 'rayetun_medianest_folder_meta_updated', $term_id, $sanitized );
+		}
+
+		return $result;
 	}
 
 	public static function move( int $term_id, int $new_parent_id ) {
@@ -206,16 +218,32 @@ class RayetunMediaNest_Folder_Service {
 			return new WP_Error( 'invalid_parent', __( 'Target parent folder does not exist.', 'pixelvault' ), array( 'status' => 400 ) );
 		}
 
+		$existing   = RayetunMediaNest_DB::get_folder_by_term_id( $term_id );
+		$old_parent = $existing ? (int) $existing->parent_id : 0;
+
 		$result = wp_update_term( $term_id, RayetunMediaNest_Taxonomy::TAXONOMY, array( 'parent' => $new_parent_id ) );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 
-		return RayetunMediaNest_DB::update_folder_meta( $term_id, array(
+		$meta_result = RayetunMediaNest_DB::update_folder_meta( $term_id, array(
 			'parent_id'  => $new_parent_id,
 			'updated_at' => current_time( 'mysql' ),
 		) );
+
+		if ( ! is_wp_error( $meta_result ) ) {
+			/**
+			 * Fires after a folder is moved to a new parent.
+			 *
+			 * @param int $term_id    Folder term ID.
+			 * @param int $new_parent New parent term ID (0 = root).
+			 * @param int $old_parent Previous parent term ID (0 = root).
+			 */
+			do_action( 'rayetun_medianest_folder_moved', $term_id, $new_parent_id, $old_parent );
+		}
+
+		return $meta_result;
 	}
 
 	public static function reorder( array $ordered_term_ids ) {
@@ -324,7 +352,16 @@ class RayetunMediaNest_Folder_Service {
 			return $result;
 		}
 
-		do_action( 'rayetun_medianest_attachment_assigned', $attachment_id, $term_ids );
+		/**
+		 * Fires after an attachment is assigned to one or more folders.
+		 *
+		 * Canonical signature (always passed): attachment ID, target term IDs, context string.
+		 *
+		 * @param int    $attachment_id Attachment ID.
+		 * @param int[]  $term_ids      Folder term IDs the attachment now belongs to.
+		 * @param string $context       Where the assignment came from (e.g. 'manual', 'auto_assign').
+		 */
+		do_action( 'rayetun_medianest_attachment_assigned', $attachment_id, $term_ids, 'manual' );
 		return true;
 	}
 
@@ -482,7 +519,16 @@ class RayetunMediaNest_Folder_Service {
 			}
 		}
 
-		do_action( 'rayetun_medianest_attachment_assigned' );
+		/**
+		 * Fires after one or more attachments are removed from a specific folder.
+		 *
+		 * @param int   $term_id        Folder term ID they were removed from.
+		 * @param int[] $attachment_ids Attachment IDs that were processed.
+		 */
+		do_action( 'rayetun_medianest_attachments_removed', $term_id, $attachment_ids );
+
+		// Generic cache-flush signal (counts, smart folders, analytics).
+		do_action( 'rayetun_medianest_media_changed' );
 
 		return array( 'processed' => $processed, 'errors' => $errors );
 	}
