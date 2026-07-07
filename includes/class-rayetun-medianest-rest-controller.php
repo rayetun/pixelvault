@@ -239,7 +239,11 @@ class RayetunMediaNest_REST_Controller extends WP_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return bool True if the current user can manage options.
 	 */
-	public function reorder_permissions_check( $request ) { return current_user_can( 'manage_options' ); }
+	public function reorder_permissions_check( $request ) {
+		// Reorder changes the global folder order, so it needs a folder-edit capability
+		// (not merely upload_files). Administrators and folder editors qualify.
+		return current_user_can( 'manage_options' ) || current_user_can( 'medianest_edit_any_folder' );
+	}
 
 	private function get_create_args() {
 		$args = array(

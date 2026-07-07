@@ -247,7 +247,7 @@ class RayetunMediaNest_Folder_Service {
 	}
 
 	public static function reorder( array $ordered_term_ids ) {
-		if ( ! current_user_can( 'upload_files' ) ) {
+		if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'medianest_edit_any_folder' ) ) {
 			return new WP_Error( 'forbidden', __( 'You do not have permission to reorder folders.', 'pixelvault' ), array( 'status' => 403 ) );
 		}
 

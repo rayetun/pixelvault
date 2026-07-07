@@ -3,7 +3,7 @@
  * Plugin Name:       PixelVault — Media Library Folders
  * Plugin URI:        https://wordpress.org/plugins/pixelvault/
  * Description:       Unlimited nested media folders for WordPress. Colour-coded folders, drag and drop, bulk ZIP download, analytics, role permissions, and one-click plugin migration.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            Md Rayhan Uddin
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RAYETUN_MEDIANEST_VERSION',  '1.1.0' );
+define( 'RAYETUN_MEDIANEST_VERSION',  '1.1.1' );
 define( 'RAYETUN_MEDIANEST_DIR',      plugin_dir_path( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_URL',      plugin_dir_url( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_BASENAME', plugin_basename( __FILE__ ) );

@@ -68,6 +68,7 @@ class RayetunMediaNest_Admin {
 					'deleteAnyFolder' => current_user_can( 'medianest_delete_any_folder' ),
 					'lockFolders'     => current_user_can( 'manage_options' ),
 					'editOthersMedia' => current_user_can( 'edit_others_posts' ),
+					'reorderFolders'  => current_user_can( 'manage_options' ) || current_user_can( 'medianest_edit_any_folder' ),
 				),
 				'starred'        => RayetunMediaNest_Starred::get_starred(),
 				'settings'       => array(
@@ -149,6 +150,7 @@ class RayetunMediaNest_Admin {
 					'deleteAnyFolder' => current_user_can( 'medianest_delete_any_folder' ),
 					'lockFolders'     => current_user_can( 'manage_options' ),
 					'editOthersMedia' => current_user_can( 'edit_others_posts' ),
+					'reorderFolders'  => current_user_can( 'manage_options' ) || current_user_can( 'medianest_edit_any_folder' ),
 				),
 				'starred'        => RayetunMediaNest_Starred::get_starred(),
 				'settings'       => array(
@@ -223,6 +225,7 @@ class RayetunMediaNest_Admin {
 					'deleteAnyFolder' => current_user_can( 'medianest_delete_any_folder' ),
 					'lockFolders'     => current_user_can( 'manage_options' ),
 					'editOthersMedia' => current_user_can( 'edit_others_posts' ),
+					'reorderFolders'  => current_user_can( 'manage_options' ) || current_user_can( 'medianest_edit_any_folder' ),
 				),
 				'starred'        => RayetunMediaNest_Starred::get_starred(),
 				'settings'       => array(

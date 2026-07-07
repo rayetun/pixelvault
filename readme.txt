@@ -1,11 +1,11 @@
 === PixelVault — Media Library Folders ===
 Contributors:      rayetun
 Donate link:       https://wise.com/pay/me/mdrayhanu2
-Tags:              media library, media folders, file organizer, media organizer, folders
+Tags:              media library, media folders, file organizer, media organizer, file manager
 Requires at least: 6.2
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.1.0
+Stable tag:        1.1.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,9 +13,11 @@ Unlimited nested media folders for WordPress. Colour-coded folders, drag-and-dro
 
 == Description ==
 
-📁 **PixelVault** adds a drag-and-drop folder panel to your WordPress Media Library so you can sort images, videos, PDFs, and audio into unlimited nested folders.
+📁 **PixelVault** is the free way to **organize your WordPress media library** with unlimited, drag-and-drop **media folders**. Sort images, videos, PDFs, audio, and documents into nested, colour-coded folders — right inside the Media Library, exactly where you upload and choose files.
 
-Folders are **virtual** — physical files never move, no URLs change, and standard WordPress export/import works without any special steps.
+Stop scrolling through hundreds of unsorted attachments. PixelVault lets you **categorize media into folders and subfolders**, filter instantly, and find any file in seconds — a proper **file manager** for your WordPress media.
+
+Folders are **virtual** — physical files never move, no URLs change, nothing breaks, and standard WordPress export/import keeps working without any special steps.
 
 = ✨ Core Features =
 
@@ -167,6 +169,11 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 
 == Changelog ==
 
+= 1.1.1 =
+* Fix: folder drag-to-reorder now starts from anywhere on the folder row — previously it required a pixel-perfect press on the tiny drag handle, so reordering often did nothing.
+* Fix: drag-to-reorder now works for Editors (users with the "Edit Any Folder" capability), not only Administrators. Previously it silently failed to save for non-admins.
+* Tweak: the drag handle is hidden for users who don't have permission to reorder, so there's no confusing non-working handle.
+
 = 1.1.0 =
 * New: ⭐ Starred Folders — mark favourite folders and pin them to the top of the media library sidebar (per user).
 * New: 🗂️ Folder Templates — save your current folder structure as a reusable template and apply it in one click (Settings → Tools).
@@ -205,6 +212,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+Fixes folder drag-reorder for Editors. Recommended for multi-user sites.
 
 = 1.1.0 =
 Adds Starred Folders, Folder Templates, JSON structure backup, and a developer hooks API.
