@@ -25,6 +25,8 @@ class RayetunMediaNest_Settings {
 	const DEFAULTS = array(
 		'auto_assign'        => 1,
 		'show_counts'        => 1,
+		// Safety: folder data survives plugin deletion unless the user opts in.
+		'delete_data_on_uninstall' => 0,
 		'default_sort'       => 'manual',
 		'sf_missing_alt'     => 1,
 		'sf_unused'          => 1,
@@ -107,8 +109,8 @@ class RayetunMediaNest_Settings {
 	public static function add_page() {
 		self::$page_hook = (string) add_submenu_page(
 			'upload.php',
-			__( 'MediaNest Settings', 'pixelvault' ),
-			__( 'pixelvault', 'pixelvault' ),
+			__( 'PixelVault Settings', 'pixelvault' ),
+			__( 'PixelVault', 'pixelvault' ),
 			'medianest_manage_folders',
 			'rayetun-medianest',
 			array( __CLASS__, 'render_page' )
@@ -225,6 +227,7 @@ class RayetunMediaNest_Settings {
 		$clean = array(
 			'auto_assign'        => ! empty( $raw['auto_assign'] ) ? 1 : 0,
 			'show_counts'        => ! empty( $raw['show_counts'] ) ? 1 : 0,
+			'delete_data_on_uninstall' => ! empty( $raw['delete_data_on_uninstall'] ) ? 1 : 0,
 			'default_sort'       => in_array( $raw['default_sort'] ?? '', array( 'manual', 'name', 'date', 'count' ), true )
 			                            ? sanitize_key( $raw['default_sort'] ) : 'manual',
 			'sf_missing_alt'     => ! empty( $raw['sf_missing_alt'] ) ? 1 : 0,
@@ -676,6 +679,10 @@ class RayetunMediaNest_Settings {
 									'date'   => __( 'Date Created (newest first)', 'pixelvault' ),
 									'count'  => __( 'File Count (most files first)', 'pixelvault' ),
 								)
+							); ?>
+							<?php self::render_toggle( 'delete_data_on_uninstall', $settings['delete_data_on_uninstall'],
+								__( 'Delete All Data on Uninstall', 'pixelvault' ),
+								__( 'DANGER: only enable this if you want deleting the plugin to permanently erase every folder and all media-to-folder assignments. When off (recommended), your folders are kept safe in the database and reappear if you reinstall.', 'pixelvault' )
 							); ?>
 						</div>
 						<?php self::render_save_bar( 'settings' ); ?>

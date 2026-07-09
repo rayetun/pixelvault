@@ -5,7 +5,7 @@ Tags:              media library, media folders, file organizer, media organizer
 Requires at least: 6.2
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.1.1
+Stable tag:        1.1.2
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -169,6 +169,13 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 
 == Changelog ==
 
+= 1.1.2 =
+* Fix: the Media Library layout no longer pulls WordPress's own "Help" and "Screen Options" tabs (and the update/admin notices) into the folder sidebar row. They now stay in their normal position instead of forming an empty column and pushing the media grid off-screen.
+* Fix: newly uploaded files now appear in the grid instantly — with WordPress's native upload progress bar — without needing to reload the page.
+* Fix: the folder drag handle and the expand/collapse arrow no longer overlap in the sidebar.
+* Fix: the "Media → PixelVault" admin menu item now shows with correct capitalisation.
+* New: developer filter `rayetun_medianest_load_admin_assets` lets companion plugins load the PixelVault folder sidebar inside their own media modals.
+
 = 1.1.1 =
 * Fix: folder drag-to-reorder now starts from anywhere on the folder row — previously it required a pixel-perfect press on the tiny drag handle, so reordering often did nothing.
 * Fix: drag-to-reorder now works for Editors (users with the "Edit Any Folder" capability), not only Administrators. Previously it silently failed to save for non-admins.
@@ -212,6 +219,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+Fixes the Media Library layout (Help/Screen Options tabs and notices) and makes uploads appear instantly with the native progress bar — no reload. Recommended for everyone.
 
 = 1.1.1 =
 Fixes folder drag-reorder for Editors. Recommended for multi-user sites.

@@ -30,7 +30,19 @@ class RayetunMediaNest_Admin {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$is_elementor = $is_editor && isset( $_GET['action'] ) && 'elementor' === sanitize_key( wp_unslash( $_GET['action'] ) );
 
-		if ( ! $is_media_library && ! $is_editor ) {
+		/*
+		 * By default the folder sidebar loads on the Media Library grid and the
+		 * post/Elementor editors. Add-ons (e.g. FileShelf) that open the WordPress
+		 * media modal on their own admin screens can opt-in via this filter so the
+		 * PixelVault folder sidebar appears there too.
+		 *
+		 * Example (from another plugin):
+		 *   add_filter( 'rayetun_medianest_load_admin_assets', function ( $load, $hook ) {
+		 *       return ( 'toplevel_page_fileshelf' === $hook ) ? true : $load;
+		 *   }, 10, 2 );
+		 */
+		$should_load = apply_filters( 'rayetun_medianest_load_admin_assets', ( $is_media_library || $is_editor ), $hook );
+		if ( ! $should_load ) {
 			return;
 		}
 

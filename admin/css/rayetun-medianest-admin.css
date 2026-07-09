@@ -39,6 +39,7 @@
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
 	color: #3c434a;
 	min-height: 90vh;
+	margin-right: 1%;
 }
 
 /* ============================================================
@@ -283,7 +284,7 @@
 	display: flex;
 	align-items: center;
 	gap: 5px;
-	padding: 5px 10px 5px 6px;
+	padding: 5px 5px 5px 5px;
 	margin: 1px 4px;
 	border-radius: 4px;
 	cursor: pointer;
@@ -398,7 +399,7 @@
 .rayetun-mn-row-actions-btn:hover { background: #dcdcde; color: #1d2327; }
 
 /* Drag handle */
-.rayetun-mn-drag-handle {
+.rayetun-mn-list span.rayetun-mn-drag-handle {
 	flex-shrink: 0;
 	width: 14px;
 	display: flex;
@@ -408,6 +409,21 @@
 	cursor: grab;
 	color: #646970;
 	transition: opacity 0.1s;
+}
+
+/* Harden the two leading row controls so an inherited admin/theme style — e.g.
+   Elementor's global `button`/`span` rules — can't pull them out of the flex
+   flow and overlap them. Force a fixed 14px track for each and neutralise any
+   inherited position/float/margin. */
+.rayetun-mn-drag-handle,
+.rayetun-mn-toggle {
+	position: static !important;
+	float: none !important;
+	margin: 0 !important;
+	box-sizing: border-box;
+	flex: 0 0 14px;
+	min-width: 14px;
+	height: 14px;
 }
 .rayetun-mn-row:hover .rayetun-mn-drag-handle { opacity: 0.85; }
 .rayetun-mn-drag-handle:active { cursor: grabbing; }

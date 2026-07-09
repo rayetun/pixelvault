@@ -381,6 +381,59 @@
 		   Our wp.ajax.post patch + cookie both ensure PHP applies the filter. */
 	}
 
+	/* ────────────────────────────────────────────────────────
+	   initUploadRefresh — show uploads live, with the native progress bar.
+
+	   Our folder filtering turns the Media Library grid into a CUSTOM library
+	   query (the _mn_ts prop + folder-cookie filtering). WordPress only auto-
+	   injects newly-uploaded files into SIMPLE, mirroring queries — so with a
+	   custom query active, uploads never appear until a manual page reload.
+
+	   WordPress keeps every in-flight upload in the global wp.Uploader.queue
+	   collection (real wp.media Attachment models). We bridge each one into the
+	   currently-visible grid collection ourselves: because it's WP's own model,
+	   the grid renders it natively — the blue progress bar while it uploads and
+	   the real thumbnail once it finishes — with no full-grid "flash".
+	   ──────────────────────────────────────────────────────── */
+	function initUploadRefresh() {
+		if ( !window.wp || !window.wp.Uploader || !window.wp.Uploader.queue ) { return false; }
+		var q = window.wp.Uploader.queue;
+		if ( q._mnUploadBound ) { return true; }
+		q._mnUploadBound = true;
+
+		function currentLibrary() {
+			try {
+				var frame = window.wp.media && window.wp.media.frame;
+				return frame ? frame.state().get( 'library' ) : null;
+			} catch ( e ) { return null; }
+		}
+
+		/* Drop the upload's model into the visible grid (deduped by id/cid). */
+		function inject( model ) {
+			var lib = currentLibrary();
+			if ( !lib || !model ) { return; }
+			if ( ( model.id && lib.get( model.id ) ) || lib.get( model.cid ) ) { return; }
+			try { lib.add( model, { at: 0 } ); } catch ( e ) {}
+		}
+
+		/* 'add' → upload started: inject the model so WordPress renders it with the
+		   native blue progress bar while it uploads. */
+		q.on( 'add', inject );
+
+		/* Once the whole batch finishes, the injected placeholders have done their
+		   job. WordPress doesn't cleanly transition a manually-injected model to its
+		   finished state (it stays stuck on "uploading…"), so we re-query the grid
+		   once to reconcile it with the server — real thumbnails and correct counts.
+		   This is a single, quiet refresh at the END of the upload, not per-file. */
+		q.on( 'remove reset', function () {
+			clearTimeout( q._mnRefreshT );
+			q._mnRefreshT = setTimeout( function () {
+				if ( q.length === 0 ) { forceGridFilter(); }
+			}, 400 );
+		} );
+		return true;
+	}
+
 	/* Get attachment IDs currently selected via WP's native Bulk Select UI.
 	   WP stores these in frame.state().get('selection') — a Backbone Selection. */
 	function getWpSelectedIds() {
@@ -1898,6 +1951,14 @@
 		if(document.getElementById('rayetun-mn-panel'))return;
 		var wpBody=document.getElementById('wpbody-content');
 		if(!wpBody)return;
+		/* Wrap ONLY the folder panel + the media page content (.wrap) in the flex row.
+		   Previously we moved EVERY child of #wpbody-content into the flex wrapper, which
+		   captured WordPress's own #screen-meta / #screen-meta-links (Help & Screen Options)
+		   and admin notices (e.g. the "update available" nag) — turning them into a dead
+		   middle column and, when opened, pushing the media grid off-screen. Leaving those
+		   native elements in place restores the normal layout. */
+		var contentWrap=wpBody.querySelector('.wrap');
+		if(!contentWrap)return;
 		var panel=document.createElement('div');
 		panel.id='rayetun-mn-panel';
 		var wrapper=document.getElementById('rayetun-mn-wrap');
@@ -1906,12 +1967,22 @@
 			wrapper.id='rayetun-mn-wrap';
 			wrapper.className='rayetun-mn-wrap';
 			wrapper.style.cssText='display:flex;flex-direction:row;align-items:flex-start;';
-			while(wpBody.firstChild){wrapper.appendChild(wpBody.firstChild);}
-			wpBody.appendChild(wrapper);
+			/* Put the wrapper where .wrap currently is, then move ONLY .wrap into it. */
+			contentWrap.parentNode.insertBefore(wrapper,contentWrap);
+			wrapper.appendChild(contentWrap);
 		}
 		wrapper.insertBefore(panel,wrapper.firstChild);
 		render();
 		loadData();
+		/* Refresh the grid live after uploads finish (no page reload needed).
+		   wp.Uploader may load just after us, so retry briefly until it exists. */
+		if ( !initUploadRefresh() ) {
+			var _urAtt = 0;
+			var _urIv = setInterval( function () {
+				_urAtt++;
+				if ( initUploadRefresh() || _urAtt > 40 ) { clearInterval( _urIv ); }
+			}, 100 );
+		}
 	}
 
 	if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);
