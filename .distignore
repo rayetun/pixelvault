@@ -32,5 +32,8 @@ phpunit.xml.dist
 tests
 bin
 
+# Developer docs — kept on GitHub for add-on authors, not shipped to end users
+HOOKS.md
+
 # Distribution artifacts
 pixelvault.zip
