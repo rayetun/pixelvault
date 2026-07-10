@@ -85,7 +85,7 @@ class RayetunMediaNest_Zip_Import {
 			/* PHP silently discards the whole POST (so $_FILES is empty) when the
 			   request body exceeds post_max_size. Detect that so we can show the
 			   real reason instead of a misleading "no file" message. */
-			$content_length = (int) ( $_SERVER['CONTENT_LENGTH'] ?? 0 );
+			$content_length = isset( $_SERVER['CONTENT_LENGTH'] ) ? absint( wp_unslash( $_SERVER['CONTENT_LENGTH'] ) ) : 0;
 			$server_max     = self::server_max_upload_bytes();
 			if ( $content_length > 0 && $server_max > 0 && $content_length > $server_max ) {
 				return new WP_Error(
@@ -251,7 +251,8 @@ class RayetunMediaNest_Zip_Import {
 
 		// Give the heavy image work room to run.
 		if ( function_exists( 'wp_raise_memory_limit' ) ) { wp_raise_memory_limit( 'image' ); }
-		if ( function_exists( 'set_time_limit' ) ) { @set_time_limit( 120 ); } // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_set_time_limit
+		// Extend the time limit for this batch of image sideloads; harmless if the host disables it.
+		if ( function_exists( 'set_time_limit' ) ) { @set_time_limit( 120 ); } // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_set_time_limit, Squiz.PHP.DiscouragedFunctions.Discouraged
 
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
