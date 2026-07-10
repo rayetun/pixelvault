@@ -5,7 +5,7 @@ Tags:              media library, media folders, file organizer, media organizer
 Requires at least: 6.2
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.1.2
+Stable tag:        1.1.3
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -169,6 +169,13 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 
 == Changelog ==
 
+= 1.1.3 =
+* New: create a folder right from the media popup while adding images to a post, page, Elementor, or Divi — no need to pre-create it in the Media Library first. New uploads go straight into the folder you just made.
+* New: ZIP imports now run in batches, so large archives (hundreds or thousands of files) import reliably without timing out, with a live "Importing X of Y…" progress readout.
+* New: added safety guards to ZIP import — a per-file-count limit and an uncompressed-size (zip-bomb) limit — and abandoned extractions are now cleaned up automatically.
+* Fix: dropping a .zip onto the "Import ZIP to folder" window no longer uploads it to the Media Library by mistake — the drop is now captured by the import window and sent to the chosen folder.
+* Fix: the "Done" button in the ZIP import window now closes the window as expected.
+
 = 1.1.2 =
 * Fix: the Media Library layout no longer pulls WordPress's own "Help" and "Screen Options" tabs (and the update/admin notices) into the folder sidebar row. They now stay in their normal position instead of forming an empty column and pushing the media grid off-screen.
 * Fix: newly uploaded files now appear in the grid instantly — with WordPress's native upload progress bar — without needing to reload the page.
@@ -219,6 +226,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.1.3 =
+ZIP import now handles large archives in batches (no timeouts), with progress and zip-bomb safety guards. Fixes drag-drop and the Done button in the import window.
 
 = 1.1.2 =
 Fixes the Media Library layout (Help/Screen Options tabs and notices) and makes uploads appear instantly with the native progress bar — no reload. Recommended for everyone.

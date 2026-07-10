@@ -178,7 +178,9 @@
 	function apiCreate( name, pid, color ) {
 		return apiFetch( '/folders', { method:'POST', body:JSON.stringify({name:name,parent_id:pid||0,color:color||''}) } ).then(function(r) {
 			state.folders.push({term_id:r.term_id,parent_id:pid||0,name:name,slug:'',color:color||'',icon:'',sort_order:999});
-			return refreshCounts();
+			/* Resolve with the new folder's ID so callers (e.g. the media-modal
+			   New Folder button) can select it immediately. */
+			return refreshCounts().then(function(){ return r.term_id; });
 		});
 	}
 	function apiRename( tid, name ) {
@@ -355,12 +357,15 @@
 	   cookie and returns filtered results. Grid updates via _sync.
 	   ──────────────────────────────────────────────────────── */
 	function forceGridFilter() {
-		var frame = window.wp && window.wp.media && window.wp.media.frame;
+		/* On the Media Library page the frame is wp.media.frame; inside a media
+		   MODAL (post editor / Elementor / Divi) it's only reachable via
+		   _mnLastFrame. Support both so uploads refresh live in every context. */
+		var frame = ( window.wp && window.wp.media && window.wp.media.frame ) || _mnLastFrame;
 		if ( !frame ) {
 			var _att = 0;
 			var _iv = setInterval(function() {
 				_att++;
-				var f = window.wp && window.wp.media && window.wp.media.frame;
+				var f = ( window.wp && window.wp.media && window.wp.media.frame ) || _mnLastFrame;
 				if (f) { clearInterval(_iv); forceGridFilter(); }
 				if (_att > 40) clearInterval(_iv);
 			}, 100);
@@ -403,7 +408,7 @@
 
 		function currentLibrary() {
 			try {
-				var frame = window.wp.media && window.wp.media.frame;
+				var frame = ( window.wp.media && window.wp.media.frame ) || _mnLastFrame;
 				return frame ? frame.state().get( 'library' ) : null;
 			} catch ( e ) { return null; }
 		}
@@ -806,56 +811,126 @@
 		document.body.removeChild(ta);
 	}
 
-	/* \u2500\u2500 ZIP Import modal \u2500\u2500 */
+	/* \u2500\u2500 ZIP Import modal (chunked upload + import) \u2500\u2500 */
 	function showZipImportModal(folder){
 		var overlay=el('div',{className:'rayetun-mn-modal-overlay'});
 		var box=el('div',{className:'rayetun-mn-modal-box'});
 		box.innerHTML='<h2 class="rayetun-mn-modal-title">Import ZIP to &ldquo;'+folder.name+'&rdquo;</h2>'+
-			'<p class="rayetun-mn-modal-desc">Upload a .zip file &mdash; all images, videos, audio files, and PDFs inside will be extracted and added directly to this folder.</p>';
+			'<p class="rayetun-mn-modal-desc">Upload a .zip file &mdash; all images, videos, audio files, and PDFs inside will be extracted and added directly to this folder. Large archives are imported in batches, so they won\u2019t time out.</p>';
 
-		var fileLabel=el('label',{className:'rayetun-mn-modal-file-label'});
+		var selectedFile=null;
+		var isDone=false;
+
+		/* Drop zone + hidden-ish file input (Browse). */
+		var dropZone=el('div',{className:'rayetun-mn-zip-dropzone'});
+		var dzHint=el('div',{className:'rayetun-mn-zip-hint'},'Drag & drop a .zip here, or');
 		var fileInput=el('input',{type:'file',accept:'.zip,application/zip,application/x-zip-compressed'});
-		fileInput.style.cssText='display:block;margin:14px 0;width:100%;';
-		fileLabel.appendChild(fileInput);
-		box.appendChild(fileLabel);
+		fileInput.style.cssText='display:block;margin:8px auto 0;';
+		var fileNameEl=el('div',{className:'rayetun-mn-zip-filename'});
+		dropZone.appendChild(dzHint);
+		dropZone.appendChild(fileInput);
+		dropZone.appendChild(fileNameEl);
+		box.appendChild(dropZone);
 
 		var progressArea=el('div',{className:'rayetun-mn-modal-preview'});
 		box.appendChild(progressArea);
 
-		var btnRow=el('div',{className:'rayetun-mn-modal-btns'});
-		var importBtn=el('button',{className:'rayetun-mn-modal-btn is-primary',onClick:function(){
-			if(!fileInput.files||!fileInput.files[0]){progressArea.textContent='Please select a ZIP file first.';return;}
-			importBtn.textContent='Uploading\u2026';importBtn.disabled=true;progressArea.textContent='';
+		function setFile(f){
+			if(isDone)return;
+			if(!f)return;
+			if(!/\.zip$/i.test(f.name)){progressArea.textContent='Please choose a .zip file.';return;}
+			selectedFile=f;
+			fileNameEl.textContent=f.name;
+			progressArea.textContent='';
+			importBtn.disabled=false;importBtn.textContent='Upload & Import';
+		}
+		fileInput.addEventListener('change',function(){ if(fileInput.files&&fileInput.files[0]) setFile(fileInput.files[0]); });
 
-			var formData=new FormData();
-			formData.append('zip_file',fileInput.files[0]);
-			formData.append('folder_id',String(folder.term_id));
+		/* Intercept drag/drop at the document level WHILE this modal is open, so the
+		   WordPress media-library uploader (which listens on the whole window) can't
+		   grab the dropped .zip and upload it as a media file. preventDefault on
+		   dragover is required for 'drop' to fire; stopImmediatePropagation keeps the
+		   event from ever reaching WP's handlers. */
+		function isOpen(){ return document.body.contains(overlay); }
+		function onOver(e){ if(!isOpen())return; e.preventDefault(); e.stopImmediatePropagation(); if(e.dataTransfer)e.dataTransfer.dropEffect='copy'; dropZone.classList.add('is-drag'); }
+		function onLeave(e){ if(!isOpen())return; e.stopImmediatePropagation(); }
+		function onDrop(e){ if(!isOpen())return; e.preventDefault(); e.stopImmediatePropagation(); dropZone.classList.remove('is-drag'); var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; setFile(f); }
+		document.addEventListener('dragenter',onOver,true);
+		document.addEventListener('dragover',onOver,true);
+		document.addEventListener('dragleave',onLeave,true);
+		document.addEventListener('drop',onDrop,true);
+		function closeModal(){
+			document.removeEventListener('dragenter',onOver,true);
+			document.removeEventListener('dragover',onOver,true);
+			document.removeEventListener('dragleave',onLeave,true);
+			document.removeEventListener('drop',onDrop,true);
+			overlay.remove();
+		}
 
-			/* NOTE: Do NOT set Content-Type \u2014 browser sets multipart boundary automatically */
-			fetch(cfg.restUrl+'/zip-import',{
+		function parseJson(r){
+			if(r.ok)return r.json();
+			/* Surface the REAL reason. A WordPress REST error is JSON with a
+			   `message`; but a WAF/security-plugin block, a proxy error or a PHP
+			   fatal often returns an HTML page — so fall back to a cleaned-up text
+			   snippet, and always include the HTTP status. */
+			return r.text().then(function(t){
+				var msg='';
+				try{ var j=JSON.parse(t); msg=j.message||j.code||''; }
+				catch(e){ msg=t?String(t).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,180):''; }
+				throw new Error(msg?(msg+' (HTTP '+r.status+')'):('Request failed — HTTP '+r.status+' '+(r.statusText||'')));
+			});
+		}
+		function fail(e){ progressArea.textContent='Error: '+(e&&e.message?e.message:'Import failed'); importBtn.disabled=false; importBtn.textContent='Retry'; }
+		function finish(acc){
+			progressArea.innerHTML='<span style="color:#16a34a;font-weight:600">Done!</span> '+
+				acc.imported+' file'+(acc.imported!==1?'s':'')+' imported, '+acc.skipped+' skipped'+
+				(acc.errors?' ('+acc.errors+' errors)':'')+'.';
+			isDone=true; importBtn.disabled=false; importBtn.textContent='Done';
+			loadData();
+		}
+		function runBatch(session,offset,total,acc){
+			progressArea.innerHTML='Importing '+Math.min(offset,total)+' of '+total+'\u2026';
+			fetch(cfg.restUrl+'/zip-import/batch',{
+				method:'POST',
+				headers:{'X-WP-Nonce':cfg.restNonce,'Content-Type':'application/json'},
+				body:JSON.stringify({session:session,offset:offset})
+			}).then(parseJson).then(function(b){
+				acc.imported+=(b.imported|0); acc.errors+=(b.errors|0); acc.skipped+=(b.skipped|0);
+				progressArea.innerHTML='Importing '+Math.min(b.next_offset|0,total)+' of '+total+'\u2026';
+				if(b.done){ finish(acc); }
+				else { runBatch(session,b.next_offset|0,total,acc); }
+			}).catch(fail);
+		}
+		function startImport(){
+			importBtn.disabled=true; importBtn.textContent='Uploading\u2026'; progressArea.textContent='Uploading ZIP\u2026';
+			var fd=new FormData();
+			fd.append('zip_file',selectedFile);
+			fd.append('folder_id',String(folder.term_id));
+			/* NOTE: no Content-Type \u2014 the browser sets the multipart boundary. */
+			fetch(cfg.restUrl+'/zip-import/start',{
 				method:'POST',
 				headers:{'X-WP-Nonce':cfg.restNonce},
-				body:formData
-			}).then(function(r){
-				if(!r.ok)return r.json().catch(function(){return{};}).then(function(b){throw new Error(b.message||'Upload failed');});
-				return r.json();
-			}).then(function(res){
-				progressArea.innerHTML='<span style="color:#16a34a;font-weight:600">Done!</span> '+
-					res.imported+' file'+(res.imported!==1?'s':'')+' imported, '+
-					res.skipped+' skipped'+(res.errors?' ('+res.errors+' errors)':'')+'.';
-				importBtn.textContent='Done';importBtn.disabled=true;
-				loadData();
-			}).catch(function(e){
-				progressArea.textContent='Error: '+(e.message||'Upload failed');
-				importBtn.textContent='Retry';importBtn.disabled=false;
-			});
+				body:fd
+			}).then(parseJson).then(function(res){
+				var total=res.total|0, skipped=res.skipped|0;
+				if(!total){ finish({imported:0,skipped:skipped,errors:0}); return; }
+				importBtn.textContent='Importing\u2026';
+				runBatch(res.session,0,total,{imported:0,skipped:skipped,errors:0});
+			}).catch(fail);
+		}
+
+		var btnRow=el('div',{className:'rayetun-mn-modal-btns'});
+		var importBtn=el('button',{className:'rayetun-mn-modal-btn is-primary',onClick:function(){
+			if(isDone){ closeModal(); return; }
+			if(!selectedFile){ progressArea.textContent='Please select a ZIP file first.'; return; }
+			startImport();
 		}},'Upload & Import');
 
-		btnRow.appendChild(el('button',{className:'rayetun-mn-modal-btn',onClick:function(){overlay.remove();}},'\u00d7 Close'));
+		btnRow.appendChild(el('button',{className:'rayetun-mn-modal-btn',onClick:function(){closeModal();}},'\u00d7 Close'));
 		btnRow.appendChild(importBtn);
 		box.appendChild(btnRow);
 		overlay.appendChild(box);
-		overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+		overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
 		document.body.appendChild(overlay);
 	}
 
@@ -1551,6 +1626,17 @@
 
 		/* Elementor-specific integration (async init, cached frames, null frame fix) */
 		initElementorIntegration();
+
+		/* Live-refresh uploads inside the modal too (post editor / Elementor / Divi),
+		   so images uploaded into a folder appear without a page reload. Retry until
+		   wp.Uploader exists (it may load just after us). */
+		if ( !initUploadRefresh() ) {
+			var _urAtt = 0;
+			var _urIv = setInterval( function () {
+				_urAtt++;
+				if ( initUploadRefresh() || _urAtt > 40 ) { clearInterval( _urIv ); }
+			}, 100 );
+		}
 	}
 
 	/*
@@ -1799,6 +1885,39 @@
 		mp.appendChild(hdr);
 
 		/* ── Search ── */
+		/* New Folder — create + upload into a folder without leaving the
+		   post / Elementor / Divi editor. Only for users who can create folders. */
+		var nfHolder=el('div',{className:'rayetun-mn-modal-nf'});
+		if(_caps.createFolders){
+			var newBtn=el('button',{className:'rayetun-mn-modal-newfolder',title:'Create a new folder'});
+			newBtn.innerHTML=II.plus+' New';
+			hdr.appendChild(newBtn);
+			newBtn.addEventListener('click',function(e){
+				e.stopPropagation();
+				if(nfHolder.firstChild){ nfHolder.innerHTML=''; return; }
+				nfHolder.appendChild(mkInput('New folder name',
+					function(name){
+						newBtn.disabled=true;
+						apiCreate(name,0,'').then(function(newId){
+							buildModalPanel(mp);
+							/* Delay past buildModalPanel's own modalFilter(null) (fires at
+							   30ms) so our selection of the new folder wins. */
+							setTimeout(function(){
+								var node=mp.querySelector('.rayetun-mn-modal-item[data-mn-term="'+newId+'"]');
+								if(node)node.click();
+							},60);
+						}).catch(function(err){
+							newBtn.disabled=false;
+							var i=nfHolder.querySelector('.rayetun-mn-new-folder-input');
+							if(i){i.style.borderColor='#d63638';i.title=(err&&err.message)||'Error';}
+						});
+					},
+					function(){ nfHolder.innerHTML=''; }
+				));
+			});
+		}
+		mp.appendChild(nfHolder);
+
 		var srchWrap=el('div',{className:'rayetun-mn-modal-search'});
 		var srch=el('input',{type:'text',placeholder:'Search\u2026',className:'rayetun-mn-modal-search-input'});
 		srch.addEventListener('keydown',function(e){e.stopPropagation();});
@@ -1830,7 +1949,7 @@
 		var tree=buildTree(state.folders,0);
 		(function addI(items,depth){items.forEach(function(f){
 			var cnt=SHOW_COUNTS?state.counts[f.term_id]:0;
-			var item=el('div',{className:'rayetun-mn-modal-item',style:{paddingLeft:(12+depth*16)+'px'}});
+			var item=el('div',{className:'rayetun-mn-modal-item','data-mn-term':f.term_id,style:{paddingLeft:(12+depth*16)+'px'}});
 			var iconHtml=f.icon&&f.icon.trim()?'<span style="font-size:14px;margin-right:4px;line-height:1">'+f.icon+'</span>':iF(f.color||'#646970');
 			item.innerHTML=iconHtml+'<span class="rayetun-mn-modal-name">'+f.name+'</span>'+(cnt?'<span class="rayetun-mn-modal-count">'+cnt+'</span>':'');
 			item.addEventListener('click',function(){setModalActive(item);modalFilter(Number(f.term_id));});
