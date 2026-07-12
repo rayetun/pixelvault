@@ -976,6 +976,12 @@
 
 	document.addEventListener('click',function(e){if(!e.target.closest||!e.target.closest('#rayetun-mn-panel'))state.focusedFolderId=null;closeMenu();closeImgMenu();});
 	document.addEventListener('keydown',function(e){
+		/* Sidebar keyboard shortcuts (N = new folder, Delete = remove folder) apply
+		   ONLY on the Media Library page, where the folder sidebar exists. Without this
+		   guard the global "N" handler swallowed the letter "n" while typing in the
+		   Gutenberg / block editor (and Elementor / Divi), because our admin script also
+		   loads on those screens for the media-modal folder panel. */
+		if(!IS_MEDIA_LIB)return;
 		if(e.key==='Escape'){closeMenu();closeImgMenu();state.colorPickerFor=null;state.showNewFolder=false;state.showSubfolderFor=null;render();return;}
 		/* N = New folder (outside inputs) */
 		var tag=(e.target&&e.target.tagName)||'';

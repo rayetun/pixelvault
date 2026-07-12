@@ -1,11 +1,11 @@
 === PixelVault — Media Library Folders ===
 Contributors:      rayetun
 Donate link:       https://wise.com/pay/me/mdrayhanu2
-Tags:              media library, media folders, file organizer, media organizer, file manager
+Tags:              media library, media folders, WordPress media library folders, media organizer, file manager
 Requires at least: 6.2
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.1.3
+Stable tag:        1.1.4
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -169,6 +169,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 
 == Changelog ==
 
+= 1.1.4 =
+* Fix: pressing the "N" key while typing in the block (Gutenberg) editor, Elementor, or Divi no longer triggers the folder shortcut — the "New Folder" keyboard shortcut is now limited to the Media Library screen, where the folder sidebar lives. Previously the letter "n" could be swallowed while writing a post or page.
+
 = 1.1.3 =
 * New: create a folder right from the media popup while adding images to a post, page, Elementor, or Divi — no need to pre-create it in the Media Library first. New uploads go straight into the folder you just made.
 * New: ZIP imports now run in batches, so large archives (hundreds or thousands of files) import reliably without timing out, with a live "Importing X of Y…" progress readout.
@@ -226,6 +229,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.1.4 =
+Fixes the "N" key being swallowed while typing in the block editor, Elementor, or Divi. Recommended for everyone.
 
 = 1.1.3 =
 ZIP import now handles large archives in batches (no timeouts), with progress and zip-bomb safety guards. Fixes drag-drop and the Done button in the import window.
