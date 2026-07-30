@@ -5,7 +5,7 @@ Tags:              media library, media folders, WordPress media library folders
 Requires at least: 6.2
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.1.4
+Stable tag:        1.1.5
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -169,6 +169,11 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 
 == Changelog ==
 
+= 1.1.5 =
+* Improve: the folder panel in the media popup now shows a collapsible tree (collapsed by default with expand arrows), so large folder structures stay tidy instead of appearing fully expanded.
+* Fix: removed the flicker/flash in the media popup when opening it, switching folders, or uploading. The folder panel and grid now render smoothly.
+* Improve: dragging files onto a locked folder now shows clear feedback (a blocked highlight while dragging, and a rejection shake plus a message on drop) instead of failing silently.
+
 = 1.1.4 =
 * Fix: pressing the "N" key while typing in the block (Gutenberg) editor, Elementor, or Divi no longer triggers the folder shortcut — the "New Folder" keyboard shortcut is now limited to the Media Library screen, where the folder sidebar lives. Previously the letter "n" could be swallowed while writing a post or page.
 
@@ -229,6 +234,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.1.5 =
+Polishes the media popup: collapsible folder tree, no more flicker when opening/switching/uploading, and clear feedback when dragging onto a locked folder.
 
 = 1.1.4 =
 Fixes the "N" key being swallowed while typing in the block editor, Elementor, or Divi. Recommended for everyone.

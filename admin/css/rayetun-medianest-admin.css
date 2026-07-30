@@ -314,6 +314,27 @@
 	outline-offset: -2px;
 }
 
+/* Dragging files over a LOCKED folder — blocked state (before drop) */
+.rayetun-mn-row.is-drag-blocked {
+	background: #fcf0f0;
+	outline: 2px dashed #d63638;
+	outline-offset: -2px;
+	cursor: not-allowed;
+}
+
+/* Dropped on a locked folder — rejection shake (after drop) */
+.rayetun-mn-row.is-drop-rejected {
+	background: #fcf0f0 !important;
+	outline: 2px solid #d63638;
+	outline-offset: -2px;
+	animation: rayetun-mn-reject-shake 0.3s ease;
+}
+@keyframes rayetun-mn-reject-shake {
+	0%, 100% { transform: translateX( 0 ); }
+	20%, 60% { transform: translateX( -3px ); }
+	40%, 80% { transform: translateX( 3px ); }
+}
+
 .rayetun-mn-row:focus-visible { outline: 2px solid #4f46e5; outline-offset: -2px; border-radius: 4px; }
 
 /* Toggle chevron */
@@ -797,6 +818,30 @@ div.rayetun-mn-modal-header {
 	font-weight: 600;
 	border-radius: 4px;
 }
+
+/* Collapsible tree toggle (chevron) in the modal folder panel */
+.rayetun-mn-modal-toggle {
+	flex: 0 0 14px;
+	width: 14px;
+	height: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #8c8f94;
+	border-radius: 2px;
+	transition: transform 0.15s ease, color 0.1s, background 0.1s;
+}
+.rayetun-mn-modal-toggle:hover  { color: #3c434a; background: #e5e7eb; }
+.rayetun-mn-modal-toggle.is-open { transform: rotate( 90deg ); }
+.rayetun-mn-modal-toggle.is-leaf { visibility: hidden; }
+
+/* Persistent horizontal offset for WP's attachments browser while our folder panel
+   is present. WP re-renders .attachments-browser on every re-query and wipes any
+   inline margin we set, which repainted the grid full-width for a frame before JS
+   re-nudged it — the visible "flash". A class-scoped !important rule re-applies the
+   offset instantly to the freshly-rendered element, so there is no flash. The panel
+   is 190px wide (see injectModalPanel PANEL_W). */
+.media-frame-content.mn-has-panel .attachments-browser { margin-left: 190px !important; }
 
 .rayetun-mn-modal-name {
 	flex: 1;

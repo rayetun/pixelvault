@@ -808,13 +808,14 @@ class RayetunMediaNest_Settings {
 					<div class="rayetun-mn-panel" data-panel="locking" style="display:none">
 						<div class="rayetun-mn-panel-header">
 							<h2><?php esc_html_e( 'Folder Locking', 'pixelvault' ); ?></h2>
-							<p><?php esc_html_e( 'Prevent accidental changes to important folders.', 'pixelvault' ); ?></p>
+							<p><?php esc_html_e( 'Protect a folder\'s structure and existing files from accidental changes.', 'pixelvault' ); ?></p>
 						</div>
 						<div class="rayetun-mn-info-box">
 							<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
 							<div>
 								<strong><?php esc_html_e( 'How it works', 'pixelvault' ); ?></strong>
-								<p><?php esc_html_e( 'Right-click any folder in the Media Library sidebar and choose "Lock Folder". Locked folders display a padlock badge and cannot be renamed, deleted, moved, or have files reassigned until explicitly unlocked.', 'pixelvault' ); ?></p>
+								<p><?php esc_html_e( 'Right-click any folder in the Media Library sidebar and choose "Lock Folder". A locked folder shows a padlock badge and is protected from accidental reorganisation: it cannot be renamed, recoloured, moved, or deleted, and existing files cannot be dragged into or out of it, until you explicitly unlock it.', 'pixelvault' ); ?></p>
+								<p><?php esc_html_e( 'What locking does not do: it does not block brand-new uploads. If you open a locked folder and upload files from your computer, those new files are still added to it. Locking is meant to freeze a folder\'s existing structure and contents, not to stop you adding fresh media.', 'pixelvault' ); ?></p>
 								<p><?php esc_html_e( 'Only users with the "Manage Settings" capability can lock or unlock folders.', 'pixelvault' ); ?></p>
 							</div>
 						</div>

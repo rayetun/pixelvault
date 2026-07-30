@@ -27,7 +27,7 @@
 	/* ── State ── */
 	var STORAGE_KEY = 'rayetun_mn_last_folder';
 	var state = {
-		folders: [], counts: {}, activeFolderId: null, expanded: {},
+		folders: [], counts: {}, activeFolderId: null, expanded: {}, modalExpanded: {},
 		loading: true, searchQuery: '', colorPickerFor: null,
 		showNewFolder: false, showSubfolderFor: null,
 		bulkMode: false, selectedIds: [],
@@ -606,23 +606,35 @@
 				document.body.appendChild(g);drag.ghost=g;
 			}
 			if(drag.ghost){drag.ghost.style.left=(e.clientX+14)+'px';drag.ghost.style.top=(e.clientY+8)+'px';}
-			document.querySelectorAll('.rayetun-mn-row.is-drag-over').forEach(function(r){r.classList.remove('is-drag-over');});
+			document.querySelectorAll('.rayetun-mn-row.is-drag-over,.rayetun-mn-row.is-drag-blocked').forEach(function(r){r.classList.remove('is-drag-over');r.classList.remove('is-drag-blocked');});
 			var under=document.elementFromPoint(e.clientX,e.clientY);
 			var row=under&&under.closest&&under.closest('.rayetun-mn-row[data-mn-term]');
-			if(row)row.classList.add('is-drag-over');
+			if(row){
+				/* Show a distinct "blocked" state over locked folders so the rejection
+				   is obvious before the user even drops. */
+				row.classList.add(row.classList.contains('is-locked')?'is-drag-blocked':'is-drag-over');
+			}
 			e.preventDefault();
 		});
 		document.addEventListener('mouseup',function(e){
 			if(!drag.tracking)return;
 			var wasActive=drag.active;
 			drag.tracking=false;drag.active=false;
-			document.querySelectorAll('.rayetun-mn-row.is-drag-over').forEach(function(r){r.classList.remove('is-drag-over');});
+			document.querySelectorAll('.rayetun-mn-row.is-drag-over,.rayetun-mn-row.is-drag-blocked').forEach(function(r){r.classList.remove('is-drag-over');r.classList.remove('is-drag-blocked');});
 			if(drag.ghost){drag.ghost.remove();drag.ghost=null;}
 			if(!wasActive)return;
 			var under=document.elementFromPoint(e.clientX,e.clientY);
 			var row=under&&under.closest&&under.closest('.rayetun-mn-row[data-mn-term]');
 			if(!row)return;
 			var tid=parseInt(row.getAttribute('data-mn-term'),10);if(isNaN(tid))return;
+			/* Reject a drop onto a locked folder with clear feedback (red shake + toast)
+			   instead of letting it fail silently with a server 423. */
+			if(row.classList.contains('is-locked')){
+				row.classList.add('is-drop-rejected');
+				setTimeout(function(){row.classList.remove('is-drop-rejected');},900);
+				showToast('That folder is locked. Unlock it to add files.');
+				return;
+			}
 			apiBulk(drag.ids.slice(),[tid]).then(function(){
 				state.selectedIds=[];state.bulkMode=false;render();
 				row.style.background='#d1fae5';
@@ -1561,7 +1573,7 @@
 				if(target.classList&&target.classList.contains('media-frame-content')){
 					var modal=target.closest&&target.closest('.media-modal');
 					if(modal&&!target.querySelector('#rayetun-mn-modal-panel')){
-						setTimeout(function(){injectModalPanel(modal);},60);
+						scheduleInjectModalPanel(modal);
 					}
 					return;
 				}
@@ -1573,7 +1585,7 @@
 					var modal=fc.closest&&fc.closest('.media-modal');
 					if(!modal)return;
 					if(!fc.querySelector('#rayetun-mn-modal-panel')){
-						setTimeout(function(){injectModalPanel(modal);},60);
+						scheduleInjectModalPanel(modal);
 					}
 				});
 			});
@@ -1604,25 +1616,15 @@
 				frame.on('open',function(){
 					_mnLastFrame=frame;      /* refresh on each open (cached frames) */
 					setFolderCookie(null);   /* clear again — belt-and-suspenders */
-					setTimeout(function(){
-						var modal=document.querySelector('.media-modal');
-						if(modal&&!modal.querySelector('#rayetun-mn-modal-panel'))
-							injectModalPanel(modal);
-					},60);
+					scheduleInjectModalPanel(null);
 				});
 				frame.on('content:render:browse',function(){
 					_mnLastFrame=frame;
-					setTimeout(function(){
-						var modal=document.querySelector('.media-modal');
-						if(modal)injectModalPanel(modal);
-					},60);
+					scheduleInjectModalPanel(null);
 				});
 				frame.on('content:activate:browse',function(){
 					_mnLastFrame=frame;
-					setTimeout(function(){
-						var modal=document.querySelector('.media-modal');
-						if(modal)injectModalPanel(modal);
-					},60);
+					scheduleInjectModalPanel(null);
 				});
 			}
 			return frame;
@@ -1719,14 +1721,14 @@
 		var deadline=Date.now()+maxMs;
 		var iv=setInterval(function(){
 			var modal=document.querySelector('.media-modal');
-			if(modal){clearInterval(iv);injectModalPanel(modal);return;}
+			if(modal){clearInterval(iv);scheduleInjectModalPanel(modal);return;}
 			if(Date.now()>deadline)clearInterval(iv);
 		},50);
 	}
 
 	function checkForMediaModal(){
 		var modal=document.querySelector('.media-modal');
-		if(modal)injectModalPanel(modal);
+		if(modal)scheduleInjectModalPanel(modal);
 	}
 
 	/*
@@ -1794,6 +1796,19 @@
 		}catch(e){}
 	}
 
+	/* Coalesce the many modal events (open, content:render/activate:browse, the body
+	   MutationObserver, Elementor/Divi pollers) into ONE injection per burst, so the
+	   panel builds once per open instead of being torn down and rebuilt repeatedly
+	   (that repeated rebuild was a major source of the visible flashing). */
+	var _mnInjectT=null;
+	function scheduleInjectModalPanel(modal){
+		clearTimeout(_mnInjectT);
+		_mnInjectT=setTimeout(function(){
+			var m=(modal&&document.body.contains(modal))?modal:document.querySelector('.media-modal');
+			if(m)injectModalPanel(m);
+		},70);
+	}
+
 	function injectModalPanel(modal){
 		var content=modal.querySelector('.media-frame-content');
 		if(!content)return;
@@ -1811,6 +1826,11 @@
 			'border-right:1px solid #dcdcde','overflow:hidden',
 			'display:flex','flex-direction:column','box-sizing:border-box'].join(';');
 		content.appendChild(mp);
+		/* Persistent CSS offset for the attachments browser (see stylesheet). WP
+		   re-renders the browser on every re-query and wipes inline styles, so an
+		   inline margin flashed full-width first; a class-driven CSS rule re-applies
+		   the offset instantly to the freshly-rendered element with no flash. */
+		content.classList.add('mn-has-panel');
 		buildModalPanel(mp);
 
 		/* Height: WP sets .media-frame-content height as inline style (e.g. 644px).
@@ -1873,7 +1893,7 @@
 					}
 				});
 				m.removedNodes.forEach(function(n){
-					if(n.id==='rayetun-mn-modal-panel')setTimeout(function(){injectModalPanel(modal);},30);
+					if(n.id==='rayetun-mn-modal-panel')scheduleInjectModalPanel(modal);
 				});
 			});
 		});
@@ -1932,6 +1952,11 @@
 		/* ── Folder list ── */
 		var list=el('div',{className:'rayetun-mn-modal-list'});
 
+		/* Tracks the current selection (null = All Files, 'uncategorized', or a folder
+		   term_id) so a tree re-render (expand/collapse/search) can re-apply the active
+		   highlight without touching the grid filter. */
+		var activeModalId = null;
+
 		function setModalActive(node){
 			list.querySelectorAll('.rayetun-mn-modal-item').forEach(function(x){x.classList.remove('is-active');});
 			node.classList.add('is-active');
@@ -1940,36 +1965,56 @@
 		/* All Files row */
 		var allBtn=el('div',{className:'rayetun-mn-modal-item is-active',title:'Show all files'});
 		allBtn.innerHTML=II.files+'<span class="rayetun-mn-modal-name">All Files</span>'+(SHOW_COUNTS&&state.counts.total?'<span class="rayetun-mn-modal-count">'+state.counts.total+'</span>':'');
-		allBtn.addEventListener('click',function(){setModalActive(allBtn);modalFilter(null);});
+		allBtn.addEventListener('click',function(){activeModalId=null;setModalActive(allBtn);modalFilter(null);});
 		list.appendChild(allBtn);
 
 		/* Uncategorized row */
 		if(state.counts.uncategorized){
 			var ucBtn=el('div',{className:'rayetun-mn-modal-item',title:'Show unassigned files'});
 			ucBtn.innerHTML=II.files+'<span class="rayetun-mn-modal-name">Uncategorized</span><span class="rayetun-mn-modal-count">'+state.counts.uncategorized+'</span>';
-			ucBtn.addEventListener('click',function(){setModalActive(ucBtn);modalFilter('uncategorized');});
+			ucBtn.addEventListener('click',function(){activeModalId='uncategorized';setModalActive(ucBtn);modalFilter('uncategorized');});
 			list.appendChild(ucBtn);
 		}
 
-		/* Folder tree */
-		var tree=buildTree(state.folders,0);
-		(function addI(items,depth){items.forEach(function(f){
-			var cnt=SHOW_COUNTS?state.counts[f.term_id]:0;
-			var item=el('div',{className:'rayetun-mn-modal-item','data-mn-term':f.term_id,style:{paddingLeft:(12+depth*16)+'px'}});
-			var iconHtml=f.icon&&f.icon.trim()?'<span style="font-size:14px;margin-right:4px;line-height:1">'+f.icon+'</span>':iF(f.color||'#646970');
-			item.innerHTML=iconHtml+'<span class="rayetun-mn-modal-name">'+f.name+'</span>'+(cnt?'<span class="rayetun-mn-modal-count">'+cnt+'</span>':'');
-			item.addEventListener('click',function(){setModalActive(item);modalFilter(Number(f.term_id));});
-			list.appendChild(item);
-			if(f.children&&f.children.length)addI(f.children,depth+1);
-		});})(tree,0);
+		/* Folder tree — collapsible. Default collapsed; a folder's children render
+		   only when it is expanded (state.modalExpanded[tid]). Toggling re-renders
+		   just this tree, so it never disturbs the current grid filter or selection. */
+		var treeWrap=el('div',{className:'rayetun-mn-modal-tree'});
+		list.appendChild(treeWrap);
 
-		/* Live search filter */
+		function renderModalTree(forceExpand){
+			treeWrap.innerHTML='';
+			var tree=buildTree(state.folders,0);
+			(function addI(items,depth){items.forEach(function(f){
+				var tid=Number(f.term_id);
+				var hasKids=!!(f.children&&f.children.length);
+				var isOpen=forceExpand||!!state.modalExpanded[tid];
+				var cnt=SHOW_COUNTS?state.counts[f.term_id]:0;
+				var item=el('div',{className:'rayetun-mn-modal-item'+(tid===activeModalId?' is-active':''),'data-mn-term':f.term_id,style:{paddingLeft:(6+depth*14)+'px'}});
+				var togCls='rayetun-mn-modal-toggle'+(hasKids?(isOpen?' is-open':''):' is-leaf');
+				var iconHtml=f.icon&&f.icon.trim()?'<span style="font-size:14px;line-height:1">'+f.icon+'</span>':iF(f.color||'#646970');
+				item.innerHTML='<span class="'+togCls+'" aria-hidden="true">'+II.chev+'</span>'+iconHtml+'<span class="rayetun-mn-modal-name">'+f.name+'</span>'+(cnt?'<span class="rayetun-mn-modal-count">'+cnt+'</span>':'');
+				if(hasKids){
+					item.querySelector('.rayetun-mn-modal-toggle').addEventListener('click',function(e){
+						e.stopPropagation();
+						state.modalExpanded[tid]=!state.modalExpanded[tid];
+						renderModalTree(false);
+					});
+				}
+				item.addEventListener('click',function(){activeModalId=tid;setModalActive(item);modalFilter(tid);});
+				treeWrap.appendChild(item);
+				if(hasKids&&isOpen)addI(f.children,depth+1);
+			});})(tree,0);
+		}
+		renderModalTree(false);
+
+		/* Live search filter — force-expands the tree so deep matches surface. */
 		srch.addEventListener('input',function(){
 			var q=srch.value.toLowerCase().trim();
-			list.querySelectorAll('.rayetun-mn-modal-item').forEach(function(it){
+			renderModalTree(!!q);
+			treeWrap.querySelectorAll('.rayetun-mn-modal-item').forEach(function(it){
 				var nm=it.querySelector('.rayetun-mn-modal-name');
-				if(!nm){it.style.display='';return;} /* All Files / Uncategorized always show */
-				it.style.display=(!q||nm.textContent.toLowerCase().indexOf(q)!==-1)?'':'none';
+				it.style.display=(!q||(nm&&nm.textContent.toLowerCase().indexOf(q)!==-1))?'':'none';
 			});
 		});
 
