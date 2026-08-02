@@ -1,0 +1,10 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "rayetun-medianest/gallery",
+	"title": "PixelVault Gallery",
+	"category": "media",
+	"icon": "format-gallery",
+	"description": "Display the images in a PixelVault folder as a responsive gallery with an optional lightbox and captions.",
+	"keywords": [ "gallery", "folder", "media", "images", "pixelvault" ],
+	"textdomain": "pixelvault"
+}

@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name:       PixelVault — Media Library Folders
+ * Plugin Name:       PixelVault - Media Library Folders & Asset Manager
  * Plugin URI:        https://wordpress.org/plugins/pixelvault/
- * Description:       Unlimited nested media folders for WordPress. Colour-coded folders, drag and drop, bulk ZIP download, analytics, role permissions, and one-click plugin migration.
- * Version:           1.1.5
- * Requires at least: 6.2
+ * Description:       Media library folders plus a downloadable Document Library block. Nested colour-coded folders, drag and drop, bulk ZIP, analytics, and migration.
+ * Version:           1.2.0
+ * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            Md Rayhan Uddin
  * Author URI:        https://rayetun.com/
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RAYETUN_MEDIANEST_VERSION',  '1.1.5' );
+define( 'RAYETUN_MEDIANEST_VERSION',  '1.2.0' );
 define( 'RAYETUN_MEDIANEST_DIR',      plugin_dir_path( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_URL',      plugin_dir_url( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_BASENAME', plugin_basename( __FILE__ ) );
@@ -44,6 +44,7 @@ function rayetun_medianest_load_classes() {
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-export.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-import.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-gallery.php';
+	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-doclib.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-smart-folders.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-importer.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-zip-import.php';
@@ -139,6 +140,9 @@ final class RayetunMediaNest {
 		}
 		if ( RayetunMediaNest_Settings::get( 'feature_gallery', 1 ) ) {
 			RayetunMediaNest_Gallery::register();
+		}
+		if ( RayetunMediaNest_Settings::get( 'feature_document_library', 1 ) ) {
+			RayetunMediaNest_DocLib::register();
 		}
 		if ( RayetunMediaNest_Settings::get( 'feature_analytics', 1 ) ) {
 			RayetunMediaNest_Analytics::register();

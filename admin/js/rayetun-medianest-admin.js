@@ -161,7 +161,12 @@
 			.then(function(folders){
 				state.folders=folders;state.loading=false;render();
 				if(IS_MEDIA_LIB){
-					if(!_libInited){_libInited=true;initDragDrop();initImgMenu();initFolderReorder();initNativeBulkDetection();}
+					if(!_libInited){_libInited=true;initDragDrop();initImgMenu();initFolderReorder();initNativeBulkDetection();
+						/* Clear any Bulk Select mode left over from a previous visit or
+						   restored from the browser's back/forward cache. */
+						setTimeout(killSelectMode,300);setTimeout(killSelectMode,800);
+						window.addEventListener('pageshow',function(e){ if(e&&e.persisted){setTimeout(killSelectMode,200);setTimeout(killSelectMode,600);} });
+					}
 					if(state.activeFolderId!==null)forceGridFilter();
 				}
 				return Promise.all([
@@ -196,12 +201,18 @@
 			return refreshCounts();
 		});
 	}
+	/* "Add to folder" — append mode (replace:false) so a file KEEPS its existing
+	   folder memberships. PixelVault is many-to-many; a file can live in several
+	   folders at once. Use apiMoveTo() when you specifically want to relocate. */
 	function apiBulk( ids, tids ) {
-		return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:ids,term_ids:tids,replace:true})}).then(refreshCounts);
+		return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:ids,term_ids:tids,replace:false})}).then(refreshCounts);
 	}
-	/* Permanently delete multiple attachments */
-	function apiBulkDelete( ids ) {
-		return apiFetch('/bulk-delete',{method:'POST',body:JSON.stringify({attachment_ids:ids})}).then(function(res){refreshCounts();return res;});
+	/* Move = add to the target folder (append, so the file keeps any OTHER
+	   folders it belongs to) then remove it from the source folder. There is no
+	   single "move" endpoint, so we compose the two calls. */
+	function apiMoveTo( ids, fromTid, toTid ) {
+		return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:ids,term_ids:[toTid],replace:false})})
+			.then(function(){ return apiRemoveFromFolder(ids, fromTid); });
 	}
 	function apiSetIcon(tid,icon){return apiFetch('/folders/'+tid,{method:'PUT',body:JSON.stringify({icon:icon})}).then(function(){var f=fnd(tid);if(f)f.icon=icon;});}
 	function apiLock(tid,locked){
@@ -335,6 +346,7 @@
 		setFolderCookie( id );
 
 		if ( IS_MEDIA_LIB ) {
+			resetBulkSelection();
 			forceGridFilter();
 			render();
 			return;
@@ -1107,27 +1119,18 @@
 		removeBtn.addEventListener('click',function(){
 			var ids=bar._ids;
 			if(!ids||!ids.length||!state.activeFolderId)return;
-			apiRemoveFromFolder(ids,state.activeFolderId)
-				.then(function(){forceGridFilter();render();clearFloatingBar();
-					showToast(ids.length+' file'+(ids.length!==1?'s':'')+' removed from folder');})
-				.catch(console.error);
+			var fid=state.activeFolderId;
+			runBulkWithProgress(ids,'Removing',function(chunk){
+				return apiFetch('/folders/'+fid+'/remove',{method:'POST',body:JSON.stringify({attachment_ids:chunk})});
+			},function(n){return n+' file'+(n!==1?'s':'')+' removed from folder';});
 		});
 		delBtn.addEventListener('click',function(){
 			var ids=bar._ids;if(!ids||!ids.length)return;
 			var n=ids.length;
 			if(!window.confirm('Permanently delete '+n+' file'+(n!==1?'s':'')+' from WordPress?\nThis cannot be undone.'))return;
-			delBtn.disabled=true;delBtn.textContent='Deleting\u2026';
-			apiBulkDelete(ids)
-				.then(function(res){
-					forceGridFilter();render();clearFloatingBar();
-					var d=res&&typeof res.deleted==='number'?res.deleted:n;
-					if(d===0){showToast('No files deleted — you may not have permission.','error');}
-					else{showToast(d+' file'+(d!==1?'s':'')+' deleted');}
-				})
-				.catch(function(e){
-					delBtn.disabled=false;delBtn.innerHTML='&#x1F5D1; Delete';
-					showToast('Delete failed: '+(e&&e.message||'Unknown error'),'error');
-				});
+			runBulkWithProgress(ids,'Deleting',function(chunk){
+				return apiFetch('/bulk-delete',{method:'POST',body:JSON.stringify({attachment_ids:chunk})}).then(function(res){return (res&&typeof res.deleted==='number')?res.deleted:chunk.length;});
+			},function(d){return d===0?'No files deleted — you may not have permission.':(d+' file'+(d!==1?'s':'')+' deleted');});
 		});
 		closeBtn.addEventListener('click',function(){
 			clearFloatingBar();
@@ -1145,16 +1148,117 @@
 		if(!ids||!ids.length){bar.style.display='none';return;}
 		bar._ids=ids;
 		bar.style.display='flex';
+		/* Always reset the bar to a fresh, non-busy state when it (re)appears —
+		   the bar is a reused singleton, so a prior "Deleting…"/busy state would
+		   otherwise stick around and leave buttons disabled. */
+		setBarBusy(false);
+		var delEl=bar.querySelector('.rayetun-mn-fb-delete');
+		if(delEl){delEl.disabled=false;delEl.innerHTML='&#x1F5D1; Delete';}
 		bar.querySelector('.rayetun-mn-fb-count').textContent=
 			ids.length+' file'+(ids.length!==1?'s':'')+' selected';
 		var inFolder=state.activeFolderId&&state.activeFolderId!=='uncategorized';
 		bar.querySelector('.rayetun-mn-fb-remove').style.display=inFolder?'':'none';
 		bar.querySelector('.rayetun-mn-fb-move').style.display=inFolder?'':'none';
 	}
-	
+
+	/* Dim + disable the whole bar while an action is in flight, so it reads as
+	   "working" instead of "broken" and can't be double-clicked. */
+	function setBarBusy(on){
+		if(!_floatingBar)return;
+		_floatingBar.classList.toggle('is-busy',!!on);
+		_floatingBar.querySelectorAll('.rayetun-mn-fb-btn').forEach(function(b){b.disabled=!!on;});
+	}
+
+	/* Run an action over the selection in CHUNKS (default 10 files per request),
+	   updating the bar's count to "verb X of N…" so the user sees real progress
+	   without paying for one round-trip per file. perChunk(idsChunk) returns a
+	   Promise; if it resolves with a number that is treated as the success count
+	   for that chunk (otherwise the whole chunk counts as done). A rejection counts
+	   the whole chunk as failed. Counts + grid refresh once at the very end. */
+	function runBulkWithProgress( ids, verb, perChunk, doneMsg, chunkSize ){
+		if(!ids||!ids.length)return;
+		chunkSize=chunkSize||10;
+		var total=ids.length, ok=0, failed=0, done=0;
+		var chunks=[];
+		for(var i=0;i<ids.length;i+=chunkSize){chunks.push(ids.slice(i,i+chunkSize));}
+		setBarBusy(true);
+		var countEl=_floatingBar&&_floatingBar.querySelector('.rayetun-mn-fb-count');
+		function step(ci){
+			if(ci>=chunks.length){
+				return refreshCounts().then(function(){
+					forceGridFilter();render();clearFloatingBar();
+					if(failed){showToast(doneMsg(ok)+' ('+failed+' failed)','error');}
+					else{showToast(doneMsg(ok));}
+				});
+			}
+			var chunk=chunks[ci];
+			if(countEl){countEl.textContent=verb+' '+Math.min(done+chunk.length,total)+' of '+total+'…';}
+			return perChunk(chunk).then(function(res){
+				ok+=(typeof res==='number')?res:chunk.length;
+			},function(){failed+=chunk.length;}).then(function(){
+				done+=chunk.length;
+				return step(ci+1);
+			});
+		}
+		step(0);
+	}
+
 	function clearFloatingBar(){
-		if(_floatingBar)_floatingBar.style.display='none';
+		if(_floatingBar){_floatingBar.style.display='none';_floatingBar.classList.remove('is-busy');_floatingBar._ids=[];}
 		state.selectedIds=[];state.bulkMode=false;render();
+	}
+
+	/* When true, the native-bulk MutationObserver ignores changes — used while we
+	   programmatically exit Bulk Select so the bar doesn't flicker on its way out. */
+	var _suppressBulkObs=false;
+
+	/* Turn WordPress's native "Bulk Select" MODE off, the same way the Cancel button
+	   does. We hit it three ways for reliability: the frame API (deactivateMode),
+	   clearing the selection model, and — if the select toolbar is still in the DOM —
+	   clicking WP's own Cancel toggle. Idempotent: never turns select mode ON. */
+	function killSelectMode(){
+		var frame=null;
+		try{ frame=window.wp&&window.wp.media&&window.wp.media.frame; }catch(e){}
+		if(!frame||typeof frame.isModeActive!=='function')return;
+		/* Single source of truth = WP's own mode state. Act ONLY when Bulk Select is
+		   genuinely ON, so we can never accidentally TOGGLE it on (that was the bug that
+		   left every folder in select mode). */
+		var active=false; try{ active=frame.isModeActive('select'); }catch(e){ active=false; }
+		if(!active)return;
+		try{ if(typeof frame.deactivateMode==='function')frame.deactivateMode('select'); }catch(e){}
+		try{ var sel=frame.state&&frame.state().get&&frame.state().get('selection'); if(sel&&sel.reset)sel.reset(); }catch(e){}
+		/* If it is STILL active, click WP's real Cancel toggle. Gated by the isModeActive
+		   check above, so the toggle is guaranteed to be in its "Cancel" state, never
+		   "Bulk Select". */
+		var stillActive=false; try{ stillActive=frame.isModeActive('select'); }catch(e){ stillActive=false; }
+		if(stillActive){
+			var cancel=document.querySelector('.select-mode-toggle-button');
+			if(cancel){ try{cancel.click();}catch(e){} }
+		}
+	}
+
+	/* Exit Bulk Select whenever the folder changes, so neither the selection NOR the
+	   select toolbar carries into the next folder — or back to a previous one. WP can
+	   re-render the grid back into select mode right AFTER our re-query (its frame mode
+	   was still 'select'), so we re-kill it once the grid settles, not just up front. */
+	function resetBulkSelection(){
+		if(!IS_MEDIA_LIB)return;
+		/* Only act if Bulk Select is actually on right now. Otherwise a normal folder
+		   switch would schedule kills that could cancel a Bulk Select the user enables
+		   a moment later on the new folder. Trust WP's mode state; fall back to the
+		   frame's .mode-select class only when the API is unavailable. */
+		var wasSelect=false;
+		try{
+			var fr=window.wp&&window.wp.media&&window.wp.media.frame;
+			if(fr&&typeof fr.isModeActive==='function'){ wasSelect=fr.isModeActive('select'); }
+			else { wasSelect=!!document.querySelector('.media-frame.mode-select'); }
+		}catch(e){ wasSelect=!!document.querySelector('.media-frame.mode-select'); }
+		if(!wasSelect)return;
+		_suppressBulkObs=true;
+		killSelectMode();
+		if(_floatingBar){_floatingBar.style.display='none';_floatingBar._ids=[];_floatingBar.classList.remove('is-busy');}
+		setTimeout(killSelectMode,150);
+		setTimeout(function(){killSelectMode();_suppressBulkObs=false;},450);
 	}
 	
 	/* Folder picker popup — nested tree, for Add/Move */
@@ -1182,11 +1286,16 @@
 				picker.remove();
 				var tid=Number(ff.term_id);
 				var fromTid=(mode==='move'&&state.activeFolderId&&state.activeFolderId!=='uncategorized')?state.activeFolderId:null;
-				var op=fromTid?apiMoveTo(ids,fromTid,tid):apiBulk(ids,[tid]);
-				op.then(function(){
-					forceGridFilter();render();clearFloatingBar();
-					showToast(ids.length+' file'+(ids.length!==1?'s':'')+' '+(fromTid?'moved to':'added to')+' '+ff.name);
-				}).catch(console.error);
+				if(fromTid){
+					runBulkWithProgress(ids,'Moving',function(chunk){
+						return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:chunk,term_ids:[tid],replace:false})})
+							.then(function(){return apiFetch('/folders/'+fromTid+'/remove',{method:'POST',body:JSON.stringify({attachment_ids:chunk})});});
+					},function(n){return n+' file'+(n!==1?'s':'')+' moved to '+ff.name;});
+				}else{
+					runBulkWithProgress(ids,'Adding',function(chunk){
+						return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:chunk,term_ids:[tid],replace:false})});
+					},function(n){return n+' file'+(n!==1?'s':'')+' added to '+ff.name;});
+				}
 			});})(f);
 			list.appendChild(item);
 			if(f.children&&f.children.length)addItems(f.children,depth+1);
@@ -1215,6 +1324,7 @@
 	function initNativeBulkDetection(){
 		if(!IS_MEDIA_LIB)return;
 		var _obs=new MutationObserver(function(){
+			if(_suppressBulkObs)return;
 			var ids=[];
 			document.querySelectorAll('.attachments li.attachment[aria-checked="true"]').forEach(function(el){
 				var id=parseInt(el.getAttribute('data-id'),10);if(!isNaN(id))ids.push(id);

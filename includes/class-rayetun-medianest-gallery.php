@@ -53,7 +53,10 @@ class RayetunMediaNest_Gallery {
 			true
 		);
 
-		register_block_type( 'rayetun-medianest/gallery', array(
+		// Register from block.json metadata (title/description/icon shown on the
+		// WordPress.org plugin page) while keeping the runtime script/attributes/render
+		// here in PHP. The path points at the folder that contains block.json.
+		register_block_type( RAYETUN_MEDIANEST_DIR . 'blocks/gallery', array(
 			'editor_script'   => 'rayetun-medianest-gallery-block',
 			'render_callback' => array( __CLASS__, 'render_block' ),
 			'attributes'      => array(

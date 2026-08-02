@@ -1,0 +1,243 @@
+/**
+ * PixelVault — Document Library block (frontend).
+ * Preset-driven via CSS custom properties. Accessibility-first: visible focus,
+ * AA contrast, reduced-motion aware.
+ */
+
+.pv-doclib {
+	/* Tokens (overridden per preset) */
+	--pv-accent: #4f46e5;
+	--pv-cols: 3;
+	--pv-radius: 10px;
+	--pv-gap: 14px;
+	--pv-tile-bg: #fff;
+	--pv-tile-border: 1px solid #e5e7eb;
+	--pv-tile-shadow: 0 1px 2px rgba(0,0,0,.05);
+	--pv-tile-pad: 16px;
+	--pv-text: #1f2328;
+	--pv-muted: #646970;
+
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 20px;
+	align-items: flex-start;
+	color: var(--pv-text);
+	font-size: 15px;
+	box-sizing: border-box;
+	max-width: 100%;
+	overflow: hidden;
+}
+/* Contain paddings (esp. the framed 22px) inside every element's width so the
+   block never forces horizontal page overflow on small screens. */
+.pv-doclib, .pv-doclib *, .pv-doclib *::before, .pv-doclib *::after { box-sizing: border-box; }
+
+/* ── Framed container (border + shadow + sidebar divider) ── */
+.pv-doclib--framed {
+	border: 1px solid #e5e7eb;
+	border-radius: 14px;
+	box-shadow: 0 1px 3px rgba(0,0,0,.06);
+	background: #fff;
+	padding: 22px;
+}
+.pv-doclib--framed .pv-doclib__sidebar { border-right: 1px solid #eef0f2; padding-right: 16px; }
+
+/* ── Presets ─────────────────────────────────────────────── */
+/* CARDS: elevated, roomy tiles (best for showcasing). */
+.pv-doclib--cards   { --pv-tile-shadow: 0 2px 8px rgba(0,0,0,.08); --pv-tile-pad: 18px; --pv-radius: 12px; --pv-gap: 16px; }
+
+/* COMPACT: denser tiles — smaller icon/text, tighter, flat border — clearly
+   distinct from Cards. */
+.pv-doclib--compact { --pv-tile-shadow: none; --pv-tile-pad: 10px; --pv-radius: 8px; --pv-gap: 10px; --pv-tile-bg: #fff; --pv-tile-border: 1px solid #e5e7eb; }
+.pv-doclib--compact .pv-doclib__file-icon svg { width: 34px; height: 34px; }
+.pv-doclib--compact .pv-doclib__file-name { font-size: 13px; }
+.pv-doclib--compact .pv-doclib__file-size { font-size: 11px; }
+
+/* MINIMAL: always a clean, tight LIST (grid tiles read as empty). This makes the
+   preset genuinely distinct and fixes both the empty grid look and the loose list
+   spacing. The grid/list toggle has no visible effect while Minimal is selected. */
+.pv-doclib--minimal .pv-doclib__files { display: block !important; }
+.pv-doclib--minimal .pv-doclib__file {
+	flex-direction: row; text-align: left; align-items: center; gap: 12px;
+	margin: 0; padding: 9px 4px; border: none; border-bottom: 1px solid #eef0f2;
+	border-radius: 0; box-shadow: none; background: transparent;
+}
+.pv-doclib--minimal .pv-doclib__file:last-child { border-bottom: none; }
+.pv-doclib--minimal .pv-doclib__file-icon svg { width: 26px; height: 26px; }
+.pv-doclib--minimal .pv-doclib__file-name { flex: 1; min-width: 0; }
+.pv-doclib--minimal .pv-doclib__file-dl { margin-left: 4px; }
+
+/* ── Sidebar tree ────────────────────────────────────────── */
+/* Fixed 30% sidebar / 70% main, side by side at every width (per design spec).
+   Long folder lists scroll INSIDE the sidebar instead of making it endlessly
+   tall — capped to the viewport so it stays usable on any laptop/desktop. */
+.pv-doclib__sidebar {
+	flex: 0 0 30%; width: 30%; box-sizing: border-box;
+	align-self: flex-start;
+	max-height: min(70vh, 620px);
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-right: 4px;
+}
+.pv-doclib__sidebar::-webkit-scrollbar { width: 8px; }
+.pv-doclib__sidebar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+.pv-doclib__sidebar::-webkit-scrollbar-track { background: transparent; }
+.pv-doclib__sidebar { scrollbar-width: thin; }
+/* Hard-reset list styling with class-nested selectors so no theme can add
+   bullets, markers, indents or list margins to our trees or file grids. */
+.pv-doclib ul.pv-doclib__tree,
+.pv-doclib ul.pv-doclib__tree ul,
+.pv-doclib ul.pv-doclib__files { list-style: none !important; margin: 0; padding: 0; }
+.pv-doclib ul.pv-doclib__tree ul { padding-left: 14px; }
+.pv-doclib li.pv-doclib__tree-item,
+.pv-doclib li.pv-doclib__file { list-style: none !important; }
+.pv-doclib li.pv-doclib__tree-item { margin: 0; padding: 0; }
+.pv-doclib li.pv-doclib__tree-item::marker, .pv-doclib li.pv-doclib__tree-item::before,
+.pv-doclib li.pv-doclib__file::marker, .pv-doclib li.pv-doclib__file::before { content: none; }
+/* button.<class> specificity + explicit resets so theme button styles (colours,
+   borders, text-transform, shadows) can never bleed into our controls. */
+.pv-doclib button.pv-doclib__tree-btn {
+	display: flex; align-items: center; gap: 8px; width: 100%;
+	background: none; border: 0; box-shadow: none; cursor: pointer; text-align: left;
+	padding: 7px 8px; border-radius: 6px; color: var(--pv-text);
+	font: inherit; line-height: 1.3; text-transform: none; letter-spacing: normal; min-height: 0;
+}
+.pv-doclib button.pv-doclib__tree-btn:hover { background: #f3f4f6; color: var(--pv-text); }
+.pv-doclib button.pv-doclib__tree-btn.is-active { background: color-mix(in srgb, var(--pv-accent) 12%, transparent); color: var(--pv-accent); font-weight: 600; }
+.pv-doclib button.pv-doclib__tree-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+.pv-doclib__tree-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-doclib__tree-count { font-size: 12px; color: var(--pv-muted); background: #f0f0f1; border-radius: 10px; padding: 1px 8px; }
+
+/* ── Main ────────────────────────────────────────────────── */
+.pv-doclib__main { flex: 1 1 0%; min-width: 0; max-width: 100%; }
+.pv-doclib__files-wrap { min-width: 0; }
+
+/* Header row: breadcrumb on the left, Download all on the right (aligned) */
+.pv-doclib__header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.pv-doclib__breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 15px; font-weight: 600; margin: 0; flex: 1 1 auto; min-width: 0; }
+.pv-doclib button.pv-doclib__crumb { background: none; border: 0; box-shadow: none; cursor: pointer; color: var(--pv-accent); font: inherit; text-transform: none; padding: 2px 4px; border-radius: 4px; min-height: 0; }
+.pv-doclib button.pv-doclib__crumb.is-current { color: var(--pv-text); font-weight: 600; cursor: default; }
+.pv-doclib__crumb-sep { color: var(--pv-muted); }
+
+.pv-doclib__toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.pv-doclib input.pv-doclib__search {
+	flex: 1 1 220px; max-width: 340px; width: auto; margin: 0; box-sizing: border-box; min-height: 0;
+	padding: 8px 12px; border: 1px solid #dcdcde; border-radius: 8px;
+	font: inherit; color: var(--pv-text); background: #fff; line-height: 1.4;
+	-webkit-appearance: none; appearance: none;
+}
+.pv-doclib input.pv-doclib__search:focus { outline: none; border-color: var(--pv-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pv-accent) 30%, transparent); }
+.pv-doclib__layout-toggle { display: inline-flex; margin-left: auto; border: 1px solid #dcdcde; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.pv-doclib button.pv-doclib__layout-btn { background: #fff; border: 0; box-shadow: none; padding: 7px 9px; cursor: pointer; color: var(--pv-muted); display: inline-flex; min-height: 0; }
+.pv-doclib button.pv-doclib__layout-btn svg { width: 18px; height: 18px; }
+.pv-doclib button.pv-doclib__layout-btn.is-active { background: var(--pv-accent); color: #fff; }
+
+.pv-doclib button.pv-doclib__download-all { display: inline-flex; align-items: center; gap: 6px; background: var(--pv-accent); color: #fff; border: 0; box-shadow: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font: inherit; font-weight: 600; text-transform: none; min-height: 0; flex-shrink: 0; white-space: nowrap; }
+.pv-doclib button.pv-doclib__download-all svg { width: 16px; height: 16px; }
+.pv-doclib button.pv-doclib__download-all:hover { filter: brightness(.94); background: var(--pv-accent); color: #fff; }
+.pv-doclib button.pv-doclib__download-all[disabled] { opacity: .45; cursor: not-allowed; filter: none; }
+
+/* ── Files: grid ─────────────────────────────────────────── */
+.pv-doclib__files { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--pv-cols), minmax(0, 1fr)); gap: var(--pv-gap); }
+.pv-doclib__file {
+	display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+	background: var(--pv-tile-bg); border: var(--pv-tile-border); box-shadow: var(--pv-tile-shadow);
+	border-radius: var(--pv-radius); padding: var(--pv-tile-pad);
+	transition: transform .13s ease, box-shadow .13s ease, border-color .13s ease, background .13s ease;
+}
+/* Smooth hover per preset */
+.pv-doclib--cards   .pv-doclib__file:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.10); }
+.pv-doclib--compact .pv-doclib__file:hover { border-color: var(--pv-accent); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.pv-doclib--minimal .pv-doclib__file:hover { background: color-mix(in srgb, var(--pv-accent) 6%, transparent); }
+.pv-doclib__file-icon { color: var(--pv-accent); }
+.pv-doclib__file-icon svg { width: 46px; height: 46px; }
+.pv-doclib__file-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.pv-doclib__file-size { font-size: 12px; color: var(--pv-muted); }
+.pv-doclib__file-dl { display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: color-mix(in srgb, var(--pv-accent) 10%, transparent); color: var(--pv-accent); border-radius: 6px; padding: 5px 12px; text-decoration: none; font-size: 13px; font-weight: 600; }
+.pv-doclib__file-dl svg { width: 15px; height: 15px; }
+.pv-doclib__file-dl:hover { background: color-mix(in srgb, var(--pv-accent) 18%, transparent); }
+
+/* ── Files: list ─────────────────────────────────────────── */
+.pv-doclib.pv-layout-list .pv-doclib__files { display: block; }
+.pv-doclib.pv-layout-list .pv-doclib__file { flex-direction: row; text-align: left; align-items: center; gap: 12px; margin-bottom: var(--pv-gap); min-width: 0; }
+.pv-doclib.pv-layout-list .pv-doclib__file-icon { flex: 0 0 auto; }
+.pv-doclib.pv-layout-list .pv-doclib__file-icon svg { width: 28px; height: 28px; }
+.pv-doclib.pv-layout-list .pv-doclib__file-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-doclib.pv-layout-list .pv-doclib__file-size { flex: 0 0 auto; white-space: nowrap; }
+.pv-doclib.pv-layout-list .pv-doclib__file-dl { flex: 0 0 auto; margin-left: auto; }
+
+.pv-doclib__empty, .pv-doclib-empty { color: var(--pv-muted); padding: 24px 0; }
+
+/* Sub-folder quick-nav pills */
+.pv-doclib__subfolders { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.pv-doclib__subfolders:empty { display: none; }
+.pv-doclib button.pv-doclib__subfolder {
+	display: inline-flex; align-items: center; gap: 6px;
+	background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
+	padding: 6px 12px; cursor: pointer; font: inherit; color: var(--pv-text);
+	box-shadow: none; text-transform: none; min-height: 0; line-height: 1.3;
+}
+.pv-doclib button.pv-doclib__subfolder:hover { background: color-mix(in srgb, var(--pv-accent) 10%, transparent); border-color: var(--pv-accent); color: var(--pv-accent); }
+.pv-doclib button.pv-doclib__subfolder svg { width: 16px; height: 16px; }
+.pv-doclib__subfolder-count { font-size: 12px; color: var(--pv-muted); }
+
+/* Loading state while a folder fetch is in flight */
+.pv-doclib.is-loading .pv-doclib__files-wrap { opacity: .45; transition: opacity .12s ease; pointer-events: none; }
+
+/* Items-per-page selector */
+.pv-doclib__perpage { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--pv-muted); white-space: nowrap; }
+.pv-doclib select.pv-doclib__perpage-select {
+	font: inherit; margin: 0; padding: 6px 8px; min-height: 0; cursor: pointer;
+	border: 1px solid #dcdcde; border-radius: 8px; background: #fff; color: var(--pv-text); box-shadow: none; line-height: 1.3;
+}
+.pv-doclib select.pv-doclib__perpage-select:focus { outline: none; border-color: var(--pv-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pv-accent) 30%, transparent); }
+
+/* Pagination */
+.pv-doclib__pagination-wrap:empty { display: none; }
+.pv-doclib__pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; margin-top: 18px; }
+.pv-doclib button.pv-doclib__page-btn {
+	min-width: 34px; height: 34px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center;
+	background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; color: var(--pv-text);
+	font: inherit; cursor: pointer; box-shadow: none; text-transform: none; min-height: 0;
+}
+.pv-doclib button.pv-doclib__page-btn:hover:not([disabled]):not(.is-current) { border-color: var(--pv-accent); color: var(--pv-accent); background: #fff; }
+.pv-doclib button.pv-doclib__page-btn.is-current,
+.pv-doclib button.pv-doclib__page-btn.is-current:hover,
+.pv-doclib button.pv-doclib__page-btn.is-current:focus { background: var(--pv-accent); border-color: var(--pv-accent); color: #fff; }
+.pv-doclib button.pv-doclib__page-btn[disabled] { opacity: .4; cursor: default; }
+.pv-doclib__page-gap { padding: 0 4px; color: var(--pv-muted); }
+
+/* ── Accessibility ───────────────────────────────────────── */
+.pv-doclib :focus-visible { outline: 2px solid var(--pv-accent); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) {
+	.pv-doclib * { transition: none !important; animation: none !important; }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+/* Desktop/tablet keep the 30/70 side-by-side layout. On genuinely small screens
+   a 30% sidebar is too narrow (folder names truncate), so we stack it full-width
+   above the grid for readability. This is intentional mobile behaviour, distinct
+   from the old desktop stacking bug (which was the is-layout-grid class clash). */
+@media (max-width: 782px) {
+	.pv-doclib { flex-direction: column; }
+	.pv-doclib__sidebar { flex: 0 0 auto; width: 100%; max-width: none; max-height: 280px; }
+	.pv-doclib--framed .pv-doclib__sidebar {
+		border-right: none; padding-right: 0;
+		border-bottom: 1px solid #eef0f2; padding-bottom: 14px; margin-bottom: 6px;
+	}
+	.pv-doclib__files { --pv-cols: 2; }
+	/* Toolbar: search takes the whole row, per-page + layout toggle sit together
+	   underneath. Prevents overflow that made controls sit outside the block. */
+	.pv-doclib input.pv-doclib__search { flex: 1 1 100%; max-width: none; }
+	.pv-doclib__perpage { margin-left: 0; }
+	.pv-doclib__layout-toggle { margin-left: auto; }
+	/* Header row: stack breadcrumb and Download all on narrow screens */
+	.pv-doclib__header { gap: 10px; }
+	.pv-doclib button.pv-doclib__download-all { width: auto; }
+	/* List view on mobile: tighten row, hide size, keep name + download visible */
+	.pv-doclib.pv-layout-list .pv-doclib__file { gap: 10px; padding: 10px 12px; }
+	.pv-doclib.pv-layout-list .pv-doclib__file-size { display: none; }
+}
+@media (max-width: 420px) {
+	.pv-doclib.pv-layout-list .pv-doclib__file-icon svg { width: 22px; height: 22px; }
+}
+@media (max-width: 520px) { .pv-doclib__files { --pv-cols: 1; } }

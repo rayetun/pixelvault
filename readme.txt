@@ -1,23 +1,37 @@
-=== PixelVault — Media Library Folders ===
+=== PixelVault - Media Library Folders & Asset Manager ===
 Contributors:      rayetun
 Donate link:       https://wise.com/pay/me/mdrayhanu2
-Tags:              media library, media folders, WordPress media library folders, media organizer, file manager
-Requires at least: 6.2
+Tags:              media library, media folders, document library, asset manager, file manager
+Requires at least: 6.5
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.1.5
+Stable tag:        1.2.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Unlimited nested media folders for WordPress. Colour-coded folders, drag-and-drop, bulk ZIP, analytics, role permissions, one-click migration.
+Media library folders plus a downloadable Document Library block. Colour-coded folders, drag-and-drop, bulk ZIP, analytics, and migration.
 
 == Description ==
 
-📁 **PixelVault** is the free way to **organize your WordPress media library** with unlimited, drag-and-drop **media folders**. Sort images, videos, PDFs, audio, and documents into nested, colour-coded folders — right inside the Media Library, exactly where you upload and choose files.
+📁 **PixelVault** is the free way to **organize your WordPress media library** with unlimited, drag-and-drop **media folders**, and now to **present** those folders as a downloadable **Document Library** on the front end. Sort images, videos, PDFs, audio, and documents into nested, colour-coded folders right inside the Media Library, then publish any folder as a browsable **asset manager** for your visitors.
 
 Stop scrolling through hundreds of unsorted attachments. PixelVault lets you **categorize media into folders and subfolders**, filter instantly, and find any file in seconds — a proper **file manager** for your WordPress media.
 
 Folders are **virtual** — physical files never move, no URLs change, nothing breaks, and standard WordPress export/import keeps working without any special steps.
+
+= 🆕 Document Library block (new in 1.2.0) =
+
+Turn any media folder into a browsable, downloadable **document library** on the front end, no page builder required. The **PixelVault Document Library** Gutenberg block renders a folder as an accessible file browser with a sidebar folder tree, breadcrumb navigation, in-library search, pagination, and per-file downloads.
+
+* 🗂️ **Folder tree and breadcrumb**: visitors browse nested folders without page reloads
+* 🔍 **Search and pagination**: find files fast inside large folders
+* ⬇️ **Per-file download plus Download-all ZIP**: grab one file or the whole folder in a click
+* 🎨 **Three design presets** (Cards, Compact, Minimal), with an accent colour and a framed option
+* ♿ **Accessibility-first**: full keyboard navigation (WAI-ARIA tree pattern), screen-reader friendly
+* 📱 **Fully responsive**: grid and list layouts adapt to mobile
+* 🔒 **Respects folder visibility**: restricted folders stay hidden from guests
+
+Perfect for knowledge bases, press kits, resource centres, download portals, and product documentation.
 
 = ✨ Core Features =
 
@@ -77,6 +91,7 @@ Granular folder access per WordPress user role: control who can create, edit, an
 
 = 🧩 Gutenberg, Elementor, and Divi =
 
+* 📚 **PixelVault Document Library block** — publish a folder as an accessible, downloadable file library with a folder tree, search, pagination, and Download-all ZIP
 * 🖼️ **PixelVault Gallery block** — insert a folder's contents as a responsive gallery with lightbox directly in the block editor
 * 📝 **[pixelvault_gallery] shortcode** — classic editor, widgets, and theme template support
 * 🎛️ **Elementor** — folder panel works inside the Elementor media modal
@@ -148,7 +163,11 @@ Yes — all four are supported. Go to **Settings → Tools → Import from Anoth
 
 = 🧩 Does it work with Elementor, Divi, and Gutenberg? =
 
-Yes. The folder panel works inside Elementor's media modal, in both the Divi back-end and front-end builders, and the Gutenberg media uploader. There is also a dedicated PixelVault Gallery Gutenberg block.
+Yes. The folder panel works inside Elementor's media modal, in both the Divi back-end and front-end builders, and the Gutenberg media uploader. There are also two dedicated Gutenberg blocks: the PixelVault Gallery block and the new PixelVault Document Library block.
+
+= 📚 What is the Document Library block and where does it work? =
+
+The Document Library block turns any folder into a front-end file browser your visitors can search, navigate, and download from (including a Download-all ZIP). It is a Gutenberg block, so add it on any post or page from the block inserter, pick a folder, and choose a design preset. It is keyboard-accessible and fully responsive, and it respects your folder visibility rules, so restricted folders stay hidden from guests. Requires WordPress 6.5 or newer.
 
 = 💬 Get Support =
 
@@ -166,8 +185,24 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 8. Import Existing Media — auto-organize your existing media into folders by a chosen rule (By Year, By Month, By File Type)
 9. Media Replace — Swap any media file in-place, keeping the same URL and post ID.
 10. Folder Permissions — Control which roles can perform folder actions. Administrators always have full access.
+11. PixelVault Document Library block on the front end: folder tree, breadcrumb, search, and downloadable file tiles.
+12. Document Library design presets: Minimal view layouts.
+13. Document Library design presets: Minimal view in list layouts.
+14. Document Library block settings in the editor: pick a folder, preset, columns, and accent colour.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: 📚 **PixelVault Document Library block** — publish any media folder as an accessible, downloadable file library on the front end, with a sidebar folder tree, breadcrumb navigation, in-library search, pagination, per-file downloads, and a Download-all ZIP.
+* New: three design presets (Cards, Compact, Minimal), plus an accent colour, a framed option, and grid/list layouts, all configurable from the block settings.
+* New: the block is accessibility-first (full keyboard navigation using the WAI-ARIA tree pattern, screen-reader friendly) and fully responsive on mobile.
+* New: the Document Library respects folder visibility and role permissions, so restricted folders stay hidden from guests. It uses a public REST endpoint for no-reload navigation, and adds developer filters to extend file queries, downloads, and per-file output.
+* Fix: bulk "Move to folder" in the Media Library now works. It previously did nothing.
+* Fix: bulk "Add to folder" now keeps a file's existing folders instead of removing it from them, so a file can stay in several folders at once.
+* Fix: the bulk Delete button no longer gets stuck showing "Deleting..." after a deletion.
+* Fix: turning on Bulk Select and switching folders now clears it, instead of leaving Bulk Select active when you move between folders or return to a previous one.
+* Improve: bulk Add, Move, Remove, and Delete now show live "X of N" progress and run in batches for speed.
+* Change: **Requires at least** is now WordPress 6.5, which the Document Library block needs.
 
 = 1.1.5 =
 * Improve: the folder panel in the media popup now shows a collapsible tree (collapsed by default with expand arrows), so large folder structures stay tidy instead of appearing fully expanded.
@@ -234,6 +269,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds the PixelVault Document Library block: publish any folder as an accessible, searchable, downloadable file library on the front end. Now requires WordPress 6.5 or newer.
 
 = 1.1.5 =
 Polishes the media popup: collapsible folder tree, no more flicker when opening/switching/uploading, and clear feedback when dragging onto a locked folder.

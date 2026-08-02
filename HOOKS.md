@@ -123,6 +123,48 @@ wp.hooks.addAction( 'pixelvault.bulkActions', 'pixelvault-pro', function ( actio
 
 ---
 
+## Document Library Block
+
+The **PixelVault Document Library** block (`rayetun-medianest/document-library`) renders a folder
+as a front-end file browser. It exposes filters and an action so add-ons (such as **PixelVault
+Pro**) can extend the file query, per-file data, per-file row actions, ZIP downloads, and the
+block's own option schema.
+
+### Filters
+
+| Filter | Arguments | Purpose |
+|---|---|---|
+| `rayetun_medianest_doclib_schema` | `$schema` | Add or modify the block's option definitions (the controls shown in the editor). Return the modified array. |
+| `rayetun_medianest_doclib_file_query_args` | `$args, $term_id, $search` | Change the `WP_Query` args used to fetch a folder's files (ordering, meta queries, and so on). |
+| `rayetun_medianest_doclib_file` | `$file, $attachment_id` | Modify a single file's data before it renders. `$file` is `array( id, name, url, mime, size )`. Add keys here for use by the file-actions hook. |
+| `rayetun_medianest_doclib_can_download` | `$allowed, $folder, $root` | Return `false` to block a Download-all ZIP request for a given folder (for example, gate it by login or role). |
+
+### Actions
+
+| Action | Arguments | Fires when |
+|---|---|---|
+| `rayetun_medianest_doclib_file_actions` | `$file` | Inside each file tile, before it closes. Echo extra buttons or links per file here. |
+
+### Example — restrict Download-all to logged-in users
+```php
+add_filter( 'rayetun_medianest_doclib_can_download', function ( $allowed, $folder, $root ) {
+    return is_user_logged_in() ? $allowed : false;
+}, 10, 3 );
+```
+
+### Example — add a per-file "Copy link" button
+```php
+add_action( 'rayetun_medianest_doclib_file_actions', function ( $file ) {
+    printf(
+        '<button type="button" class="pv-doclib__copy" data-url="%s">%s</button>',
+        esc_url( $file['url'] ),
+        esc_html__( 'Copy link', 'pixelvault' )
+    );
+} );
+```
+
+---
+
 ## REST API
 
 Base: `/wp-json/rayetun-medianest/v1/` — authenticate with an `X-WP-Nonce` header.

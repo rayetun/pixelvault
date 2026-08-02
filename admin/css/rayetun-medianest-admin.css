@@ -1134,6 +1134,9 @@ div.rayetun-mn-modal-header {
 .rayetun-mn-fb-btn.is-danger { background: rgba(220,38,38,.25); border-color: rgba(220,38,38,.5); }
 .rayetun-mn-fb-btn.is-danger:hover { background: rgba(220,38,38,.45); }
 .rayetun-mn-fb-btn:disabled { opacity: .5; cursor: not-allowed; }
+/* While an action is in flight the whole bar dims and stops accepting clicks,
+   so it reads as "working" rather than broken, and cannot be double-triggered. */
+.rayetun-mn-floating-bar.is-busy { opacity: .6; pointer-events: none; }
 .rayetun-mn-fb-close {
 	background: none; border: none; color: rgba(255,255,255,.6);
 	font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 4px;

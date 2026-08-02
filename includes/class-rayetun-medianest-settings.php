@@ -50,6 +50,7 @@ class RayetunMediaNest_Settings {
 		'feature_zip_import'        => 1,
 		'feature_media_usage_map'   => 1,
 		'feature_gallery'           => 1,
+		'feature_document_library'  => 1,
 	);
 
 	// ── Public getter ─────────────────────────────────────────────────────────
@@ -252,6 +253,7 @@ class RayetunMediaNest_Settings {
 			'feature_zip_import'        => (int) $saved['feature_zip_import'],
 			'feature_media_usage_map'   => (int) $saved['feature_media_usage_map'],
 			'feature_gallery'           => (int) $saved['feature_gallery'],
+			'feature_document_library'  => (int) $saved['feature_document_library'],
 		);
 
 		update_option( self::OPTION_KEY, $clean );
