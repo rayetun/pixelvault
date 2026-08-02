@@ -22,6 +22,7 @@
 	);
 
 	registerBlockType('rayetun-medianest/gallery',{
+		apiVersion: 3,
 		title: __('PixelVault Gallery','pixelvault'),
 		description: __('Display images from a PixelVault folder as a beautiful gallery.','pixelvault'),
 		category: 'media',

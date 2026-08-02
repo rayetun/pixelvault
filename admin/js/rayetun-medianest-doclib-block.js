@@ -12,6 +12,7 @@
 	var useState = element.useState;
 	var useEffect = element.useEffect;
 	var InspectorControls = blockEditor.InspectorControls;
+	var useBlockProps = blockEditor.useBlockProps;
 	var PanelBody = components.PanelBody;
 	var ToggleControl = components.ToggleControl;
 	var SelectControl = components.SelectControl;
@@ -77,6 +78,7 @@
 	}
 
 	blocks.registerBlockType( 'rayetun-medianest/document-library', {
+		apiVersion: 3,
 		title: __( 'PixelVault Document Library', 'pixelvault' ),
 		description: __( 'A browsable, downloadable document library from your media folders.', 'pixelvault' ),
 		icon: 'category',
@@ -117,9 +119,11 @@
 				);
 			} );
 
+			var blockProps = useBlockProps();
+
 			return el( Fragment, {},
 				el( InspectorControls, {}, panels ),
-				el( 'div', props.blockProps ? props.blockProps() : {},
+				el( 'div', blockProps,
 					el( ServerSideRender, {
 						block: 'rayetun-medianest/document-library',
 						attributes: attrs
