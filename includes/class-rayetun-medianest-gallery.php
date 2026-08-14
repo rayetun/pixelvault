@@ -53,11 +53,36 @@ class RayetunMediaNest_Gallery {
 			true
 		);
 
+		// Register the frontend style + script at init (rather than only at render
+		// time) so block.json can reference them by handle. This is what lets the
+		// WordPress.org plugin page detect and list the block: block.json must name a
+		// script/editorScript AND a style/editorStyle for the directory to show it.
+		$css      = 'public/css/rayetun-medianest-gallery.css';
+		$css_path = RAYETUN_MEDIANEST_DIR . $css;
+		wp_register_style(
+			'rayetun-medianest-gallery',
+			RAYETUN_MEDIANEST_URL . $css,
+			array(),
+			self::VERSION . ( file_exists( $css_path ) ? '.' . filemtime( $css_path ) : '' )
+		);
+
+		$view      = 'public/js/rayetun-medianest-gallery.js';
+		$view_path = RAYETUN_MEDIANEST_DIR . $view;
+		wp_register_script(
+			'rayetun-medianest-gallery',
+			RAYETUN_MEDIANEST_URL . $view,
+			array(),
+			self::VERSION . ( file_exists( $view_path ) ? '.' . filemtime( $view_path ) : '' ),
+			true
+		);
+
 		// Register from block.json metadata (title/description/icon shown on the
 		// WordPress.org plugin page) while keeping the runtime script/attributes/render
 		// here in PHP. The path points at the folder that contains block.json.
 		register_block_type( RAYETUN_MEDIANEST_DIR . 'blocks/gallery', array(
 			'editor_script'   => 'rayetun-medianest-gallery-block',
+			'style'           => 'rayetun-medianest-gallery',
+			'view_script'     => 'rayetun-medianest-gallery',
 			'render_callback' => array( __CLASS__, 'render_block' ),
 			'attributes'      => array(
 				'folder_id'    => array( 'type' => 'number',  'default' => 0 ),
@@ -77,19 +102,31 @@ class RayetunMediaNest_Gallery {
 	// ── Frontend asset enqueueing ────────────────────────────────
 
 	public static function enqueue_frontend() {
-		wp_enqueue_style(
-			'rayetun-medianest-gallery',
-			RAYETUN_MEDIANEST_URL . 'public/css/rayetun-medianest-gallery.css',
-			array(),
-			self::VERSION
-		);
-		wp_enqueue_script(
-			'rayetun-medianest-gallery',
-			RAYETUN_MEDIANEST_URL . 'public/js/rayetun-medianest-gallery.js',
-			array(),
-			self::VERSION,
-			true
-		);
+		// Handles are registered at init in register_block(); enqueue them by handle.
+		// wp_enqueue_* falls back to registering on the fly if register_block() has not
+		// run yet (e.g. a very early shortcode render), keeping this self-contained.
+		if ( wp_style_is( 'rayetun-medianest-gallery', 'registered' ) ) {
+			wp_enqueue_style( 'rayetun-medianest-gallery' );
+		} else {
+			wp_enqueue_style(
+				'rayetun-medianest-gallery',
+				RAYETUN_MEDIANEST_URL . 'public/css/rayetun-medianest-gallery.css',
+				array(),
+				self::VERSION
+			);
+		}
+
+		if ( wp_script_is( 'rayetun-medianest-gallery', 'registered' ) ) {
+			wp_enqueue_script( 'rayetun-medianest-gallery' );
+		} else {
+			wp_enqueue_script(
+				'rayetun-medianest-gallery',
+				RAYETUN_MEDIANEST_URL . 'public/js/rayetun-medianest-gallery.js',
+				array(),
+				self::VERSION,
+				true
+			);
+		}
 	}
 
 	// ── Core rendering ───────────────────────────────────────────

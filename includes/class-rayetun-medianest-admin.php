@@ -19,7 +19,16 @@ class RayetunMediaNest_Admin {
 	 */
 	public static function enqueue_assets( string $hook ) {
 		$is_media_library = ( 'upload.php' === $hook );
-		$is_editor        = in_array( $hook, array( 'post.php', 'post-new.php' ), true );
+		/*
+		 * Screens where the WordPress media modal can be opened and should carry the
+		 * folder sidebar. Besides the classic post editor, this now includes the Site
+		 * Editor (FSE, hook `site-editor.php`) and the block-based Widgets screen.
+		 * Without this, the folder filter (a cookie read by RayetunMediaNest_Query on
+		 * every query-attachments AJAX call) still narrows the modal to the last-used
+		 * folder, but the sidebar UI to change or clear it never loads — so users saw a
+		 * folder's contents with no menu. See support report re: site-editor.php.
+		 */
+		$is_editor        = in_array( $hook, array( 'post.php', 'post-new.php', 'site-editor.php', 'widgets.php' ), true );
 
 		/*
 		 * Elementor editor pages use post.php with action=elementor.

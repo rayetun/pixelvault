@@ -5,7 +5,7 @@ Tags:              media library, media folders, document library, asset manager
 Requires at least: 6.5
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        1.2.0
+Stable tag:        1.2.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -186,11 +186,15 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 9. Media Replace — Swap any media file in-place, keeping the same URL and post ID.
 10. Folder Permissions — Control which roles can perform folder actions. Administrators always have full access.
 11. PixelVault Document Library block on the front end: folder tree, breadcrumb, search, and downloadable file tiles.
-12. Document Library design presets: Minimal view layouts.
-13. Document Library design presets: Minimal view in list layouts.
+12. Document Library design presets: Cards View layouts.
+13. Document Library design presets: Minimal List View layouts.
 14. Document Library block settings in the editor: pick a folder, preset, columns, and accent colour.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: the folder sidebar now appears in the Site Editor (full-site editing) and the block-based Widgets screen when you open the media library. Previously the modal there could stay filtered to your last-used folder with no sidebar to change or clear it.
+* Fix: the PixelVault Gallery and Document Library blocks now declare their editor script and styles in their block.json, so both blocks are detected and listed on the WordPress.org plugin page.
 
 = 1.2.0 =
 * New: 📚 **PixelVault Document Library block** — publish any media folder as an accessible, downloadable file library on the front end, with a sidebar folder tree, breadcrumb navigation, in-library search, pagination, per-file downloads, and a Download-all ZIP.
@@ -269,6 +273,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+Fixes the folder sidebar not showing in the Site Editor (FSE) and Widgets media modals, and makes both PixelVault blocks visible on the WordPress.org plugin page.
 
 = 1.2.0 =
 Adds the PixelVault Document Library block: publish any folder as an accessible, searchable, downloadable file library on the front end. Now requires WordPress 6.5 or newer.

@@ -3,7 +3,7 @@
  * Plugin Name:       PixelVault - Media Library Folders & Asset Manager
  * Plugin URI:        https://wordpress.org/plugins/pixelvault/
  * Description:       Media library folders plus a downloadable Document Library block. Nested colour-coded folders, drag and drop, bulk ZIP, analytics, and migration.
- * Version:           1.2.0
+ * Version:           1.2.1
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            Md Rayhan Uddin
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RAYETUN_MEDIANEST_VERSION',  '1.2.0' );
+define( 'RAYETUN_MEDIANEST_VERSION',  '1.2.1' );
 define( 'RAYETUN_MEDIANEST_DIR',      plugin_dir_path( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_URL',      plugin_dir_url( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_BASENAME', plugin_basename( __FILE__ ) );

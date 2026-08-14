@@ -2,10 +2,15 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "rayetun-medianest/document-library",
+	"version": "1.2.1",
 	"title": "PixelVault Document Library",
 	"category": "media",
 	"icon": "category",
 	"description": "Publish a media folder as a browsable, downloadable document library with a folder tree, breadcrumb, in-library search, pagination, and a Download-all ZIP.",
 	"keywords": [ "document", "library", "download", "folder", "files" ],
-	"textdomain": "pixelvault"
+	"textdomain": "pixelvault",
+	"editorScript": "rayetun-medianest-doclib-block",
+	"viewScript": "rayetun-medianest-doclib-view",
+	"style": "rayetun-medianest-doclib",
+	"editorStyle": "rayetun-medianest-doclib"
 }
