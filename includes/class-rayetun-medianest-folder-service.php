@@ -30,6 +30,19 @@ class RayetunMediaNest_Folder_Service {
 			return new WP_Error( 'name_too_long', __( 'Folder name cannot exceed 200 characters.', 'pixelvault' ), array( 'status' => 400 ) );
 		}
 
+		// Folders are stored per object type (the post_type column). Only allow a
+		// folder to be created for an object type the taxonomy is actually registered
+		// for, so add-ons (Pro F7) can create post/CPT folders while junk types are
+		// rejected. Free always passes 'attachment'.
+		$post_type = sanitize_key( $args['post_type'] ?? 'attachment' );
+		if ( '' === $post_type ) {
+			$post_type = 'attachment';
+		}
+		if ( ! in_array( $post_type, RayetunMediaNest_Taxonomy::get_object_types(), true ) ) {
+			return new WP_Error( 'invalid_post_type', __( 'Folders cannot be created for that content type.', 'pixelvault' ), array( 'status' => 400 ) );
+		}
+		$args['post_type'] = $post_type;
+
 		$parent_id = absint( $args['parent_id'] ?? 0 );
 
 		if ( $parent_id > 0 && ! self::folder_exists( $parent_id ) ) {
@@ -80,9 +93,13 @@ class RayetunMediaNest_Folder_Service {
 	// -------------------------------------------------------------------------
 
 	public static function get_flat( string $post_type = 'attachment' ) {
+		$post_type = sanitize_key( $post_type );
+		if ( '' === $post_type ) {
+			$post_type = 'attachment';
+		}
 		return apply_filters(
 			'rayetun_medianest_get_folders',
-			RayetunMediaNest_DB::get_visible_folders( get_current_user_id(), sanitize_key( $post_type ) ),
+			RayetunMediaNest_DB::get_visible_folders( get_current_user_id(), $post_type ),
 			$post_type
 		);
 	}

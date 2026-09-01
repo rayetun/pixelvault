@@ -38,6 +38,8 @@ class RayetunMediaNest_Settings {
 		'replace_cdn_notice' => 1,
 		'alt_editor_enabled' => 1,
 		'alt_per_page'       => 20,
+		// SVG upload + on-upload sanitization (admin-gated). Free feature.
+		'svg_upload_enabled' => 1,
 		// Feature on/off toggles
 		'feature_smart_filters'     => 1,
 		'feature_auto_assign'       => 1,

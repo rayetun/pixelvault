@@ -190,7 +190,17 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 13. Document Library design presets: Minimal List View layouts.
 14. Document Library block settings in the editor: pick a folder, preset, columns, and accent colour.
 
+== Credits ==
+
+PixelVault bundles the following open-source library:
+
+* [enshrined/svg-sanitize](https://github.com/darylldoyle/svg-sanitizer) by Daryll Doyle — sanitizes SVG uploads to remove scripts and other unsafe content. Licensed under GPL-2.0-or-later.
+
 == Changelog ==
+
+= 1.2.2 =
+* New: 🖼️ **SVG upload support** — upload SVG images to the Media Library (administrators only by default). Every SVG is automatically sanitized on upload — scripts, event handlers, and remote or unsafe references are stripped — so only clean files are stored, and SVGs preview correctly in the grid.
+* Developer: new `rayetun_medianest_folder_object_types` filter lets add-ons register the folder taxonomy for other post types (posts, pages, custom post types), reusing the existing folder engine. Also adds `rayetun_medianest_svg_upload_capability` and `rayetun_medianest_svg_allowed_elements` filters.
 
 = 1.2.1 =
 * Fix: the folder sidebar now appears in the Site Editor (full-site editing) and the block-based Widgets screen when you open the media library. Previously the modal there could stay filtered to your last-used folder with no sidebar to change or clear it.
@@ -273,6 +283,9 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.2.2 =
+Adds SVG upload support with automatic on-upload sanitization (scripts and unsafe content stripped). SVG upload is limited to administrators by default.
 
 = 1.2.1 =
 Fixes the folder sidebar not showing in the Site Editor (FSE) and Widgets media modals, and makes both PixelVault blocks visible on the WordPress.org plugin page.

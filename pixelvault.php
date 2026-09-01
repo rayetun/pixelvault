@@ -56,6 +56,7 @@ function rayetun_medianest_load_classes() {
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-analytics.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-media-replace.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-alt-editor.php';
+	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-svg.php';
 }
 
 /**
@@ -152,6 +153,9 @@ final class RayetunMediaNest {
 		}
 		if ( RayetunMediaNest_Settings::get( 'alt_editor_enabled', 1 ) ) {
 			RayetunMediaNest_Alt_Editor::register();
+		}
+		if ( RayetunMediaNest_Settings::get( 'svg_upload_enabled', 1 ) ) {
+			RayetunMediaNest_SVG::register();
 		}
 	}
 

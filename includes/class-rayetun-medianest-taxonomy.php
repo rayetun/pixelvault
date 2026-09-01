@@ -14,12 +14,40 @@ class RayetunMediaNest_Taxonomy {
 	const TAXONOMY = 'rayetun_medianest_folder';
 
 	/**
+	 * The object types (post types) the folder taxonomy is registered for.
+	 *
+	 * Free ships media-only: the default is just 'attachment'. Add-ons (PixelVault
+	 * Pro — F7 Content Foldering) extend this via the
+	 * `rayetun_medianest_folder_object_types` filter to fold posts, pages,
+	 * WooCommerce products, or any custom post type through the same folder engine.
+	 * 'attachment' is always kept so media folders never break, no matter what a
+	 * filter returns. The folder DATA layer is already object-type-aware (each folder
+	 * row carries a post_type column and reads are scoped by it), so once the
+	 * taxonomy is attached to a post type, wp_set_object_terms() works for it.
+	 *
+	 * @return string[] Sanitized, de-duplicated list of object types.
+	 */
+	public static function get_object_types(): array {
+		/**
+		 * Filter the object types the folder taxonomy is registered for.
+		 *
+		 * @param string[] $object_types Post types to attach folders to. Default ['attachment'].
+		 */
+		$types = (array) apply_filters( 'rayetun_medianest_folder_object_types', array( 'attachment' ) );
+		$types = array_values( array_unique( array_filter( array_map( 'sanitize_key', $types ) ) ) );
+		if ( ! in_array( 'attachment', $types, true ) ) {
+			array_unshift( $types, 'attachment' );
+		}
+		return $types;
+	}
+
+	/**
 	 * Register the taxonomy. Hooked to 'init'.
 	 */
 	public static function register() {
 		register_taxonomy(
 			self::TAXONOMY,
-			array( 'attachment' ),
+			self::get_object_types(),
 			array(
 				'labels'             => array(
 					'name'          => __( 'Media Folders', 'pixelvault' ),

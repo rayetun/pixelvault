@@ -14,3 +14,6 @@ package-lock.json
 # Distribution artifacts
 pixelvault.zip
 *.zip
+
+# Internal planning — kept local only, never pushed to the public repo
+PIXELVAULT-PRO-PLAN.md

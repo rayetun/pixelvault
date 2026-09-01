@@ -43,6 +43,7 @@ add_action( 'rayetun_medianest_folder_deleted', function ( $term_id, $folder ) {
 | Filter | Arguments | Purpose |
 |---|---|---|
 | `rayetun_medianest_get_folders` | `$folders, $post_type` | Modify/enrich the folder list before it is returned |
+| `rayetun_medianest_folder_object_types` | `$object_types` | Object types (post types) the folder taxonomy is registered for. Default `['attachment']`; `attachment` is always kept. Add-ons extend this to fold posts, pages, CPTs, or products through the same folder engine (the folder data layer is already `post_type`-scoped). |
 | `rayetun_medianest_settings_defaults` | `$defaults` | Register default option values |
 | `rayetun_medianest_settings_tabs` | `$tabs, $settings` | Add sidebar tabs to the settings page |
 | `rayetun_medianest_dashboard_features` | `$features, $settings` | Add cards to the dashboard "Active Features" grid |
@@ -51,6 +52,8 @@ add_action( 'rayetun_medianest_folder_deleted', function ( $term_id, $folder ) {
 | `rayetun_medianest_smart_folder_query_args` | `$args, $type` | Filter the media grid when a custom smart folder is active |
 | `rayetun_medianest_auto_assign_target` | `$term_id, $attachment_id` | Override the folder a new upload is assigned to (rules engines) |
 | `rayetun_medianest_folder_rest_args` | `$args, $op` | Register custom REST fields on folder create/update (`$op` = `'create'`\|`'update'`) |
+| `rayetun_medianest_svg_upload_capability` | `$capability` | Capability required to upload SVG files (default `manage_options`). |
+| `rayetun_medianest_svg_allowed_elements` | `$allowed` | Allowlist of SVG element names kept by the on-upload sanitizer. |
 
 ### Example — register a custom "Duplicates" smart folder
 ```php
@@ -84,6 +87,25 @@ add_filter( 'rayetun_medianest_auto_assign_target', function ( $term_id, $attach
     return $term_id; // leave unchanged
 }, 10, 2 );
 ```
+
+### Example — fold posts as well as media (content foldering)
+```php
+// 1. Attach the folder taxonomy to more post types.
+add_filter( 'rayetun_medianest_folder_object_types', function ( $types ) {
+    $types[] = 'post';
+    return $types;
+} );
+
+// 2. Create a folder scoped to that post type.
+$folder = RayetunMediaNest_Folder_Service::create( 'Drafts', array( 'post_type' => 'post' ) );
+
+// 3. Read that post type's folder tree, and assign a post to a folder.
+$tree = RayetunMediaNest_Folder_Service::get_tree( 'post' );
+wp_set_object_terms( $post_id, array( $folder['term_id'] ), RayetunMediaNest_Taxonomy::TAXONOMY );
+```
+Folders are stored per object type (a `post_type` column), so media folders and post
+folders are independent trees sharing one engine. Registering the folder sidebar UI on the
+relevant list screens is the add-on's job.
 
 ---
 
