@@ -17,6 +17,7 @@
 	var ToggleControl = components.ToggleControl;
 	var SelectControl = components.SelectControl;
 	var RangeControl = components.RangeControl;
+	var CheckboxControl = components.CheckboxControl;
 	var ServerSideRender = ssr;
 
 	var CFG = window.pvDoclibConfig || { schema: [], restUrl: '', nonce: '' };
@@ -54,6 +55,34 @@
 				options: fopts.map( function ( o ) { return { value: String( o.value ), label: o.label }; } ),
 				onChange: function ( v ) { onChange( parseInt( v, 10 ) || 0 ); }
 			} );
+		}
+		if ( row.type === 'folders' ) {
+			/* Multi-select folder list. The value is an array of term IDs; add-ons use this
+			   to let an editor hand-pick which folders a block shows. */
+			var selected = Array.isArray( value ) ? value.map( Number ) : [];
+			return el( 'div', { key: key, style: { margin: '4px 0 20px' } },
+				el( 'span', {
+					style: { display: 'block', fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.02em', color: '#1e1e1e', marginBottom: '8px' }
+				}, row.label ),
+				el( 'div', {
+					style: { maxHeight: '190px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '4px', padding: '8px' }
+				}, folderOptions.map( function ( o ) {
+					var id = Number( o.value );
+					return el( CheckboxControl, {
+						key: 'f' + id,
+						label: o.label,
+						checked: selected.indexOf( id ) !== -1,
+						onChange: function ( on ) {
+							var next = selected.filter( function ( v ) { return v !== id; } );
+							if ( on ) { next.push( id ); }
+							onChange( next );
+						}
+					} );
+				} ) ),
+				row.help ? el( 'p', {
+					style: { fontSize: '12px', fontStyle: 'normal', color: '#757575', margin: '8px 0 0' }
+				}, row.help ) : null
+			);
 		}
 		if ( row.type === 'color' ) {
 			/* Lightweight color input. Inline styles because InspectorControls render
