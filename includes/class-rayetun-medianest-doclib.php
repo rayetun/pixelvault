@@ -268,9 +268,21 @@ class RayetunMediaNest_DocLib {
 	public static function attributes(): array {
 		$attrs = array();
 		foreach ( self::schema() as $c ) {
-			$type = 'toggle' === $c['type'] ? 'boolean'
-				: ( in_array( $c['type'], array( 'range', 'folder' ), true ) ? 'number' : 'string' );
+			if ( 'toggle' === $c['type'] ) {
+				$type = 'boolean';
+			} elseif ( in_array( $c['type'], array( 'range', 'folder' ), true ) ) {
+				$type = 'number';
+			} elseif ( 'folders' === $c['type'] ) {
+				$type = 'array';
+			} else {
+				$type = 'string';
+			}
 			$attrs[ $c['key'] ] = array( 'type' => $type, 'default' => $c['default'] );
+			if ( 'array' === $type ) {
+				// REST (and so ServerSideRender) rejects an array attribute without an
+				// item schema, which shows up in the editor as "Error loading block".
+				$attrs[ $c['key'] ]['items'] = array( 'type' => 'number' );
+			}
 		}
 		return $attrs;
 	}
