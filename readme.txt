@@ -201,6 +201,7 @@ PixelVault bundles the following open-source library:
 = 1.2.2 =
 * New: 🖼️ **SVG upload support** — upload SVG images to the Media Library (administrators only by default). Every SVG is automatically sanitized on upload — scripts, event handlers, and remote or unsafe references are stripped — so only clean files are stored, and SVGs preview correctly in the grid.
 * Developer: new `rayetun_medianest_folder_object_types` filter lets add-ons register the folder taxonomy for other post types (posts, pages, custom post types), reusing the existing folder engine. Also adds `rayetun_medianest_svg_upload_capability` and `rayetun_medianest_svg_allowed_elements` filters.
+* Developer: new `rayetun_medianest_after_analytics_panel` action so add-ons can render extra sections inside the Analytics tab, and `rayetun_medianest_delete_data_desc` filter to extend the "Delete All Data on Uninstall" description.
 * Compatibility: tested up to WordPress 7.1.
 
 = 1.2.1 =
