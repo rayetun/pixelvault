@@ -686,7 +686,13 @@ class RayetunMediaNest_Settings {
 							); ?>
 							<?php self::render_toggle( 'delete_data_on_uninstall', $settings['delete_data_on_uninstall'],
 								__( 'Delete All Data on Uninstall', 'pixelvault' ),
-								__( 'DANGER: only enable this if you want deleting the plugin to permanently erase every folder and all media-to-folder assignments. When off (recommended), your folders are kept safe in the database and reappear if you reinstall.', 'pixelvault' )
+								/**
+								 * Filter the "Delete All Data on Uninstall" description. Add-ons that
+								 * clean up their own data on this same switch can extend the warning.
+								 *
+								 * @param string $desc Description text.
+								 */
+								apply_filters( 'rayetun_medianest_delete_data_desc', __( 'DANGER: only enable this if you want deleting the plugin to permanently erase every folder and all media-to-folder assignments. When off (recommended), your folders are kept safe in the database and reappear if you reinstall.', 'pixelvault' ) )
 							); ?>
 						</div>
 						<?php self::render_save_bar( 'settings' ); ?>
@@ -806,6 +812,14 @@ class RayetunMediaNest_Settings {
 								<?php esc_html_e( 'Loading analytics…', 'pixelvault' ); ?>
 							</div>
 						</div>
+						<?php
+						/**
+						 * Fires at the end of the Analytics panel, after the storage report.
+						 * Add-ons (e.g. PixelVault Pro) render extra analytics sections here so
+						 * the plugin has a single Analytics home.
+						 */
+						do_action( 'rayetun_medianest_after_analytics_panel' );
+						?>
 					</div><!-- /analytics -->
 
 					<!-- ── Folder Locking Tab ──────────────────────────────── -->
