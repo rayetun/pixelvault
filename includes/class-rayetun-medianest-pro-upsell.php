@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class RayetunMediaNest_Pro_Upsell {
 
-	const DEFAULT_URL = 'https://rayetun.com/pixelvault-pro/';
+	const DEFAULT_URL = 'https://checkout.freemius.com/plugin/39343/plan/67509/';
 
 	public static function register() {
 		// Never upsell to someone who already runs Pro.
