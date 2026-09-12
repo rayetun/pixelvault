@@ -1,0 +1,376 @@
+﻿/**
+ * Content Folders â€” edit.php list-screen sidebar.
+ *
+ * A lightweight folder rail beside WordPress's own list table. Uses the free plugin's
+ * indigo accent so it feels native to PixelVault.
+ */
+
+.mn-cf-layout {
+	display: flex;
+	align-items: flex-start;
+	gap: 18px;
+	margin-top: 6px;
+	/* WordPress floats the .subsubsub views list (All | Mine | â€¦) left; a flex box would
+	   sit beside that float and get pushed right, so drop below it and hug the left edge. */
+	clear: both;
+}
+.mn-cf-main {
+	flex: 1 1 auto;
+	/* Let the list table keep its natural width and scroll inside this column instead of
+	   crushing its columns when the sidebar leaves it less room (column-heavy screens). */
+	min-width: 0;
+	overflow-x: auto;
+}
+/* WordPress forces list tables to width:100%; allow ours to size to content so columns
+   never collapse â€” min-width keeps it filling the column when content is narrow. */
+.mn-cf-main table.wp-list-table {
+	width: auto;
+	min-width: 100%;
+}
+.mn-cf-sidebar {
+	flex: 0 0 280px;
+	width: 280px;
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+	padding: 12px;
+	box-sizing: border-box;
+	position: sticky;
+	top: 46px;
+	/* Drop the rail down so its top lines up with the list table (past the search /
+	   bulk-actions toolbar that sits above the table on the right). */
+	margin-top: 50px;
+	/* Column layout so a long folder list scrolls on its own while the header and the
+	   assignment footer stay put. */
+	display: flex;
+	flex-direction: column;
+	max-height: calc(100vh - 72px);
+}
+/* Everything except the tree keeps its size; the tree takes the slack and scrolls. */
+.mn-cf-sidebar > * { flex: 0 0 auto; }
+
+.mn-cf-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+	padding: 2px 4px;
+}
+.mn-cf-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: #1e293b;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+	padding-left: 5px;
+}
+.mn-cf-add {
+	border: 1px solid #cbd5e1;
+	background: #f8fafc;
+	color: #4f46e5;
+	border-radius: 6px;
+	width: 26px;
+	height: 26px;
+	line-height: 1;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+}
+.mn-cf-add:hover { background: #eef2ff; border-color: #a5b4fc; }
+.mn-cf-head .mn-cf-title { flex: 1 1 auto; }
+
+.mn-cf-toggle {
+	border: 1px solid #cbd5e1;
+	background: #f8fafc;
+	color: #475569;
+	border-radius: 6px;
+	width: 26px;
+	height: 26px;
+	font-size: 15px;
+	line-height: 1;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+}
+.mn-cf-toggle:hover { background: #eef2ff; border-color: #a5b4fc; color: #4f46e5; }
+
+/* â”€â”€ Collapsed rail â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.mn-cf-layout.is-collapsed .mn-cf-sidebar {
+	flex: 0 0 46px;
+	width: 46px;
+	padding: 8px 6px;
+}
+.mn-cf-layout.is-collapsed .mn-cf-head {
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 0;
+	padding: 0;
+	justify-content: center;
+}
+.mn-cf-layout.is-collapsed .mn-cf-title,
+.mn-cf-layout.is-collapsed .mn-cf-add,
+.mn-cf-layout.is-collapsed .mn-cf-nav,
+.mn-cf-layout.is-collapsed .mn-cf-tree,
+.mn-cf-layout.is-collapsed .mn-cf-assign,
+.mn-cf-layout.is-collapsed .mn-cf-rootinput,
+.mn-cf-layout.is-collapsed .mn-cf-toast { display: none; }
+.mn-cf-collapsed-hint {
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	color: #94a3b8;
+	margin-top: 4px;
+	user-select: none;
+}
+
+.mn-cf-nav { border-bottom: 1px solid #eef2f7; padding-bottom: 6px; margin-bottom: 6px; }
+
+.mn-cf-tree { flex: 1 1 auto; min-height: 40px; overflow-x: hidden; overflow-y: auto; margin: 0 -4px; padding: 0 4px; }
+
+.mn-cf-row {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	border-radius: 7px;
+	position: relative;
+	text-decoration: none;
+}
+.mn-cf-tree .mn-cf-row { margin-top: 3px; }
+.mn-cf-fixed { padding-left: 8px; color: #334155; }
+/* Chevron gutter â€” shared by every row so folder icons align with All / Unfiled and the
+   disclosure arrow has room on its left (matches the Media Library sidebar). */
+.mn-cf-chevslot {
+	flex: 0 0 18px;
+	height: 22px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.mn-cf-row:hover { background: #f1f5f9; }
+.mn-cf-row.is-active { background: #eef2ff; }
+.mn-cf-row.is-active .mn-cf-name { color: #4338ca; font-weight: 600; }
+
+.mn-cf-link {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 7px 8px 7px 6px;
+	text-decoration: none;
+	color: #334155;
+}
+
+/* Folder / section icon â€” the indigo affordance that makes each row read as a folder. */
+.mn-cf-ico {
+	flex: 0 0 auto;
+	width: 16px;
+	height: 16px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #6366f1;
+}
+.mn-cf-ico svg { width: 16px; height: 16px; }
+.mn-cf-fixed .mn-cf-ico { color: #94a3b8; }
+.mn-cf-row.is-active .mn-cf-ico { color: #4338ca; }
+.mn-cf-name {
+	flex: 1 1 auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 13px;
+}
+.mn-cf-count {
+	flex: 0 0 auto;
+	font-size: 11px;
+	color: #64748b;
+	background: #f1f5f9;
+	border-radius: 10px;
+	padding: 1px 8px;
+	min-width: 18px;
+	text-align: center;
+}
+.mn-cf-row.is-active .mn-cf-count { background: #e0e7ff; color: #4338ca; }
+
+.mn-cf-chev {
+	width: 18px;
+	height: 22px;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	color: #94a3b8;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	transition: transform .15s ease;
+}
+.mn-cf-chev svg { width: 13px; height: 13px; }
+.mn-cf-chev.is-open { transform: rotate(90deg); }
+.mn-cf-chev:hover { color: #4f46e5; }
+
+.mn-cf-tools {
+	display: none;
+	gap: 1px;
+	padding-right: 6px;
+}
+.mn-cf-row:hover .mn-cf-tools { display: flex; }
+.mn-cf-tool {
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	line-height: 1;
+	padding: 4px;
+	border-radius: 4px;
+	color: #64748b;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.mn-cf-tool svg { width: 14px; height: 14px; }
+.mn-cf-tool:hover { color: #4f46e5; background: #e2e8f0; }
+
+/* â”€â”€ Inline inputs (create / rename) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.mn-cf-rootinput:not(:empty) { padding: 4px 2px 6px; }
+.mn-cf-childinput:not(:empty) { padding: 4px 2px; }
+.mn-cf-inputrow { display: flex; align-items: center; gap: 4px; flex: 1 1 auto; }
+.mn-cf-input {
+	flex: 1 1 auto;
+	min-width: 0;
+	border: 1px solid #a5b4fc;
+	border-radius: 6px;
+	padding: 5px 8px;
+	font-size: 13px;
+	box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.mn-cf-input.has-error { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.12); }
+.mn-cf-ibtn {
+	flex: 0 0 auto;
+	border: 1px solid #cbd5e1;
+	background: #fff;
+	border-radius: 6px;
+	min-width: 26px;
+	height: 28px;
+	padding: 0 7px;
+	cursor: pointer;
+	font-size: 13px;
+	line-height: 1;
+	color: #475569;
+}
+.mn-cf-ibtn.is-ok { color: #fff; background: #4f46e5; border-color: #4f46e5; }
+.mn-cf-ibtn.is-ok:hover { background: #4338ca; }
+.mn-cf-ibtn.is-danger { color: #fff; background: #dc2626; border-color: #dc2626; }
+.mn-cf-ibtn:hover { background: #f1f5f9; }
+.mn-cf-ibtn.is-ok:hover, .mn-cf-ibtn.is-danger:hover { color: #fff; }
+
+/* â”€â”€ Inline delete confirm â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.mn-cf-confirm {
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	background: #fff;
+	border: 1px solid #fecaca;
+	border-radius: 8px;
+	padding: 4px 6px;
+	box-shadow: 0 4px 14px rgba(15,23,42,.12);
+	z-index: 3;
+}
+.mn-cf-confirm-q { font-size: 12px; color: #b91c1c; font-weight: 600; }
+
+/* â”€â”€ Drag-and-drop filing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+body.mn-cf-dragging .mn-cf-row:not(.mn-cf-fixed) { outline: 1px dashed transparent; }
+.mn-cf-row.is-droptarget {
+	background: #eef2ff;
+	box-shadow: inset 0 0 0 2px #6366f1;
+}
+.mn-cf-row.is-droptarget .mn-cf-name { color: #4338ca; }
+
+/* â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.mn-cf-toast {
+	margin-top: 10px;
+	font-size: 12px;
+	line-height: 1.4;
+	color: #065f46;
+	background: #ecfdf5;
+	border: 1px solid #a7f3d0;
+	border-radius: 8px;
+	padding: 8px 10px;
+	opacity: 0;
+	transform: translateY(4px);
+	transition: opacity .18s ease, transform .18s ease;
+	pointer-events: none;
+}
+.mn-cf-toast.is-show { opacity: 1; transform: translateY(0); }
+.mn-cf-toast.is-error { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+
+.mn-cf-assign {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #eef2f7;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.mn-cf-select {
+	width: 100%;
+	max-width: 100%;
+}
+.mn-cf-apply { width: 100%; justify-content: center; text-align: center; }
+/* Brand-colour the assignment buttons (override WordPress's default blue). */
+.mn-cf-apply.button-primary,
+.mn-cf-apply.button-primary:hover,
+.mn-cf-apply.button-primary:focus {
+	background: #4f46e5;
+	border-color: #4f46e5;
+	color: #fff;
+	box-shadow: none;
+	text-shadow: none;
+}
+.mn-cf-apply.button-primary:hover { background: #4338ca; border-color: #4338ca; }
+.mn-cf-apply.button:not(.button-primary) {
+	color: #4f46e5;
+	border-color: #c7cbf5;
+	background: #fff;
+}
+.mn-cf-apply.button:not(.button-primary):hover {
+	color: #4338ca;
+	border-color: #4f46e5;
+	background: #eef2ff;
+}
+.mn-cf-status {
+	margin: 8px 0 0;
+	font-size: 12px;
+	color: #64748b;
+	min-height: 16px;
+}
+
+.mn-cf-col-empty { color: #94a3b8; }
+.mn-cf-col-chip {
+	display: inline-block;
+	background: #eef2ff;
+	color: #4338ca;
+	border-radius: 6px;
+	padding: 1px 8px;
+	font-size: 12px;
+	text-decoration: none;
+	margin: 1px 2px 1px 0;
+}
+.mn-cf-col-chip:hover { background: #e0e7ff; }
+
+@media screen and (max-width: 782px) {
+	.mn-cf-layout { display: block; }
+	.mn-cf-sidebar { width: 100%; flex-basis: auto; margin-top: 0; margin-bottom: 14px; position: static; }
+}

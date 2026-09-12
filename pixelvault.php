@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       PixelVault - Media Library Folders & Asset Manager
+ * Plugin Name:       PixelVault – Media Library Folders, Document Library & File Manager
  * Plugin URI:        https://wordpress.org/plugins/pixelvault/
- * Description:       Media library folders plus a downloadable Document Library block. Nested colour-coded folders, drag and drop, bulk ZIP, analytics, and migration.
- * Version:           1.2.1
+ * Description:       Media library folders plus a downloadable Document Library block, and Content Folders for Posts and Pages. Nested colour-coded folders, drag and drop, bulk ZIP, analytics, and migration.
+ * Version:           1.3.0
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            Md Rayhan Uddin
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RAYETUN_MEDIANEST_VERSION',  '1.2.1' );
+define( 'RAYETUN_MEDIANEST_VERSION',  '1.3.0' );
 define( 'RAYETUN_MEDIANEST_DIR',      plugin_dir_path( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_URL',      plugin_dir_url( __FILE__ ) );
 define( 'RAYETUN_MEDIANEST_BASENAME', plugin_basename( __FILE__ ) );
@@ -57,6 +57,7 @@ function rayetun_medianest_load_classes() {
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-media-replace.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-alt-editor.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-svg.php';
+	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-content-folders.php';
 }
 
 /**
@@ -156,6 +157,9 @@ final class RayetunMediaNest {
 		}
 		if ( RayetunMediaNest_Settings::get( 'svg_upload_enabled', 1 ) ) {
 			RayetunMediaNest_SVG::register();
+		}
+		if ( RayetunMediaNest_Settings::get( 'feature_content_folders', 1 ) ) {
+			RayetunMediaNest_Content_Folders::register();
 		}
 	}
 

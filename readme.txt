@@ -5,7 +5,7 @@ Tags:              media library, media folders, document library, file manager,
 Requires at least: 6.5
 Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        1.2.1
+Stable tag:        1.3.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -32,6 +32,18 @@ Turn any media folder into a browsable, downloadable **document library** on the
 * 🔒 **Respects folder visibility**: restricted folders stay hidden from guests
 
 Perfect for knowledge bases, press kits, resource centres, download portals, and product documentation.
+
+= 🗂️ Content Folders for Posts & Pages (new in 1.3.0) =
+
+Folders aren't just for media any more. Enable **Content Folders** and the same folder tree appears on your **Posts** and **Pages** list screens, so you can organise content the way you organise files — without touching public categories or tags.
+
+* 📂 **Nested folders on the Posts and Pages screens** — a sidebar with create, rename, delete, and unlimited subfolders
+* 🖱️ **Drag-and-drop filing** — drag selected rows onto a folder, or use "Add to folder"
+* ⚡ **Instant folder filtering** — click a folder to filter the list, no page reload
+* 🧩 **One shared tree** — a "Client campaign" folder can hold both its images and its landing pages
+* 🔒 **Private and admin-only** — folders never appear on the front end and never affect your categories, tags, URLs, or SEO
+
+Content Folders keep your editorial workflow tidy — group drafts, campaigns, seasonal pages, or client work — separately from the public taxonomy your visitors see.
 
 = ✨ Core Features =
 
@@ -198,9 +210,11 @@ PixelVault bundles the following open-source library:
 
 == Changelog ==
 
-= 1.2.2 =
+= 1.3.0 =
+* New: 🗂️ **Content Folders** — organize **Posts and Pages** into the same folder tree you use for media. A Folders sidebar appears on the Posts and Pages list screens (enable them under Media → PixelVault → Content Folders) with inline create, rename and delete, nested subfolders, drag-and-drop filing, a Folders column, and instant folder filtering — no page reloads. One folder can hold both a campaign's images and its pages.
 * New: 🖼️ **SVG upload support** — upload SVG images to the Media Library (administrators only by default). Every SVG is automatically sanitized on upload — scripts, event handlers, and remote or unsafe references are stripped — so only clean files are stored, and SVGs preview correctly in the grid.
-* Developer: new `rayetun_medianest_folder_object_types` filter lets add-ons register the folder taxonomy for other post types (posts, pages, custom post types), reusing the existing folder engine. Also adds `rayetun_medianest_svg_upload_capability` and `rayetun_medianest_svg_allowed_elements` filters.
+* Developer: new `rayetun_medianest_content_folder_types` filter to extend Content Folders to custom post types, and `rayetun_medianest_content_assigned` action fired when an item is filed.
+* Developer: new `rayetun_medianest_folder_object_types` filter lets add-ons register the folder taxonomy for other post types, reusing the existing folder engine. Also adds `rayetun_medianest_svg_upload_capability` and `rayetun_medianest_svg_allowed_elements` filters.
 * Developer: new `rayetun_medianest_after_analytics_panel` action so add-ons can render extra sections inside the Analytics tab, and `rayetun_medianest_delete_data_desc` filter to extend the "Delete All Data on Uninstall" description.
 * Compatibility: tested up to WordPress 7.1.
 
@@ -286,8 +300,8 @@ PixelVault bundles the following open-source library:
 
 == Upgrade Notice ==
 
-= 1.2.2 =
-Adds SVG upload support with automatic on-upload sanitization (scripts and unsafe content stripped). SVG upload is limited to administrators by default.
+= 1.3.0 =
+Adds Content Folders for Posts and Pages (organize content in the same folder tree as your media) and SVG upload support with automatic on-upload sanitization. Tested up to WordPress 7.1.
 
 = 1.2.1 =
 Fixes the folder sidebar not showing in the Site Editor (FSE) and Widgets media modals, and makes both PixelVault blocks visible on the WordPress.org plugin page.
