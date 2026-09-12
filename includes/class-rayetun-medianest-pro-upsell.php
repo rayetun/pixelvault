@@ -1,6 +1,6 @@
 <?php
 /**
- * "Upgrade to Pro" — a single, opt-out settings tab that advertises the paid PixelVault
+ * "Upgrade to Pro" is a single, opt-out settings tab that advertises the paid PixelVault
  * Pro add-on and links to its pricing page.
  *
  * WordPress.org-friendly by design: it contains NO Pro feature code and NO Freemius code,
@@ -33,6 +33,7 @@ class RayetunMediaNest_Pro_Upsell {
 			return;
 		}
 		add_filter( 'rayetun_medianest_settings_tabs',          array( __CLASS__, 'add_tab' ), 99, 2 );
+		add_action( 'rayetun_medianest_render_settings_panels', array( __CLASS__, 'render_blocks_panel' ) );
 		add_action( 'rayetun_medianest_render_settings_panels', array( __CLASS__, 'render_panel' ) );
 	}
 
@@ -59,6 +60,10 @@ class RayetunMediaNest_Pro_Upsell {
 	}
 
 	public static function add_tab( $tabs, $settings ) {
+		$tabs['blocks_showcase'] = array(
+			'label'    => __( 'Blocks', 'pixelvault' ),
+			'icon_svg' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
+		);
 		$tabs['pro_upsell'] = array(
 			'label'    => __( 'Upgrade to Pro', 'pixelvault' ),
 			'icon_svg' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.2 5.3 5.8.5-4.4 3.8 1.3 5.6L12 21l-4.9 3.8"/><path d="M12 3L9.8 8.3 4 8.8l4.4 3.8L7.1 18.2 12 15l4.9 3.2-1.3-5.6L20 8.8l-5.8-.5z"/></svg>',
@@ -75,7 +80,7 @@ class RayetunMediaNest_Pro_Upsell {
 		return array(
 			array(
 				'title' => __( 'Asset Metadata & Rights', 'pixelvault' ),
-				'desc'  => __( 'Photographer, licence, source and usage terms on every file — plus expiry dates and CSV import/export.', 'pixelvault' ),
+				'desc'  => __( 'Photographer, licence, source and usage terms on every file, plus expiry dates and CSV import/export.', 'pixelvault' ),
 				'icon'  => self::icon( '<path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 17h5"/>' ),
 			),
 			array(
@@ -85,7 +90,7 @@ class RayetunMediaNest_Pro_Upsell {
 			),
 			array(
 				'title' => __( 'Gated Downloads', 'pixelvault' ),
-				'desc'  => __( 'Capture an email before download or require a password — with a leads list you can export.', 'pixelvault' ),
+				'desc'  => __( 'Capture an email before download or require a password, with a leads list you can export.', 'pixelvault' ),
 				'icon'  => self::icon( '<path d="M4 4h16v12H5.2L4 17.2z"/><path d="M8 9h8M8 12h5"/>' ),
 			),
 			array(
@@ -95,7 +100,7 @@ class RayetunMediaNest_Pro_Upsell {
 			),
 			array(
 				'title' => __( 'Content Folders for CPTs & WooCommerce', 'pixelvault' ),
-				'desc'  => __( 'You already fold Posts and Pages — Pro extends the same sidebar to products and any custom post type.', 'pixelvault' ),
+				'desc'  => __( 'You already fold Posts and Pages. Pro extends the same sidebar to products and any custom post type.', 'pixelvault' ),
 				'icon'  => self::icon( '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>' ),
 			),
 			array(
@@ -115,7 +120,7 @@ class RayetunMediaNest_Pro_Upsell {
 		return '<svg class="mn-pro-yes" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="' . esc_attr__( 'Included', 'pixelvault' ) . '"><path d="M20 6 9 17l-5-5"/></svg>';
 	}
 	private static function no(): string {
-		return '<span class="mn-pro-no" role="img" aria-label="' . esc_attr__( 'Not included', 'pixelvault' ) . '">&mdash;</span>';
+		return '<svg class="mn-pro-no" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" role="img" aria-label="' . esc_attr__( 'Not included', 'pixelvault' ) . '"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 	}
 
 	/** Free-vs-Pro rows: [ feature label, included in free? ]. Pro includes everything. */
@@ -123,8 +128,8 @@ class RayetunMediaNest_Pro_Upsell {
 		return array(
 			array( __( 'Media library folders', 'pixelvault' ), true ),
 			array( __( 'Document Library block', 'pixelvault' ), true ),
-			array( __( 'Content Folders — Posts & Pages', 'pixelvault' ), true ),
-			array( __( 'Content Folders — custom post types & WooCommerce', 'pixelvault' ), false ),
+			array( __( 'Content Folders for Posts & Pages', 'pixelvault' ), true ),
+			array( __( 'Content Folders for custom post types & WooCommerce', 'pixelvault' ), false ),
 			array( __( 'Asset metadata & rights tracking', 'pixelvault' ), false ),
 			array( __( 'Folder access control (login / role / password)', 'pixelvault' ), false ),
 			array( __( 'Email & password-gated downloads', 'pixelvault' ), false ),
@@ -145,7 +150,7 @@ class RayetunMediaNest_Pro_Upsell {
 			),
 			array(
 				__( 'Is there a free trial?', 'pixelvault' ),
-				__( 'Yes — a 7-day free trial, no credit card required.', 'pixelvault' ),
+				__( 'Yes, a 7-day free trial, no credit card required.', 'pixelvault' ),
 			),
 			array(
 				__( 'What is your refund policy?', 'pixelvault' ),
@@ -153,21 +158,136 @@ class RayetunMediaNest_Pro_Upsell {
 			),
 			array(
 				__( 'How many sites can I use it on?', 'pixelvault' ),
-				__( 'Choose a Single-site, 5-site, or Unlimited licence — each available annually or as a one-time lifetime purchase.', 'pixelvault' ),
+				__( 'Choose a Single-site, 5-site, or Unlimited licence, each available annually or as a one-time lifetime purchase.', 'pixelvault' ),
 			),
 			array(
 				__( 'Do I get updates and support?', 'pixelvault' ),
-				__( 'Yes — automatic updates and priority email support for as long as your licence is active.', 'pixelvault' ),
+				__( 'Yes, automatic updates and priority email support for as long as your licence is active.', 'pixelvault' ),
 			),
 			array(
 				__( 'Does it work with WooCommerce and custom post types?', 'pixelvault' ),
 				__( 'Yes. Pro extends Content Folders to WooCommerce products and any custom post type (the free plugin covers Posts and Pages).', 'pixelvault' ),
 			),
 			array(
+				__( 'Where do the Pro blocks appear, and do I need to code?', 'pixelvault' ),
+				__( 'No code needed. Once Pro is active, the blocks appear in the WordPress editor under the PixelVault category. Add them to any post, page or Site Editor template like any other block.', 'pixelvault' ),
+			),
+			array(
+				__( 'Will the blocks work with my theme?', 'pixelvault' ),
+				__( 'Yes. They are standard, server-rendered Gutenberg blocks, so they display on the front end with any theme and inside block-based (FSE) templates.', 'pixelvault' ),
+			),
+			array(
+				__( 'Can visitors download several files at once?', 'pixelvault' ),
+				__( 'Yes. The Multi-Select Download Cart block lets visitors tick multiple files and download them together as a single ZIP.', 'pixelvault' ),
+			),
+			array(
+				__( 'Are the Pro blocks accessible and mobile-friendly?', 'pixelvault' ),
+				__( 'Yes. Like the free Document Library, they are keyboard-navigable, screen-reader friendly and fully responsive.', 'pixelvault' ),
+			),
+			array(
 				__( 'What happens to my data if my licence lapses?', 'pixelvault' ),
-				__( 'Your folders, metadata and settings are always preserved — nothing is deleted.', 'pixelvault' ),
+				__( 'Your folders, metadata and settings are always preserved, so nothing is deleted.', 'pixelvault' ),
 			),
 		);
+	}
+
+	/** All PixelVault blocks: [ name, is_pro, description, icon ]. */
+	private static function blocks(): array {
+		return array(
+			array(
+				'name' => __( 'Document Library', 'pixelvault' ),
+				'pro'  => false,
+				'desc' => __( 'Publish any folder as a browsable, downloadable file library with a folder tree, search, breadcrumbs and per-file downloads.', 'pixelvault' ),
+				'icon' => self::icon( '<path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 17h5"/>' ),
+			),
+			array(
+				'name' => __( 'Gallery', 'pixelvault' ),
+				'pro'  => false,
+				'desc' => __( 'Display any folder as a responsive image gallery on the front end.', 'pixelvault' ),
+				'icon' => self::icon( '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>' ),
+			),
+			array(
+				'name' => __( 'Multi-Select Download Cart', 'pixelvault' ),
+				'pro'  => true,
+				'desc' => __( 'Browse a folder, tick the files you want, and download them together as a single ZIP.', 'pixelvault' ),
+				'icon' => self::icon( '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>' ),
+			),
+			array(
+				'name' => __( 'Media Metadata Search', 'pixelvault' ),
+				'pro'  => true,
+				'desc' => __( 'A front-end search box that finds files by title and by the custom metadata you store on them.', 'pixelvault' ),
+				'icon' => self::icon( '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' ),
+			),
+			array(
+				'name' => __( 'QR Code Share', 'pixelvault' ),
+				'pro'  => true,
+				'desc' => __( 'Show a scannable QR code for a share link or any URL, great for print, packaging and events.', 'pixelvault' ),
+				'icon' => self::icon( '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M20 14v.01M14 20v.01M20 20v.01M17 17v.01"/>' ),
+			),
+			array(
+				'name' => __( 'Asset Credit & Rights Badge', 'pixelvault' ),
+				'pro'  => true,
+				'desc' => __( 'Display an image\'s photographer, licence and usage terms anywhere you place the block.', 'pixelvault' ),
+				'icon' => self::icon( '<circle cx="12" cy="8" r="5"/><path d="M8.5 13L7 22l5-3 5 3-1.5-9"/>' ),
+			),
+			array(
+				'name' => __( 'Frontend Alt Text Editor', 'pixelvault' ),
+				'pro'  => true,
+				'desc' => __( 'Let trusted users fix image alt text right from the front end, no wp-admin needed. An accessibility win.', 'pixelvault' ),
+				'icon' => self::icon( '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>' ),
+			),
+			array(
+				'name' => __( 'Client Portal', 'pixelvault' ),
+				'pro'  => true,
+				'desc' => __( 'Show each client only the folder their share link unlocks, wrapped in your own branding.', 'pixelvault' ),
+				'icon' => self::icon( '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>' ),
+			),
+			array(
+				'name' => __( 'Access Request', 'pixelvault' ),
+				'pro'  => true,
+				'desc' => __( 'Let visitors request access to a restricted folder. You approve, and they are emailed a secure link.', 'pixelvault' ),
+				'icon' => self::icon( '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>' ),
+			),
+		);
+	}
+
+	public static function render_blocks_panel( $settings ) {
+		$url = esc_url( self::pro_url() );
+		?>
+		<div class="rayetun-mn-panel" data-panel="blocks_showcase" style="display:none">
+			<div class="rayetun-mn-panel-header">
+				<h2><?php esc_html_e( 'PixelVault Blocks', 'pixelvault' ); ?></h2>
+				<p><?php esc_html_e( 'Turn your media folders into front-end experiences. Free blocks are ready to use now; Pro blocks unlock with PixelVault Pro.', 'pixelvault' ); ?></p>
+			</div>
+			<style>
+				.mn-block-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:18px 0}
+				.mn-block-card{position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+				.mn-block-card.is-pro{border-color:#e0e7ff;background:linear-gradient(#fff,#fbfbff)}
+				.mn-block-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+				.mn-block-ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;background:#eef2ff;color:#4f46e5}
+				.mn-block-badge{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap}
+				.mn-block-badge.is-free{background:#ecfdf5;color:#059669}
+				.mn-block-badge.is-pro{background:#4f46e5;color:#fff}
+				.mn-block-card h3{margin:0 0 6px;font-size:15px;font-weight:700;color:#1e293b}
+				.mn-block-card p{margin:0;font-size:13px;line-height:1.55;color:#64748b}
+			</style>
+			<div class="mn-block-grid">
+				<?php foreach ( self::blocks() as $b ) : ?>
+					<div class="mn-block-card <?php echo $b['pro'] ? 'is-pro' : ''; ?>">
+						<div class="mn-block-top">
+							<span class="mn-block-ico"><?php echo $b['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG. ?></span>
+							<span class="mn-block-badge <?php echo $b['pro'] ? 'is-pro' : 'is-free'; ?>"><?php echo $b['pro'] ? esc_html__( 'Pro', 'pixelvault' ) : esc_html__( 'Included', 'pixelvault' ); ?></span>
+						</div>
+						<h3><?php echo esc_html( $b['name'] ); ?></h3>
+						<p><?php echo esc_html( $b['desc'] ); ?></p>
+					</div>
+				<?php endforeach; ?>
+			</div>
+			<div class="mn-pro-foot">
+				<a class="mn-pro-cta" href="<?php echo $url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Unlock the Pro blocks', 'pixelvault' ); ?></a>
+			</div>
+		</div>
+		<?php
 	}
 
 	public static function render_panel( $settings ) {
@@ -181,7 +301,7 @@ class RayetunMediaNest_Pro_Upsell {
 				.mn-pro-hero p{margin:0 auto 20px;max-width:640px;font-size:15px;line-height:1.6;color:rgba(255,255,255,.92)}
 				.mn-pro-cta{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#4338ca;font-weight:700;font-size:15px;text-decoration:none;border-radius:10px;padding:12px 26px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
 				.mn-pro-cta:hover{background:#f5f3ff;color:#4338ca}
-				.mn-pro-note{margin:22px 0 0;font-size:12px;color:rgba(255,255,255,.85)}
+				.mn-pro-note{margin:28px 0 0;font-size:11px;letter-spacing:.02em;color:rgba(255,255,255,.8)}
 				.mn-pro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:22px 0}
 				.mn-pro-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
 				.mn-pro-ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;background:#eef2ff;color:#4f46e5;margin-bottom:12px}
