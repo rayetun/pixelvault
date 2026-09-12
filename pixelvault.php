@@ -58,6 +58,7 @@ function rayetun_medianest_load_classes() {
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-alt-editor.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-svg.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-content-folders.php';
+	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-blocks-manager.php';
 	require_once RAYETUN_MEDIANEST_DIR . 'includes/class-rayetun-medianest-pro-upsell.php';
 }
 
@@ -164,6 +165,8 @@ final class RayetunMediaNest {
 		if ( RayetunMediaNest_Settings::get( 'feature_content_folders', 1 ) ) {
 			RayetunMediaNest_Content_Folders::register();
 		}
+		// Blocks manager tab (per-block on/off; controls free + Pro blocks).
+		RayetunMediaNest_Blocks_Manager::register();
 		// "Upgrade to Pro" tab — self-hides when Pro is active (see the class).
 		RayetunMediaNest_Pro_Upsell::register();
 	}

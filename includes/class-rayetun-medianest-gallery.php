@@ -37,6 +37,9 @@ class RayetunMediaNest_Gallery {
 
 	public static function register_block() {
 		if ( ! function_exists( 'register_block_type' ) ) { return; }
+		if ( class_exists( 'RayetunMediaNest_Blocks_Manager' ) && ! RayetunMediaNest_Blocks_Manager::is_enabled( 'rayetun-medianest/gallery' ) ) {
+			return;
+		}
 
 		$block_js   = 'admin/js/rayetun-medianest-gallery-block.js';
 		$block_path = RAYETUN_MEDIANEST_DIR . $block_js;

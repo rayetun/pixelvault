@@ -33,7 +33,6 @@ class RayetunMediaNest_Pro_Upsell {
 			return;
 		}
 		add_filter( 'rayetun_medianest_settings_tabs',          array( __CLASS__, 'add_tab' ), 99, 2 );
-		add_action( 'rayetun_medianest_render_settings_panels', array( __CLASS__, 'render_blocks_panel' ) );
 		add_action( 'rayetun_medianest_render_settings_panels', array( __CLASS__, 'render_panel' ) );
 	}
 
@@ -60,10 +59,6 @@ class RayetunMediaNest_Pro_Upsell {
 	}
 
 	public static function add_tab( $tabs, $settings ) {
-		$tabs['blocks_showcase'] = array(
-			'label'    => __( 'Blocks', 'pixelvault' ),
-			'icon_svg' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
-		);
 		$tabs['pro_upsell'] = array(
 			'label'    => __( 'Upgrade to Pro', 'pixelvault' ),
 			'icon_svg' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.2 5.3 5.8.5-4.4 3.8 1.3 5.6L12 21l-4.9 3.8"/><path d="M12 3L9.8 8.3 4 8.8l4.4 3.8L7.1 18.2 12 15l4.9 3.2-1.3-5.6L20 8.8l-5.8-.5z"/></svg>',
@@ -189,105 +184,6 @@ class RayetunMediaNest_Pro_Upsell {
 				__( 'Your folders, metadata and settings are always preserved, so nothing is deleted.', 'pixelvault' ),
 			),
 		);
-	}
-
-	/** All PixelVault blocks: [ name, is_pro, description, icon ]. */
-	private static function blocks(): array {
-		return array(
-			array(
-				'name' => __( 'Document Library', 'pixelvault' ),
-				'pro'  => false,
-				'desc' => __( 'Publish any folder as a browsable, downloadable file library with a folder tree, search, breadcrumbs and per-file downloads.', 'pixelvault' ),
-				'icon' => self::icon( '<path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 17h5"/>' ),
-			),
-			array(
-				'name' => __( 'Gallery', 'pixelvault' ),
-				'pro'  => false,
-				'desc' => __( 'Display any folder as a responsive image gallery on the front end.', 'pixelvault' ),
-				'icon' => self::icon( '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>' ),
-			),
-			array(
-				'name' => __( 'Multi-Select Download Cart', 'pixelvault' ),
-				'pro'  => true,
-				'desc' => __( 'Browse a folder, tick the files you want, and download them together as a single ZIP.', 'pixelvault' ),
-				'icon' => self::icon( '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>' ),
-			),
-			array(
-				'name' => __( 'Media Metadata Search', 'pixelvault' ),
-				'pro'  => true,
-				'desc' => __( 'A front-end search box that finds files by title and by the custom metadata you store on them.', 'pixelvault' ),
-				'icon' => self::icon( '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' ),
-			),
-			array(
-				'name' => __( 'QR Code Share', 'pixelvault' ),
-				'pro'  => true,
-				'desc' => __( 'Show a scannable QR code for a share link or any URL, great for print, packaging and events.', 'pixelvault' ),
-				'icon' => self::icon( '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M20 14v.01M14 20v.01M20 20v.01M17 17v.01"/>' ),
-			),
-			array(
-				'name' => __( 'Asset Credit & Rights Badge', 'pixelvault' ),
-				'pro'  => true,
-				'desc' => __( 'Display an image\'s photographer, licence and usage terms anywhere you place the block.', 'pixelvault' ),
-				'icon' => self::icon( '<circle cx="12" cy="8" r="5"/><path d="M8.5 13L7 22l5-3 5 3-1.5-9"/>' ),
-			),
-			array(
-				'name' => __( 'Frontend Alt Text Editor', 'pixelvault' ),
-				'pro'  => true,
-				'desc' => __( 'Let trusted users fix image alt text right from the front end, no wp-admin needed. An accessibility win.', 'pixelvault' ),
-				'icon' => self::icon( '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>' ),
-			),
-			array(
-				'name' => __( 'Client Portal', 'pixelvault' ),
-				'pro'  => true,
-				'desc' => __( 'Show each client only the folder their share link unlocks, wrapped in your own branding.', 'pixelvault' ),
-				'icon' => self::icon( '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>' ),
-			),
-			array(
-				'name' => __( 'Access Request', 'pixelvault' ),
-				'pro'  => true,
-				'desc' => __( 'Let visitors request access to a restricted folder. You approve, and they are emailed a secure link.', 'pixelvault' ),
-				'icon' => self::icon( '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>' ),
-			),
-		);
-	}
-
-	public static function render_blocks_panel( $settings ) {
-		$url = esc_url( self::pro_url() );
-		?>
-		<div class="rayetun-mn-panel" data-panel="blocks_showcase" style="display:none">
-			<div class="rayetun-mn-panel-header">
-				<h2><?php esc_html_e( 'PixelVault Blocks', 'pixelvault' ); ?></h2>
-				<p><?php esc_html_e( 'Turn your media folders into front-end experiences. Free blocks are ready to use now; Pro blocks unlock with PixelVault Pro.', 'pixelvault' ); ?></p>
-			</div>
-			<style>
-				.mn-block-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:18px 0}
-				.mn-block-card{position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
-				.mn-block-card.is-pro{border-color:#e0e7ff;background:linear-gradient(#fff,#fbfbff)}
-				.mn-block-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
-				.mn-block-ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;background:#eef2ff;color:#4f46e5}
-				.mn-block-badge{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap}
-				.mn-block-badge.is-free{background:#ecfdf5;color:#059669}
-				.mn-block-badge.is-pro{background:#4f46e5;color:#fff}
-				.mn-block-card h3{margin:0 0 6px;font-size:15px;font-weight:700;color:#1e293b}
-				.mn-block-card p{margin:0;font-size:13px;line-height:1.55;color:#64748b}
-			</style>
-			<div class="mn-block-grid">
-				<?php foreach ( self::blocks() as $b ) : ?>
-					<div class="mn-block-card <?php echo $b['pro'] ? 'is-pro' : ''; ?>">
-						<div class="mn-block-top">
-							<span class="mn-block-ico"><?php echo $b['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG. ?></span>
-							<span class="mn-block-badge <?php echo $b['pro'] ? 'is-pro' : 'is-free'; ?>"><?php echo $b['pro'] ? esc_html__( 'Pro', 'pixelvault' ) : esc_html__( 'Included', 'pixelvault' ); ?></span>
-						</div>
-						<h3><?php echo esc_html( $b['name'] ); ?></h3>
-						<p><?php echo esc_html( $b['desc'] ); ?></p>
-					</div>
-				<?php endforeach; ?>
-			</div>
-			<div class="mn-pro-foot">
-				<a class="mn-pro-cta" href="<?php echo $url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Unlock the Pro blocks', 'pixelvault' ); ?></a>
-			</div>
-		</div>
-		<?php
 	}
 
 	public static function render_panel( $settings ) {
