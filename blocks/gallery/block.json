@@ -4,7 +4,7 @@
 	"name": "rayetun-medianest/gallery",
 	"version": "1.2.1",
 	"title": "PixelVault Gallery",
-	"category": "media",
+	"category": "pixelvault",
 	"icon": "format-gallery",
 	"description": "Display the images in a PixelVault folder as a responsive gallery with an optional lightbox and captions.",
 	"keywords": [ "gallery", "folder", "media", "images", "pixelvault" ],

@@ -420,8 +420,10 @@ class RayetunMediaNest_Content_Folders {
 	}
 
 	public static function render_settings_panel( $settings ) {
-		$enabled  = self::enabled_types();
-		$eligible = self::eligible_types();
+		$enabled    = self::enabled_types();
+		$eligible   = self::eligible_types();
+		$pro_active = defined( 'PIXELVAULT_PRO_VERSION' ) || class_exists( 'PixelVault_Pro' );
+		$pro_url    = class_exists( 'RayetunMediaNest_Pro_Upsell' ) ? RayetunMediaNest_Pro_Upsell::pro_url() : 'https://checkout.freemius.com/plugin/39343/plan/67509/';
 		?>
 		<div class="rayetun-mn-panel" data-panel="content_folders" style="display:none">
 			<div class="rayetun-mn-panel-header">
@@ -437,6 +439,13 @@ class RayetunMediaNest_Content_Folders {
 				.mn-cf-check code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:11px;color:#64748b}
 				.mn-cf-status{font-size:13px;font-weight:500;margin-top:12px}
 				.mn-cf-status.is-ok{color:#10b981}.mn-cf-status.is-err{color:#ef4444}
+				.mn-cf-check.is-locked{cursor:not-allowed;opacity:.8;background:#fafafe;border-style:dashed}
+				.mn-cf-check.is-locked:hover{border-color:#e2e8f0;background:#fafafe}
+				.mn-cf-check.is-locked input{cursor:not-allowed}
+				.mn-cf-pro-badge{background:#4f46e5;color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-left:auto}
+				.mn-cf-pro-label{margin:22px 0 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8}
+				.mn-cf-pro-cta{display:inline-block;margin-top:14px;font-size:13px;font-weight:600;color:#4f46e5;text-decoration:none}
+				.mn-cf-pro-cta:hover{text-decoration:underline}
 			</style>
 
 			<div class="rayetun-mn-info-box" style="margin-bottom:18px">
@@ -460,6 +469,23 @@ class RayetunMediaNest_Content_Folders {
 				<?php endforeach; ?>
 			</div>
 			<p id="mn-cf-save-status" class="mn-cf-status" role="status" aria-live="polite"></p>
+
+			<?php if ( ! $pro_active ) : ?>
+				<p class="mn-cf-pro-label"><?php esc_html_e( 'Available in PixelVault Pro', 'pixelvault' ); ?></p>
+				<div class="mn-cf-checklist">
+					<label class="mn-cf-check is-locked">
+						<input type="checkbox" disabled />
+						<span><?php esc_html_e( 'Custom post types', 'pixelvault' ); ?></span>
+						<span class="mn-cf-pro-badge"><?php esc_html_e( 'Pro', 'pixelvault' ); ?></span>
+					</label>
+					<label class="mn-cf-check is-locked">
+						<input type="checkbox" disabled />
+						<span><?php esc_html_e( 'WooCommerce products', 'pixelvault' ); ?></span>
+						<span class="mn-cf-pro-badge"><?php esc_html_e( 'Pro', 'pixelvault' ); ?></span>
+					</label>
+				</div>
+				<a class="mn-cf-pro-cta" href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Fold every post type with PixelVault Pro', 'pixelvault' ); ?> &rarr;</a>
+			<?php endif; ?>
 		</div>
 		<?php
 	}

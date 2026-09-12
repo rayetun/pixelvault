@@ -4,7 +4,7 @@
 	"name": "rayetun-medianest/document-library",
 	"version": "1.2.1",
 	"title": "PixelVault Document Library",
-	"category": "media",
+	"category": "pixelvault",
 	"icon": "category",
 	"description": "Publish a media folder as a browsable, downloadable document library with a folder tree, breadcrumb, in-library search, pagination, and a Download-all ZIP.",
 	"keywords": [ "document", "library", "download", "folder", "files" ],

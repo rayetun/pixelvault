@@ -103,6 +103,8 @@ final class RayetunMediaNest {
 		 * Folder_Service::delete() or some other code path (WP admin, WP-CLI, etc.).
 		 */
 		add_action( 'deleted_term',          array( __CLASS__, 'on_term_deleted' ), 10, 3 );
+		// A dedicated "PixelVault" block category for every PixelVault block (free + Pro).
+		add_filter( 'block_categories_all',  array( __CLASS__, 'register_block_category' ), 10, 2 );
 		add_action( 'rest_api_init',         array( $this, 'register_rest_routes' ) );
 		add_action( 'admin_enqueue_scripts', array( 'RayetunMediaNest_Admin', 'enqueue_assets' ) );
 		/* Elementor hijacks the admin page before admin_enqueue_scripts fires.
@@ -184,6 +186,27 @@ final class RayetunMediaNest {
 		if ( RayetunMediaNest_Taxonomy::TAXONOMY === $taxonomy ) {
 			RayetunMediaNest_DB::delete_folder_row( (int) $term_id );
 		}
+	}
+
+	/**
+	 * Register a "PixelVault" block category so all our blocks (free and Pro) group under
+	 * their own heading in the editor's block inserter instead of "Media".
+	 *
+	 * @param array $categories Existing block categories.
+	 * @return array
+	 */
+	public static function register_block_category( $categories, $context = null ) {
+		foreach ( (array) $categories as $cat ) {
+			if ( isset( $cat['slug'] ) && 'pixelvault' === $cat['slug'] ) {
+				return $categories;
+			}
+		}
+		array_unshift( $categories, array(
+			'slug'  => 'pixelvault',
+			'title' => __( 'PixelVault', 'pixelvault' ),
+			'icon'  => null,
+		) );
+		return $categories;
 	}
 }
 
