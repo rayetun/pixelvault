@@ -1,7 +1,7 @@
-=== PixelVault - Media Library Folders & Asset Manager ===
+=== PixelVault – Media Library Folders, Document Library & File Manager ===
 Contributors:      rayetun
 Donate link:       https://wise.com/pay/me/mdrayhanu2
-Tags:              media library, media folders, document library, asset manager, file manager
+Tags:              media library, media folders, document library, file manager, asset manager
 Requires at least: 6.5
 Tested up to:      7.1
 Requires PHP:      7.4
@@ -9,7 +9,7 @@ Stable tag:        1.2.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Media library folders plus a downloadable Document Library block. Colour-coded folders, drag-and-drop, bulk ZIP, analytics, and migration.
+Organize your media library with nested drag-and-drop folders, then publish any folder as a downloadable front-end Document Library.
 
 == Description ==
 
