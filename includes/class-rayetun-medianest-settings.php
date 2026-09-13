@@ -452,7 +452,6 @@ class RayetunMediaNest_Settings {
 						'dashboard'   => array( 'icon' => 'dashboard',   'label' => __( 'Dashboard', 'pixelvault' ),       'feature' => null ),
 						'general'     => array( 'icon' => 'general',     'label' => __( 'General', 'pixelvault' ),         'feature' => null ),
 						'filters'     => array( 'icon' => 'filters',     'label' => __( 'Quick Filters', 'pixelvault' ),   'feature' => 'feature_smart_filters' ),
-						'auto_assign' => array( 'icon' => 'auto_assign', 'label' => __( 'Auto Assign', 'pixelvault' ),     'feature' => 'feature_auto_assign' ),
 						'replace'     => array( 'icon' => 'replace',     'label' => __( 'Media Replace', 'pixelvault' ),   'feature' => 'feature_media_replace' ),
 						'locking'     => array( 'icon' => 'locking',     'label' => __( 'Folder Locking', 'pixelvault' ),  'feature' => 'feature_folder_locking' ),
 						'analytics'   => array( 'icon' => 'analytics',   'label' => __( 'Analytics', 'pixelvault' ),       'feature' => 'feature_analytics' ),
@@ -543,7 +542,7 @@ class RayetunMediaNest_Settings {
 								$features = array(
 									array( 'key' => null,                        'tab' => null,          'label' => __( 'Virtual Folders', 'pixelvault' ),    'active' => true,                                              'desc' => __( 'Unlimited nested folders for every media file.', 'pixelvault' ) ),
 									array( 'key' => 'feature_smart_filters',     'tab' => 'filters',     'label' => __( 'Smart Filters', 'pixelvault' ),      'active' => (bool) $settings['feature_smart_filters'],         'desc' => __( 'Dynamic sidebar views: Missing Alt, Unused, Recent, Large Files.', 'pixelvault' ) ),
-									array( 'key' => 'feature_auto_assign',       'tab' => 'auto_assign', 'label' => __( 'Auto Assign', 'pixelvault' ),        'active' => (bool) $settings['feature_auto_assign'],           'desc' => __( 'Automatically places new uploads into the active folder.', 'pixelvault' ) ),
+									array( 'key' => 'feature_auto_assign',       'tab' => 'general',     'label' => __( 'Auto Assign', 'pixelvault' ),        'active' => (bool) $settings['feature_auto_assign'],           'desc' => __( 'Automatically places new uploads into the active folder.', 'pixelvault' ) ),
 									array( 'key' => 'feature_media_replace',     'tab' => 'replace',     'label' => __( 'Media Replace', 'pixelvault' ),      'active' => (bool) $settings['feature_media_replace'],         'desc' => __( 'Swap any file in-place keeping the same URL.', 'pixelvault' ) ),
 									array( 'key' => 'feature_folder_locking',    'tab' => 'locking',     'label' => __( 'Folder Locking', 'pixelvault' ),     'active' => (bool) $settings['feature_folder_locking'],        'desc' => __( 'Lock folders to prevent accidental changes.', 'pixelvault' ) ),
 									array( 'key' => 'feature_analytics',         'tab' => 'analytics',   'label' => __( 'Storage Analytics', 'pixelvault' ),  'active' => (bool) $settings['feature_analytics'],             'desc' => __( 'Per-folder storage breakdown, top files, and file type chart.', 'pixelvault' ) ),
@@ -695,30 +694,15 @@ class RayetunMediaNest_Settings {
 								apply_filters( 'rayetun_medianest_delete_data_desc', __( 'DANGER: only enable this if you want deleting the plugin to permanently erase every folder and all media-to-folder assignments. When off (recommended), your folders are kept safe in the database and reappear if you reinstall.', 'pixelvault' ) )
 							); ?>
 						</div>
-						<?php self::render_save_bar( 'settings' ); ?>
-					</div><!-- /general -->
-
-					<!-- ── Auto Assign Tab ─────────────────────────────────── -->
-					<div class="rayetun-mn-panel" data-panel="auto_assign" style="display:none">
-						<div class="rayetun-mn-panel-header">
-							<h2><?php esc_html_e( 'Auto Assign', 'pixelvault' ); ?></h2>
-							<p><?php esc_html_e( 'Automatically place new uploads into the currently selected folder.', 'pixelvault' ); ?></p>
-						</div>
-						<div class="rayetun-mn-settings-list">
-							<?php self::render_toggle( 'auto_assign', $settings['auto_assign'],
-								__( 'Auto-assign New Uploads', 'pixelvault' ),
-								__( 'When a folder is selected in the Media Library, new uploads are automatically placed in that folder.', 'pixelvault' )
-							); ?>
-						</div>
 						<div class="rayetun-mn-info-box" style="margin-top:24px">
 							<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
 							<div>
-								<strong><?php esc_html_e( 'How it works', 'pixelvault' ); ?></strong>
+								<strong><?php esc_html_e( 'How auto-assign works', 'pixelvault' ); ?></strong>
 								<p><?php esc_html_e( 'Select any folder in the Media Library sidebar before uploading. New files are automatically assigned to that folder. Deselect the folder (click it again) to return to uploading without auto-assignment.', 'pixelvault' ); ?></p>
 							</div>
 						</div>
 						<?php self::render_save_bar( 'settings' ); ?>
-					</div><!-- /auto_assign -->
+					</div><!-- /general -->
 
 					<!-- ── Quick Filters Tab ───────────────────────────────── -->
 					<div class="rayetun-mn-panel" data-panel="filters" style="display:none">
