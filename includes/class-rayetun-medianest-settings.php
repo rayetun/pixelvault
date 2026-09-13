@@ -110,10 +110,26 @@ class RayetunMediaNest_Settings {
 	// ── Menu page ─────────────────────────────────────────────────────────────
 
 	public static function add_page() {
-		self::$page_hook = (string) add_submenu_page(
-			'upload.php',
+		// Top-level "PixelVault" menu (moved out of Media in 1.3.0) so the plugin — and
+		// PixelVault Pro's licence pages, which attach here as submenus — have a stable,
+		// discoverable home. The slug stays 'rayetun-medianest' so every existing link,
+		// tab, and redirect keeps working.
+		self::$page_hook = (string) add_menu_page(
 			__( 'PixelVault Settings', 'pixelvault' ),
 			__( 'PixelVault', 'pixelvault' ),
+			'medianest_manage_folders',
+			'rayetun-medianest',
+			array( __CLASS__, 'render_page' ),
+			'dashicons-portfolio',
+			26 // Just below Comments (25).
+		);
+
+		// Rename the auto-generated first submenu from "PixelVault" to "Settings" so the
+		// top-level label isn't duplicated as its own child.
+		add_submenu_page(
+			'rayetun-medianest',
+			__( 'PixelVault Settings', 'pixelvault' ),
+			__( 'Settings', 'pixelvault' ),
 			'medianest_manage_folders',
 			'rayetun-medianest',
 			array( __CLASS__, 'render_page' )
