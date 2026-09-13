@@ -629,6 +629,39 @@
 }
 .rayetun-mn-info-box p:last-child { margin-bottom: 0; }
 
+/* ── Collapsible "How it works" callout (matches PixelVault Pro) ─────────────── */
+.mn-callout {
+	background: color-mix(in srgb, var(--mn-primary, #4f46e5) 6%, #fff);
+	border: 1px solid color-mix(in srgb, var(--mn-primary, #4f46e5) 18%, #fff);
+	border-radius: var(--mn-radius, 10px);
+	margin: 0 0 22px;
+	color: var(--mn-text, #1e293b);
+	overflow: hidden;
+}
+.mn-callout-head {
+	display: flex; align-items: center; gap: 10px;
+	padding: 13px 16px; cursor: pointer; list-style: none;
+	font-size: 13px; font-weight: 600; color: var(--mn-text, #1e293b); user-select: none;
+}
+.mn-callout-head::-webkit-details-marker { display: none; }
+.mn-callout-head:hover { background: color-mix(in srgb, var(--mn-primary, #4f46e5) 9%, #fff); }
+.mn-callout-head:focus-visible { outline: 2px solid var(--mn-primary, #4f46e5); outline-offset: -2px; }
+.mn-callout-i { width: 18px; height: 18px; color: var(--mn-primary, #4f46e5); flex: 0 0 auto; }
+.mn-callout-title { flex: 1 1 auto; }
+.mn-callout-chev { width: 16px; height: 16px; color: var(--mn-muted, #64748b); flex: 0 0 auto; transition: transform .18s ease; }
+.mn-callout[open] .mn-callout-chev { transform: rotate(180deg); }
+.mn-callout-body {
+	padding: 0 16px 15px 44px; font-size: 13px; line-height: 1.6; color: var(--mn-muted, #475569); max-width: 840px;
+}
+.mn-callout-body strong { color: var(--mn-text, #1e293b); }
+.mn-callout-body p { margin: 0 0 8px; }
+.mn-callout-body p:last-child { margin-bottom: 0; }
+.mn-callout-body ol, .mn-callout-body ul { margin: 6px 0 0; padding-left: 18px; }
+.mn-callout-body li { margin: 4px 0; }
+.mn-callout-body code {
+	background: color-mix(in srgb, var(--mn-primary, #4f46e5) 12%, #fff); border-radius: 4px; padding: 1px 6px; font-size: 12px;
+}
+
 /* ── Save bar ──────────────────────────────────────────────────────────────── */
 .rayetun-mn-save-bar {
 	display: flex;

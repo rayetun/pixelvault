@@ -91,6 +91,36 @@ class RayetunMediaNest_Settings {
 		return null !== $fallback ? $fallback : ( $defaults[ $key ] ?? null );
 	}
 
+	/**
+	 * Render a collapsible "How it works" callout — the same component PixelVault Pro uses,
+	 * so free and Pro tabs feel consistent. If no title is given, a leading <strong>…</strong>
+	 * in $html is used as the summary.
+	 *
+	 * @param string $html  Body HTML (caller pre-escapes).
+	 * @param string $title Optional summary text.
+	 * @param bool   $open  Whether it starts expanded. Default false (collapsed).
+	 */
+	public static function callout( string $html, string $title = '', bool $open = false ) {
+		if ( '' === $title && preg_match( '~^\s*<strong>(.*?)</strong>\s*~is', $html, $m ) ) {
+			$title = wp_strip_all_tags( $m[1] );
+			$html  = (string) preg_replace( '~^\s*<strong>.*?</strong>\s*~is', '', $html, 1 );
+		}
+		if ( '' === $title ) {
+			$title = __( 'How it works', 'pixelvault' );
+		}
+		$info    = '<svg class="mn-callout-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+		$chevron = '<svg class="mn-callout-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
+		printf(
+			'<details class="mn-callout"%s><summary class="mn-callout-head">%s<span class="mn-callout-title">%s</span>%s</summary><div class="mn-callout-body">%s</div></details>',
+			$open ? ' open' : '',
+			$info, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG.
+			esc_html( $title ),
+			$chevron, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG.
+			$html // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- caller passes pre-escaped HTML.
+		);
+	}
+
 	// ── Registration ──────────────────────────────────────────────────────────
 
 	public static function register() {
@@ -710,13 +740,12 @@ class RayetunMediaNest_Settings {
 								apply_filters( 'rayetun_medianest_delete_data_desc', __( 'DANGER: only enable this if you want deleting the plugin to permanently erase every folder and all media-to-folder assignments. When off (recommended), your folders are kept safe in the database and reappear if you reinstall.', 'pixelvault' ) )
 							); ?>
 						</div>
-						<div class="rayetun-mn-info-box" style="margin-top:24px">
-							<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-							<div>
-								<strong><?php esc_html_e( 'How auto-assign works', 'pixelvault' ); ?></strong>
-								<p><?php esc_html_e( 'Select any folder in the Media Library sidebar before uploading. New files are automatically assigned to that folder. Deselect the folder (click it again) to return to uploading without auto-assignment.', 'pixelvault' ); ?></p>
-							</div>
-						</div>
+						<?php
+						self::callout(
+							'<p>' . esc_html__( 'Select any folder in the Media Library sidebar before uploading. New files are automatically assigned to that folder. Deselect the folder (click it again) to return to uploading without auto-assignment.', 'pixelvault' ) . '</p>',
+							__( 'How auto-assign works', 'pixelvault' )
+						);
+						?>
 						<?php self::render_save_bar( 'settings' ); ?>
 					</div><!-- /general -->
 
@@ -788,14 +817,13 @@ class RayetunMediaNest_Settings {
 							); ?>
 						</div>
 
-						<div class="rayetun-mn-info-box" style="margin-top:24px">
-							<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-							<div>
-								<strong><?php esc_html_e( 'How it works', 'pixelvault' ); ?></strong>
-								<p><?php esc_html_e( 'The replacement file is written to the same path on the server, overwriting the original. The attachment URL, post ID, and all folder assignments remain unchanged. Thumbnails are regenerated automatically. Page caches are purged via standard WordPress hooks.', 'pixelvault' ); ?></p>
-								<p><?php esc_html_e( 'CDN static-file caches (Cloudflare, BunnyCDN, etc.) cache the file by URL — they cannot be purged without that CDN\'s API key. If the old image still appears via a direct URL after replacing, purge the image URL in your CDN dashboard.', 'pixelvault' ); ?></p>
-							</div>
-						</div>
+						<?php
+						self::callout(
+							'<p>' . esc_html__( 'The replacement file is written to the same path on the server, overwriting the original. The attachment URL, post ID, and all folder assignments remain unchanged. Thumbnails are regenerated automatically. Page caches are purged via standard WordPress hooks.', 'pixelvault' ) . '</p>'
+							. '<p>' . esc_html__( 'CDN static-file caches (Cloudflare, BunnyCDN, etc.) cache the file by URL — they cannot be purged without that CDN\'s API key. If the old image still appears via a direct URL after replacing, purge the image URL in your CDN dashboard.', 'pixelvault' ) . '</p>',
+							__( 'How Media Replace works', 'pixelvault' )
+						);
+						?>
 
 						<?php self::render_save_bar( 'settings' ); ?>
 					</div><!-- /replace -->
@@ -828,15 +856,15 @@ class RayetunMediaNest_Settings {
 							<h2><?php esc_html_e( 'Folder Locking', 'pixelvault' ); ?></h2>
 							<p><?php esc_html_e( 'Protect a folder\'s structure and existing files from accidental changes.', 'pixelvault' ); ?></p>
 						</div>
-						<div class="rayetun-mn-info-box">
-							<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-							<div>
-								<strong><?php esc_html_e( 'How it works', 'pixelvault' ); ?></strong>
-								<p><?php esc_html_e( 'Right-click any folder in the Media Library sidebar and choose "Lock Folder". A locked folder shows a padlock badge and is protected from accidental reorganisation: it cannot be renamed, recoloured, moved, or deleted, and existing files cannot be dragged into or out of it, until you explicitly unlock it.', 'pixelvault' ); ?></p>
-								<p><?php esc_html_e( 'What locking does not do: it does not block brand-new uploads. If you open a locked folder and upload files from your computer, those new files are still added to it. Locking is meant to freeze a folder\'s existing structure and contents, not to stop you adding fresh media.', 'pixelvault' ); ?></p>
-								<p><?php esc_html_e( 'Only users with the "Manage Settings" capability can lock or unlock folders.', 'pixelvault' ); ?></p>
-							</div>
-						</div>
+						<?php
+						self::callout(
+							'<p>' . esc_html__( 'Right-click any folder in the Media Library sidebar and choose "Lock Folder". A locked folder shows a padlock badge and is protected from accidental reorganisation: it cannot be renamed, recoloured, moved, or deleted, and existing files cannot be dragged into or out of it, until you explicitly unlock it.', 'pixelvault' ) . '</p>'
+							. '<p>' . esc_html__( 'What locking does not do: it does not block brand-new uploads. If you open a locked folder and upload files from your computer, those new files are still added to it. Locking is meant to freeze a folder\'s existing structure and contents, not to stop you adding fresh media.', 'pixelvault' ) . '</p>'
+							. '<p>' . esc_html__( 'Only users with the "Manage Settings" capability can lock or unlock folders.', 'pixelvault' ) . '</p>',
+							__( 'How folder locking works', 'pixelvault' ),
+							true
+						);
+						?>
 					</div><!-- /locking -->
 
 					<!-- ── Tools Tab ───────────────────────────────────────── -->

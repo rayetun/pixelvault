@@ -497,17 +497,12 @@ class RayetunMediaNest_Content_Folders {
 				.mn-cf-pro-cta:hover{text-decoration:underline}
 			</style>
 
-			<div class="rayetun-mn-info-box" style="margin-bottom:4px">
-				<div class="rayetun-mn-info-box-icon" aria-hidden="true">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-				</div>
-				<div>
-					<strong><?php esc_html_e( 'How Content Folders work', 'pixelvault' ); ?></strong>
-					<p>
-						<?php esc_html_e( 'Turn a content type on below. A Folders sidebar then appears on its list screen (e.g. Posts → All Posts) where you create folders, click one to filter the list, and file selected items with "Add to folder". Folders are shared with your Media Library, so one folder can hold both images and pages.', 'pixelvault' ); ?>
-					</p>
-				</div>
-			</div>
+			<?php
+			RayetunMediaNest_Settings::callout(
+				'<p>' . esc_html__( 'Turn a content type on below. A Folders sidebar then appears on its list screen (e.g. Posts → All Posts) where you create folders, click one to filter the list, and file selected items with "Add to folder". Folders are shared with your Media Library, so one folder can hold both images and pages.', 'pixelvault' ) . '</p>',
+				__( 'How Content Folders work', 'pixelvault' )
+			);
+			?>
 
 			<div id="mn-cf-type-list" class="mn-cf-grid">
 				<?php foreach ( $eligible as $name => $pt ) :
