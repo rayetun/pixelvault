@@ -20,24 +20,33 @@ class RayetunMediaNest_Pro_Upsell {
 	const DEFAULT_URL = 'https://checkout.freemius.com/plugin/39343/plan/67509/';
 
 	public static function register() {
-		// Never upsell to someone who already runs Pro.
+		// The Pro-active guard lives in add_tab()/render_panel(), not here: register() runs
+		// at plugin include time — before PixelVault Pro has bootstrapped on plugins_loaded —
+		// so a decision made now could never see Pro. The tab/panel hooks fire on admin page
+		// load instead, by which point Pro has set PIXELVAULT_PRO_ACTIVE if it is licensed.
+		add_filter( 'rayetun_medianest_settings_tabs',          array( __CLASS__, 'add_tab' ), 99, 2 );
+		add_action( 'rayetun_medianest_render_settings_panels', array( __CLASS__, 'render_panel' ) );
+	}
+
+	/**
+	 * Whether to show the upsell at all: hidden once Pro is genuinely active, and
+	 * filterable off entirely. Evaluated late (tab/panel render), so it sees Pro's
+	 * real licence state rather than mere installation.
+	 */
+	private static function should_show(): bool {
 		if ( self::pro_active() ) {
-			return;
+			return false;
 		}
 		/**
 		 * Filter whether to show the "Upgrade to Pro" tab at all. Return false to remove it.
 		 *
 		 * @param bool $show Default true.
 		 */
-		if ( ! apply_filters( 'rayetun_medianest_show_pro_upsell', true ) ) {
-			return;
-		}
-		add_filter( 'rayetun_medianest_settings_tabs',          array( __CLASS__, 'add_tab' ), 99, 2 );
-		add_action( 'rayetun_medianest_render_settings_panels', array( __CLASS__, 'render_panel' ) );
+		return (bool) apply_filters( 'rayetun_medianest_show_pro_upsell', true );
 	}
 
 	private static function pro_active(): bool {
-		return defined( 'PIXELVAULT_PRO_VERSION' ) || class_exists( 'PixelVault_Pro' );
+		return RayetunMediaNest::pro_is_active();
 	}
 
 	/** The pricing / checkout destination. Set this to your Freemius checkout link. */
@@ -59,6 +68,9 @@ class RayetunMediaNest_Pro_Upsell {
 	}
 
 	public static function add_tab( $tabs, $settings ) {
+		if ( ! self::should_show() ) {
+			return (array) $tabs;
+		}
 		$tabs['pro_upsell'] = array(
 			'label'    => __( 'Upgrade to Pro', 'pixelvault' ),
 			'icon_svg' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.2 5.3 5.8.5-4.4 3.8 1.3 5.6L12 21l-4.9 3.8"/><path d="M12 3L9.8 8.3 4 8.8l4.4 3.8L7.1 18.2 12 15l4.9 3.2-1.3-5.6L20 8.8l-5.8-.5z"/></svg>',
@@ -187,6 +199,9 @@ class RayetunMediaNest_Pro_Upsell {
 	}
 
 	public static function render_panel( $settings ) {
+		if ( ! self::should_show() ) {
+			return;
+		}
 		$url = esc_url( self::pro_url() );
 		?>
 		<div class="rayetun-mn-panel" data-panel="pro_upsell" style="display:none">

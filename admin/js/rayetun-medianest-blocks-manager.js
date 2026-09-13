@@ -16,7 +16,7 @@
 			cb.addEventListener( 'change', function () {
 				var block = cb.getAttribute( 'data-block' );
 				cb.disabled = true;
-				if ( status ) { status.textContent = '…'; }
+				if ( status ) { status.textContent = cfg.strings.saving; }
 				apiFetch( { url: cfg.restUrl, method: 'POST', data: { block: block, enabled: cb.checked } } )
 					.then( function () {
 						if ( status ) { status.textContent = cfg.strings.saved; }

@@ -34,7 +34,7 @@ class RayetunMediaNest_Blocks_Manager {
 	}
 
 	private static function pro_active(): bool {
-		return defined( 'PIXELVAULT_PRO_VERSION' ) || class_exists( 'PixelVault_Pro' );
+		return RayetunMediaNest::pro_is_active();
 	}
 
 	private static function pro_url(): string {
@@ -229,8 +229,9 @@ class RayetunMediaNest_Blocks_Manager {
 			'restUrl' => esc_url_raw( rest_url( self::NAMESPACE . '/blocks/state' ) ),
 			'nonce'   => wp_create_nonce( 'wp_rest' ),
 			'strings' => array(
-				'saved' => __( 'Saved.', 'pixelvault' ),
-				'error' => __( 'Could not save. Please try again.', 'pixelvault' ),
+				'saving' => __( 'Saving…', 'pixelvault' ),
+				'saved'  => __( 'Saved.', 'pixelvault' ),
+				'error'  => __( 'Could not save. Please try again.', 'pixelvault' ),
 			),
 		) );
 	}

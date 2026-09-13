@@ -198,6 +198,19 @@ final class RayetunMediaNest {
 	 * @param array $categories Existing block categories.
 	 * @return array
 	 */
+	/**
+	 * Whether PixelVault Pro is genuinely active — installed AND cleared to run its
+	 * premium code (valid licence/trial, or Freemius dormant in dev). PixelVault Pro
+	 * defines PIXELVAULT_PRO_ACTIVE only once its licence gate opens, so this is true
+	 * "Pro is usable", not merely "Pro is installed". Read it at render time: Pro sets
+	 * the flag on plugins_loaded, well before any admin page renders.
+	 *
+	 * @return bool
+	 */
+	public static function pro_is_active(): bool {
+		return defined( 'PIXELVAULT_PRO_ACTIVE' ) && PIXELVAULT_PRO_ACTIVE;
+	}
+
 	public static function register_block_category( $categories, $context = null ) {
 		foreach ( (array) $categories as $cat ) {
 			if ( isset( $cat['slug'] ) && 'pixelvault' === $cat['slug'] ) {
