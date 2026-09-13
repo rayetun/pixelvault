@@ -211,12 +211,16 @@ PixelVault bundles the following open-source library:
 == Changelog ==
 
 = 1.3.0 =
-* New: 🗂️ **Content Folders** — organize **Posts and Pages** into the same folder tree you use for media. A Folders sidebar appears on the Posts and Pages list screens (enable them under Media → PixelVault → Content Folders) with inline create, rename and delete, nested subfolders, drag-and-drop filing, a Folders column, and instant folder filtering — no page reloads. One folder can hold both a campaign's images and its pages.
+* New: 🗂️ **Content Folders** — organize **Posts and Pages** into the same folder tree you use for media. A Folders sidebar appears on the Posts and Pages list screens (enable them under PixelVault → Content Folders) with inline create, rename and delete, nested subfolders, drag-and-drop filing, a Folders column, and instant folder filtering — no page reloads. One folder can hold both a campaign's images and its pages.
+* New: 🧩 **Blocks tab** — turn each PixelVault block on or off from one screen (PixelVault → Blocks). Disabled blocks are hidden from the editor and load no assets.
 * New: 🖼️ **SVG upload support** — upload SVG images to the Media Library (administrators only by default). Every SVG is automatically sanitized on upload — scripts, event handlers, and remote or unsafe references are stripped — so only clean files are stored, and SVGs preview correctly in the grid.
+* New: a dedicated **"PixelVault" category** in the block inserter, so the Document Library and Gallery blocks are grouped together.
 * New: an "Upgrade to Pro" tab in Settings that introduces the optional PixelVault Pro add-on. It contains only feature descriptions and a link — no third-party code — and hides itself automatically if Pro is installed.
+* Change: PixelVault now has its **own top-level admin menu** with a Settings page, instead of living under Media. All existing links and bookmarks continue to work.
+* Improve: the "How it works" panels on the settings tabs are now collapsible, and the tabs share a consistent full-width layout.
 * Developer: new `rayetun_medianest_content_folder_types` filter to extend Content Folders to custom post types, and `rayetun_medianest_content_assigned` action fired when an item is filed.
 * Developer: new `rayetun_medianest_folder_object_types` filter lets add-ons register the folder taxonomy for other post types, reusing the existing folder engine. Also adds `rayetun_medianest_svg_upload_capability` and `rayetun_medianest_svg_allowed_elements` filters.
-* Developer: new `rayetun_medianest_after_analytics_panel` action so add-ons can render extra sections inside the Analytics tab, and `rayetun_medianest_delete_data_desc` filter to extend the "Delete All Data on Uninstall" description.
+* Developer: new `rayetun_medianest_after_analytics_panel` action so add-ons can render extra sections inside the Analytics tab, and `rayetun_medianest_delete_data_desc` filter to extend the "Delete All Data on Uninstall" description. Registers a shared "pixelvault" block category via `block_categories_all`.
 * Compatibility: tested up to WordPress 7.1.
 
 = 1.2.1 =
@@ -302,7 +306,7 @@ PixelVault bundles the following open-source library:
 == Upgrade Notice ==
 
 = 1.3.0 =
-Adds Content Folders for Posts and Pages (organize content in the same folder tree as your media) and SVG upload support with automatic on-upload sanitization. Tested up to WordPress 7.1.
+Adds Content Folders for Posts and Pages, a Blocks on/off tab, SVG upload with on-upload sanitization, and a dedicated PixelVault block category. PixelVault now has its own top-level admin menu (moved out of Media); all existing links still work. Tested up to WordPress 7.1.
 
 = 1.2.1 =
 Fixes the folder sidebar not showing in the Site Editor (FSE) and Widgets media modals, and makes both PixelVault blocks visible on the WordPress.org plugin page.
