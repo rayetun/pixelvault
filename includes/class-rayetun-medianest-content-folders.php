@@ -419,11 +419,53 @@ class RayetunMediaNest_Content_Folders {
 		return (array) $tabs;
 	}
 
+	/** Small inline stroke icon, matching the Blocks tab card style. */
+	private static function icon( string $paths ): string {
+		return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $paths . '</svg>';
+	}
+
+	/** Per-type icon + one-line description for the settings cards. */
+	private static function type_meta( string $name, WP_Post_Type $pt ): array {
+		$icons = array(
+			'post'    => '<path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M15 4v5h5"/><path d="M8 13h8M8 17h5"/>',
+			'page'    => '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+			'product' => '<path d="M6 2 3 6v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+		);
+		$icon = $icons[ $name ] ?? '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>';
+
+		$label = $pt->labels->name;
+		$descs = array(
+			'post' => __( 'Sort your blog posts into the shared folder tree, right from the Posts list.', 'pixelvault' ),
+			'page' => __( 'Group pages into folders and filter the Pages list by folder.', 'pixelvault' ),
+		);
+		$desc = $descs[ $name ] ?? sprintf(
+			/* translators: %s: post type label, e.g. "Products". */
+			__( 'Organise your %s into the same folder tree as your media.', 'pixelvault' ),
+			$label
+		);
+		return array( 'icon' => self::icon( $icon ), 'desc' => $desc );
+	}
+
 	public static function render_settings_panel( $settings ) {
 		$enabled    = self::enabled_types();
 		$eligible   = self::eligible_types();
-		$pro_active = defined( 'PIXELVAULT_PRO_VERSION' ) || class_exists( 'PixelVault_Pro' );
+		$pro_active = RayetunMediaNest::pro_is_active();
 		$pro_url    = class_exists( 'RayetunMediaNest_Pro_Upsell' ) ? RayetunMediaNest_Pro_Upsell::pro_url() : 'https://checkout.freemius.com/plugin/39343/plan/67509/';
+
+		// Locked Pro rows: always shown so free users can see what Pro unlocks. When Pro is
+		// active its filter already adds the real CPTs above, so these teasers are dropped.
+		$locked = array(
+			array(
+				'title' => __( 'Custom post types', 'pixelvault' ),
+				'desc'  => __( 'Extend folders to any custom post type your theme or plugins register.', 'pixelvault' ),
+				'icon'  => self::icon( '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>' ),
+			),
+			array(
+				'title' => __( 'WooCommerce products', 'pixelvault' ),
+				'desc'  => __( 'Organise your WooCommerce catalog into the same folder tree as its images.', 'pixelvault' ),
+				'icon'  => self::icon( '<path d="M6 2 3 6v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>' ),
+			),
+		);
 		?>
 		<div class="rayetun-mn-panel" data-panel="content_folders" style="display:none">
 			<div class="rayetun-mn-panel-header">
@@ -432,57 +474,74 @@ class RayetunMediaNest_Content_Folders {
 			</div>
 
 			<style>
-				.mn-cf-checklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px 16px;margin:14px 0 0}
-				.mn-cf-check{display:flex;align-items:center;gap:9px;border:1px solid #e2e8f0;border-radius:9px;padding:11px 13px;cursor:pointer;background:#fff;font-size:13px;color:#1e293b}
-				.mn-cf-check:hover{border-color:#a5b4fc;background:#f5f6ff}
-				.mn-cf-check input{margin:0}
-				.mn-cf-check code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:11px;color:#64748b}
-				.mn-cf-status{font-size:13px;font-weight:500;margin-top:12px}
+				.mn-cf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin:16px 0 0}
+				.mn-cf-card{position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+				.mn-cf-card.is-locked{background:linear-gradient(#fff,#fbfbff);border-color:#e0e7ff}
+				.mn-cf-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+				.mn-cf-ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;background:#eef2ff;color:#4f46e5}
+				.mn-cf-card h3{margin:0 0 6px;font-size:15px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:7px}
+				.mn-cf-card h3 code{background:#eef2ff;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:600;color:#64748b}
+				.mn-cf-card p{margin:0;font-size:13px;line-height:1.55;color:#64748b}
+				.mn-cf-badge{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:#4f46e5;color:#fff;white-space:nowrap;text-decoration:none}
+				.mn-cf-switch{position:relative;display:inline-block;width:40px;height:22px;flex:0 0 auto}
+				.mn-cf-switch input{position:absolute;opacity:0;width:0;height:0}
+				.mn-cf-slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:background .18s ease;cursor:pointer}
+				.mn-cf-slider::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .18s ease}
+				.mn-cf-switch input:checked + .mn-cf-slider{background:#4f46e5}
+				.mn-cf-switch input:checked + .mn-cf-slider::after{transform:translateX(18px)}
+				.mn-cf-switch input:focus-visible + .mn-cf-slider{outline:2px solid #4f46e5;outline-offset:2px}
+				.mn-cf-status{font-size:13px;font-weight:500;margin-top:14px}
 				.mn-cf-status.is-ok{color:#10b981}.mn-cf-status.is-err{color:#ef4444}
-				.mn-cf-check.is-locked{cursor:not-allowed;opacity:.8;background:#fafafe;border-style:dashed}
-				.mn-cf-check.is-locked:hover{border-color:#e2e8f0;background:#fafafe}
-				.mn-cf-check.is-locked input{cursor:not-allowed}
-				.mn-cf-pro-badge{background:#4f46e5;color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-left:auto}
-				.mn-cf-pro-label{margin:22px 0 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8}
-				.mn-cf-pro-cta{display:inline-block;margin-top:14px;font-size:13px;font-weight:600;color:#4f46e5;text-decoration:none}
+				.mn-cf-pro-label{margin:26px 0 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8}
+				.mn-cf-pro-cta{display:inline-block;margin-top:16px;font-size:13px;font-weight:600;color:#4f46e5;text-decoration:none}
 				.mn-cf-pro-cta:hover{text-decoration:underline}
 			</style>
 
-			<div class="rayetun-mn-info-box" style="margin-bottom:18px">
+			<div class="rayetun-mn-info-box" style="margin-bottom:4px">
 				<div class="rayetun-mn-info-box-icon" aria-hidden="true">
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
 				</div>
 				<div>
 					<strong><?php esc_html_e( 'How Content Folders work', 'pixelvault' ); ?></strong>
 					<p>
-						<?php esc_html_e( 'Turn on Posts and/or Pages below. A Folders sidebar then appears on that content type’s list screen (e.g. Posts → All Posts) where you create folders, click one to filter the list, and file selected items with “Add to folder”. Folders are shared with your Media Library, so one folder can hold both images and pages.', 'pixelvault' ); ?>
+						<?php esc_html_e( 'Turn a content type on below. A Folders sidebar then appears on its list screen (e.g. Posts → All Posts) where you create folders, click one to filter the list, and file selected items with "Add to folder". Folders are shared with your Media Library, so one folder can hold both images and pages.', 'pixelvault' ); ?>
 					</p>
 				</div>
 			</div>
 
-			<div id="mn-cf-type-list" class="mn-cf-checklist">
-				<?php foreach ( $eligible as $name => $pt ) : ?>
-					<label class="mn-cf-check">
-						<input type="checkbox" value="<?php echo esc_attr( $name ); ?>" <?php checked( in_array( $name, $enabled, true ) ); ?> />
-						<span><?php echo esc_html( $pt->labels->name ); ?> <code><?php echo esc_html( $name ); ?></code></span>
-					</label>
+			<div id="mn-cf-type-list" class="mn-cf-grid">
+				<?php foreach ( $eligible as $name => $pt ) :
+					$meta = self::type_meta( $name, $pt );
+					$on   = in_array( $name, $enabled, true );
+					?>
+					<div class="mn-cf-card">
+						<div class="mn-cf-top">
+							<span class="mn-cf-ico"><?php echo $meta['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG. ?></span>
+							<label class="mn-cf-switch">
+								<input type="checkbox" value="<?php echo esc_attr( $name ); ?>" <?php checked( $on ); ?> />
+								<span class="mn-cf-slider"></span>
+							</label>
+						</div>
+						<h3><?php echo esc_html( $pt->labels->name ); ?> <code><?php echo esc_html( $name ); ?></code></h3>
+						<p><?php echo esc_html( $meta['desc'] ); ?></p>
+					</div>
 				<?php endforeach; ?>
 			</div>
 			<p id="mn-cf-save-status" class="mn-cf-status" role="status" aria-live="polite"></p>
 
 			<?php if ( ! $pro_active ) : ?>
 				<p class="mn-cf-pro-label"><?php esc_html_e( 'Available in PixelVault Pro', 'pixelvault' ); ?></p>
-				<div class="mn-cf-checklist">
-					<label class="mn-cf-check is-locked">
-						<input type="checkbox" disabled />
-						<span><?php esc_html_e( 'Custom post types', 'pixelvault' ); ?></span>
-						<span class="mn-cf-pro-badge"><?php esc_html_e( 'Pro', 'pixelvault' ); ?></span>
-					</label>
-					<label class="mn-cf-check is-locked">
-						<input type="checkbox" disabled />
-						<span><?php esc_html_e( 'WooCommerce products', 'pixelvault' ); ?></span>
-						<span class="mn-cf-pro-badge"><?php esc_html_e( 'Pro', 'pixelvault' ); ?></span>
-					</label>
+				<div class="mn-cf-grid">
+					<?php foreach ( $locked as $row ) : ?>
+						<div class="mn-cf-card is-locked">
+							<div class="mn-cf-top">
+								<span class="mn-cf-ico"><?php echo $row['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG. ?></span>
+								<a class="mn-cf-badge" href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Pro', 'pixelvault' ); ?></a>
+							</div>
+							<h3><?php echo esc_html( $row['title'] ); ?></h3>
+							<p><?php echo esc_html( $row['desc'] ); ?></p>
+						</div>
+					<?php endforeach; ?>
 				</div>
 				<a class="mn-cf-pro-cta" href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Fold every post type with PixelVault Pro', 'pixelvault' ); ?> &rarr;</a>
 			<?php endif; ?>
@@ -509,8 +568,9 @@ class RayetunMediaNest_Content_Folders {
 			'restUrl' => esc_url_raw( rest_url( self::NAMESPACE . '/content-folders/types' ) ),
 			'nonce'   => wp_create_nonce( 'wp_rest' ),
 			'strings' => array(
-				'saved' => __( 'Saved.', 'pixelvault' ),
-				'error' => __( 'Could not save. Please try again.', 'pixelvault' ),
+				'saving' => __( 'Saving…', 'pixelvault' ),
+				'saved'  => __( 'Saved.', 'pixelvault' ),
+				'error'  => __( 'Could not save. Please try again.', 'pixelvault' ),
 			),
 		) );
 	}

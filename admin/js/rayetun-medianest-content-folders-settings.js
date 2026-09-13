@@ -1,7 +1,7 @@
-﻿/**
- * Content Folders â€” settings-tab post-type chooser.
+/**
+ * Content Folders - settings-tab post-type chooser.
  *
- * Saves the set of content types that get folders as soon as a checkbox changes.
+ * Saves the set of content types that get folders as soon as a card toggle changes.
  */
 ( function ( wp ) {
 	'use strict';
@@ -26,7 +26,7 @@
 			} );
 			if ( status ) {
 				status.className = 'mn-cf-status';
-				status.textContent = 'â€¦';
+				status.textContent = cfg.strings.saving;
 			}
 			apiFetch( { url: cfg.restUrl, method: 'POST', data: { types: types } } )
 				.then( function () {
