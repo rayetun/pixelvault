@@ -111,7 +111,7 @@
 		title: __( 'PixelVault Document Library', 'pixelvault' ),
 		description: __( 'A browsable, downloadable document library from your media folders.', 'pixelvault' ),
 		icon: 'category',
-		category: 'media',
+		category: 'pixelvault',
 		keywords: [ 'folder', 'file', 'document', 'download', 'library' ],
 		supports: { align: [ 'wide', 'full' ], html: false },
 
