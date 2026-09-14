@@ -1,5 +1,5 @@
-﻿/**
- * Content Folders â€” edit.php list-screen sidebar.
+/**
+ * Content Folders — edit.php list-screen sidebar.
  *
  * A folder rail beside WordPress's list table, built to feel like the free PixelVault
  * media sidebar: inline create/rename, in-place re-render (no page reloads), toasts,
@@ -35,7 +35,7 @@
 	// DOM handles filled in by mount().
 	var treeEl, navEl, sidebarEl, layoutEl, mainEl, selectEl, toastEl;
 
-	// â”€â”€ Small helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// ── Small helpers ────────────────────────────────────────────────────────────────
 
 	function el( tag, cls, text ) {
 		var e = document.createElement( tag );
@@ -90,9 +90,11 @@
 		input.type = 'text';
 		input.placeholder = placeholder;
 		input.value = initial || '';
-		var save = el( 'button', 'mn-cf-ibtn is-ok', 'âœ“' );
+		var save = el( 'button', 'mn-cf-ibtn is-ok' );
+		save.innerHTML = svg( '<path d="M20 6 9 17l-5-5"/>' );
 		save.type = 'button'; save.title = S.save;
-		var cancel = el( 'button', 'mn-cf-ibtn', 'âœ•' );
+		var cancel = el( 'button', 'mn-cf-ibtn' );
+		cancel.innerHTML = svg( '<path d="M18 6 6 18M6 6l12 12"/>' );
 		cancel.type = 'button'; cancel.title = S.cancel;
 		function commit() {
 			var v = input.value.trim();
@@ -112,7 +114,7 @@
 		return wrap;
 	}
 
-	// â”€â”€ REST calls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// ── REST calls ───────────────────────────────────────────────────────────────────
 
 	function fetchTree() {
 		return apiFetch( { url: cfg.treeUrl + '?post_type=' + encodeURIComponent( cfg.postType ) } )
@@ -135,7 +137,7 @@
 		return apiFetch( { url: cfg.assignUrl, method: 'POST', data: { post_ids: ids, folder_id: folderId, op: op } } );
 	}
 
-	// â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// ── Actions ──────────────────────────────────────────────────────────────────────
 
 	function doCreate( parentId, holder ) {
 		if ( holder.firstChild ) { holder.innerHTML = ''; return; }
@@ -213,7 +215,7 @@
 		return '';
 	}
 
-	// â”€â”€ AJAX list filtering (falls back to navigation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// ── AJAX list filtering (falls back to navigation) ─────────────────────────────────
 
 	function urlFor( value ) {
 		var u = new URL( window.location.href );
@@ -263,7 +265,7 @@
 		applyFilter( v === null ? null : v, { noPush: true } );
 	} );
 
-	// â”€â”€ Drag and drop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// ── Drag and drop ─────────────────────────────────────────────────────────────────
 
 	function bindRowDnD() {
 		document.querySelectorAll( '#the-list tr' ).forEach( function ( tr ) {
@@ -291,7 +293,7 @@
 		treeEl.querySelectorAll( '.is-droptarget' ).forEach( function ( x ) { x.classList.remove( 'is-droptarget' ); } );
 	}
 
-	// â”€â”€ Rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// ── Rendering ──────────────────────────────────────────────────────────────────────
 
 	function childrenOf( parent ) {
 		return state.folders.filter( function ( f ) { return ( f.parent_id || 0 ) === parent; } );
@@ -439,7 +441,7 @@
 		syncSelect();
 	}
 
-	// â”€â”€ Mount â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// ── Mount ──────────────────────────────────────────────────────────────────────────
 
 	function mount() {
 		var filter = document.getElementById( 'posts-filter' );
