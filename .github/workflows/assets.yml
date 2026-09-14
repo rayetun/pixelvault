@@ -10,6 +10,7 @@ on:
     paths:
       - 'readme.txt'
       - '.wordpress-org/**'
+  workflow_dispatch: {}
 
 jobs:
   assets:
@@ -25,3 +26,8 @@ jobs:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: pixelvault
+          # Update ONLY readme.txt + listing assets, never plugin code. Without this the
+          # action rsyncs the whole repo into trunk and aborts ("Other files have been
+          # modified") because main is always ahead of the last released SVN trunk. Code
+          # ships via deploy.yml on a published release.
+          IGNORE_OTHER_FILES: true
