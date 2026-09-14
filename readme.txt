@@ -5,7 +5,7 @@ Tags:              media library, media folders, document library, file manager,
 Requires at least: 6.5
 Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        1.3.0
+Stable tag:        1.3.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -210,6 +210,9 @@ PixelVault bundles the following open-source library:
 
 == Changelog ==
 
+= 1.3.1 =
+* Fix: the Save and Cancel buttons in the Content Folders sidebar (Posts/Pages list screens) showed garbled characters instead of their check and cross icons. They now render correctly.
+
 = 1.3.0 =
 * New: 🗂️ **Content Folders** — organize **Posts and Pages** into the same folder tree you use for media. A Folders sidebar appears on the Posts and Pages list screens (enable them under PixelVault → Content Folders) with inline create, rename and delete, nested subfolders, drag-and-drop filing, a Folders column, and instant folder filtering — no page reloads. One folder can hold both a campaign's images and its pages.
 * New: 🧩 **Blocks tab** — turn each PixelVault block on or off from one screen (PixelVault → Blocks). Disabled blocks are hidden from the editor and load no assets.
@@ -304,6 +307,9 @@ PixelVault bundles the following open-source library:
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.3.1 =
+Fixes garbled icons on the Save/Cancel buttons in the Content Folders sidebar.
 
 = 1.3.0 =
 Adds Content Folders for Posts and Pages, a Blocks on/off tab, SVG upload with on-upload sanitization, and a dedicated PixelVault block category. PixelVault now has its own top-level admin menu (moved out of Media); all existing links still work. Tested up to WordPress 7.1.
