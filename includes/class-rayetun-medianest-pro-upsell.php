@@ -26,6 +26,32 @@ class RayetunMediaNest_Pro_Upsell {
 		// load instead, by which point Pro has set PIXELVAULT_PRO_ACTIVE if it is licensed.
 		add_filter( 'rayetun_medianest_settings_tabs',          array( __CLASS__, 'add_tab' ), 99, 2 );
 		add_action( 'rayetun_medianest_render_settings_panels', array( __CLASS__, 'render_panel' ) );
+
+		// A "Go Pro" link in the plugin's row on the Plugins screen. Compliant per WordPress.org
+		// Guideline 5 (a non-blocking upgrade link is allowed) and Guideline 11 (scoped to our
+		// own plugin row, not a dashboard-wide nag). Link-only, no Pro code; hides when Pro is
+		// active. The visibility check runs when the filter fires (Plugins page), by which point
+		// PIXELVAULT_PRO_ACTIVE is set if Pro is licensed.
+		add_filter( 'plugin_action_links_' . RAYETUN_MEDIANEST_BASENAME, array( __CLASS__, 'action_link' ) );
+	}
+
+	/**
+	 * Prepend a "Go Pro" link to the plugin's action links (Plugins screen). Points at the
+	 * on-dashboard "Upgrade to Pro" tab rather than straight to checkout, so users see the
+	 * comparison first. Self-hides once Pro is active.
+	 *
+	 * @param array $links Existing action links.
+	 * @return array
+	 */
+	public static function action_link( $links ) {
+		if ( ! self::should_show() ) {
+			return $links;
+		}
+		$url    = esc_url( admin_url( 'admin.php?page=rayetun-medianest&tab=pro_upsell' ) );
+		$go_pro = '<a href="' . $url . '" style="color:#4f46e5;font-weight:700;">' . esc_html__( 'Go Pro', 'pixelvault' ) . '</a>';
+		$links  = (array) $links;
+		array_unshift( $links, $go_pro );
+		return $links;
 	}
 
 	/**
