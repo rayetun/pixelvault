@@ -153,6 +153,10 @@ class RayetunMediaNest_Bulk {
 
 		$processed = 0;
 		$errors    = 0;
+		// Attachment IDs for which this call actually introduced at least one of the
+		// requested terms (append mode only). The Undo feature uses this so it removes
+		// only genuinely-new assignments and never strips a pre-existing membership.
+		$added_ids = array();
 
 		foreach ( $attachment_ids as $attachment_id ) {
 			if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
@@ -160,15 +164,25 @@ class RayetunMediaNest_Bulk {
 				continue;
 			}
 
+			// Per-attachment target set. Must be a LOCAL variable: reassigning the shared
+			// $term_ids in append mode would leak one file's existing terms onto the next.
+			$final_terms = $term_ids;
+
 			if ( ! $replace ) {
 				// Append mode — merge with existing terms.
 				$existing = wp_get_object_terms( $attachment_id, RayetunMediaNest_Taxonomy::TAXONOMY, array( 'fields' => 'ids' ) );
 				if ( ! is_wp_error( $existing ) ) {
-					$term_ids = array_unique( array_merge( $existing, $term_ids ) );
+					$existing = array_map( 'absint', $existing );
+					if ( array_diff( $term_ids, $existing ) ) {
+						$added_ids[] = $attachment_id; // a requested term was not already present
+					}
+					$final_terms = array_unique( array_merge( $existing, $term_ids ) );
+				} else {
+					$added_ids[] = $attachment_id;
 				}
 			}
 
-			$result = wp_set_object_terms( $attachment_id, $term_ids, RayetunMediaNest_Taxonomy::TAXONOMY );
+			$result = wp_set_object_terms( $attachment_id, $final_terms, RayetunMediaNest_Taxonomy::TAXONOMY );
 
 			if ( is_wp_error( $result ) ) {
 				$errors++;
@@ -183,6 +197,7 @@ class RayetunMediaNest_Bulk {
 			'processed' => $processed,
 			'errors'    => $errors,
 			'total'     => count( $attachment_ids ),
+			'added_ids' => array_values( $added_ids ),
 		);
 	}
 

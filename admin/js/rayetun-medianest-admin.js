@@ -205,14 +205,18 @@
 	   folder memberships. PixelVault is many-to-many; a file can live in several
 	   folders at once. Use apiMoveTo() when you specifically want to relocate. */
 	function apiBulk( ids, tids ) {
-		return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:ids,term_ids:tids,replace:false})}).then(refreshCounts);
+		/* Resolves to the assign result ({processed, added_ids, …}) AFTER counts refresh,
+		   so callers can read added_ids for a data-safe Undo. */
+		return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:ids,term_ids:tids,replace:false})})
+			.then(function(res){ return refreshCounts().then(function(){ return res; }); });
 	}
 	/* Move = add to the target folder (append, so the file keeps any OTHER
 	   folders it belongs to) then remove it from the source folder. There is no
-	   single "move" endpoint, so we compose the two calls. */
+	   single "move" endpoint, so we compose the two calls. Resolves to the target
+	   add result ({added_ids, …}) so Undo can tell a real move from a no-op add. */
 	function apiMoveTo( ids, fromTid, toTid ) {
 		return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:ids,term_ids:[toTid],replace:false})})
-			.then(function(){ return apiRemoveFromFolder(ids, fromTid); });
+			.then(function(addRes){ return apiRemoveFromFolder(ids, fromTid).then(function(){ return addRes; }); });
 	}
 	function apiSetIcon(tid,icon){return apiFetch('/folders/'+tid,{method:'PUT',body:JSON.stringify({icon:icon})}).then(function(){var f=fnd(tid);if(f)f.icon=icon;});}
 	function apiLock(tid,locked){
@@ -647,10 +651,18 @@
 				showToast('That folder is locked. Unlock it to add files.');
 				return;
 			}
-			apiBulk(drag.ids.slice(),[tid]).then(function(){
+			var _dropIds=drag.ids.slice();
+			apiBulk(_dropIds,[tid]).then(function(res){
 				state.selectedIds=[];state.bulkMode=false;render();
 				row.style.background='#d1fae5';
 				setTimeout(function(){row.style.background='';},800);
+				var _f=fnd(tid);
+				var _added=(res&&res.added_ids)?res.added_ids:_dropIds; /* only remove genuinely-new assignments on undo */
+				if(_added.length){
+					registerUndo((_added.length>1?_added.length+' files':'File')+' added to '+(_f?_f.name:'folder'),function(){
+						return apiRemoveFromFolder(_added,tid);
+					});
+				}
 			}).catch(console.error);
 		});
 	}
@@ -683,9 +695,13 @@
 				rmBtn.innerHTML=II.remove+'<span>Remove from “'+folderLabel+'”</span>';
 				rmBtn.addEventListener('click',function(ev){
 					ev.stopPropagation();closeImgMenu();
-					apiRemoveFromFolder([aid],state.activeFolderId).then(function(){
+					var _fid=state.activeFolderId;
+					apiRemoveFromFolder([aid],_fid).then(function(){
 						render();forceGridFilter();
-						showToast('Removed from folder');
+						var _f=fnd(_fid);
+						registerUndo('Removed from '+(_f?_f.name:'folder'),function(){
+							return apiBulk([aid],[_fid]);
+						});
 					}).catch(console.error);
 				});
 				menu.appendChild(rmBtn);
@@ -718,8 +734,25 @@
 					b.innerHTML=iF(f.color||'#646970')+'<span>'+f.name+'</span>';
 					(function(ff){b.addEventListener('click',function(ev){ev.stopPropagation();closeImgMenu();
 						var fromTid=(state.activeFolderId&&state.activeFolderId!=='uncategorized')?state.activeFolderId:null;
-						var op=(fromTid&&fromTid!==Number(ff.term_id))?apiMoveTo([aid],fromTid,Number(ff.term_id)):apiBulk([aid],[Number(ff.term_id)]);
-						op.then(function(){render();forceGridFilter();showToast('Added to '+ff.name);}).catch(console.error);
+						var toTid=Number(ff.term_id);
+						var isMove=fromTid&&fromTid!==toTid;
+						var op=isMove?apiMoveTo([aid],fromTid,toTid):apiBulk([aid],[toTid]);
+						op.then(function(res){render();forceGridFilter();
+							var wasNew=!res||!res.added_ids||res.added_ids.indexOf(aid)!==-1;
+							if(isMove){
+								/* Undo: add back to source (safe), and remove from target only if the
+								   move genuinely added it there (else it was already in target). */
+								registerUndo('Moved to '+ff.name,function(){
+									return apiBulk([aid],[fromTid]).then(function(){
+										return wasNew?apiRemoveFromFolder([aid],toTid):null;
+									});
+								});
+							}else if(wasNew){
+								registerUndo('Added to '+ff.name,function(){return apiRemoveFromFolder([aid],toTid);});
+							}else{
+								showToast('Already in '+ff.name);
+							}
+						}).catch(console.error);
 					});})(f);
 					menu.appendChild(b);
 					if(f.children&&f.children.length)addI(f.children,depth+1);
@@ -1175,7 +1208,7 @@
 	   Promise; if it resolves with a number that is treated as the success count
 	   for that chunk (otherwise the whole chunk counts as done). A rejection counts
 	   the whole chunk as failed. Counts + grid refresh once at the very end. */
-	function runBulkWithProgress( ids, verb, perChunk, doneMsg, chunkSize ){
+	function runBulkWithProgress( ids, verb, perChunk, doneMsg, chunkSize, undoFn ){
 		if(!ids||!ids.length)return;
 		chunkSize=chunkSize||10;
 		var total=ids.length, ok=0, failed=0, done=0;
@@ -1188,6 +1221,7 @@
 				return refreshCounts().then(function(){
 					forceGridFilter();render();clearFloatingBar();
 					if(failed){showToast(doneMsg(ok)+' ('+failed+' failed)','error');}
+					else if(undoFn){registerUndo(doneMsg(ok),undoFn);}
 					else{showToast(doneMsg(ok));}
 				});
 			}
@@ -1285,16 +1319,23 @@
 			(function(ff){item.addEventListener('click',function(){
 				picker.remove();
 				var tid=Number(ff.term_id);
+				var _bulkIds=ids.slice();
+				var _added=[]; /* files this bulk op genuinely added to the target */
 				var fromTid=(mode==='move'&&state.activeFolderId&&state.activeFolderId!=='uncategorized')?state.activeFolderId:null;
 				if(fromTid){
 					runBulkWithProgress(ids,'Moving',function(chunk){
 						return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:chunk,term_ids:[tid],replace:false})})
-							.then(function(){return apiFetch('/folders/'+fromTid+'/remove',{method:'POST',body:JSON.stringify({attachment_ids:chunk})});});
-					},function(n){return n+' file'+(n!==1?'s':'')+' moved to '+ff.name;});
+							.then(function(res){if(res&&res.added_ids)_added=_added.concat(res.added_ids);return apiFetch('/folders/'+fromTid+'/remove',{method:'POST',body:JSON.stringify({attachment_ids:chunk})});});
+					},function(n){return n+' file'+(n!==1?'s':'')+' moved to '+ff.name;},null,function(){
+						return reverseBulkMove(_bulkIds,tid,fromTid,_added);
+					});
 				}else{
 					runBulkWithProgress(ids,'Adding',function(chunk){
-						return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:chunk,term_ids:[tid],replace:false})});
-					},function(n){return n+' file'+(n!==1?'s':'')+' added to '+ff.name;});
+						return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:chunk,term_ids:[tid],replace:false})})
+							.then(function(res){if(res&&res.added_ids)_added=_added.concat(res.added_ids);return res;});
+					},function(n){return n+' file'+(n!==1?'s':'')+' added to '+ff.name;},null,function(){
+						return _added.length?reverseBulkAdd(_added,tid):null;
+					});
 				}
 			});})(f);
 			list.appendChild(item);
@@ -1310,14 +1351,68 @@
 		},0);
 	}
 	
-	/* Toast notification */
-	function showToast(msg,type){
+	/* Toast notification. Pass an optional `action` = {label, fn} to add a clickable
+	   button (e.g. "Undo") and a longer dismiss window. */
+	function showToast(msg,type,action){
 		var t=document.createElement('div');
-		t.className='rayetun-mn-toast'+(type==='error'?' is-error':'');
-		t.textContent=msg;
+		t.className='rayetun-mn-toast'+(type==='error'?' is-error':'')+(action&&action.fn?' has-action':'');
+		var span=document.createElement('span');
+		span.textContent=msg;
+		t.appendChild(span);
+		var dismissDelay=2800;
+		function dismiss(){if(t._done)return;t._done=true;t.classList.remove('is-visible');setTimeout(function(){t.remove();},300);}
+		if(action&&action.fn){
+			dismissDelay=6500; /* give the user time to notice the Undo offer */
+			var btn=document.createElement('button');
+			btn.type='button';
+			btn.className='rayetun-mn-toast-action';
+			btn.textContent=action.label||'Undo';
+			btn.addEventListener('click',function(){dismiss();action.fn();});
+			t.appendChild(btn);
+		}
 		document.body.appendChild(t);
 		setTimeout(function(){t.classList.add('is-visible');},10);
-		setTimeout(function(){t.classList.remove('is-visible');setTimeout(function(){t.remove();},300);},2800);
+		setTimeout(dismiss,dismissDelay);
+	}
+
+	/* ── Undo for folder moves ────────────────────────────────────────────────
+	   Folder membership is plain taxonomy data, so every move is reversible by
+	   replaying the inverse through the same REST endpoints. We snapshot the
+	   affected file IDs + source/target folders at the call site and offer an
+	   "Undo" action on the toast. (Scope: file moves only — folder deletes keep
+	   their typed confirmation and are not undoable in this version.) */
+	function registerUndo(msg,undoFn){
+		showToast(msg,null,{label:'Undo',fn:function(){runUndo(undoFn);}});
+	}
+	function runUndo(undoFn){
+		return Promise.resolve().then(undoFn).then(function(){
+			return (typeof refreshCounts==='function')?refreshCounts():null;
+		}).then(function(){
+			render();
+			if(typeof forceGridFilter==='function')forceGridFilter();
+			showToast('Move undone');
+		}).catch(function(){
+			showToast('Could not undo that move','error');
+		});
+	}
+	function _chunk(a,n){var c=[];for(var i=0;i<a.length;i+=n){c.push(a.slice(i,i+n));}return c;}
+	/* Reverse a bulk MOVE: add ALL moved files back to source (restores source
+	   membership), and remove from target ONLY the files the move actually added there
+	   (addedToTarget) — never a file that was already in the target. Chunked. */
+	function reverseBulkMove(allIds,targetTid,sourceTid,addedToTarget){
+		var add=_chunk(allIds,20), rem=_chunk(addedToTarget||[],20);
+		var p=add.reduce(function(q,chunk){
+			return q.then(function(){return apiFetch('/bulk-assign',{method:'POST',body:JSON.stringify({attachment_ids:chunk,term_ids:[sourceTid],replace:false})});});
+		},Promise.resolve());
+		return rem.reduce(function(q,chunk){
+			return q.then(function(){return apiFetch('/folders/'+targetTid+'/remove',{method:'POST',body:JSON.stringify({attachment_ids:chunk})});});
+		},p);
+	}
+	/* Reverse a bulk ADD: remove from target only the genuinely-new assignments (addedIds). Chunked. */
+	function reverseBulkAdd(addedIds,targetTid){
+		return _chunk(addedIds||[],20).reduce(function(q,chunk){
+			return q.then(function(){return apiFetch('/folders/'+targetTid+'/remove',{method:'POST',body:JSON.stringify({attachment_ids:chunk})});});
+		},Promise.resolve());
 	}
 	
 	/* Watch WP's native Bulk Select (aria-checked on .attachment elements) */

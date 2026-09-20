@@ -1218,6 +1218,20 @@ div.rayetun-mn-modal-header {
 }
 .rayetun-mn-toast.is-error { background: #7f1d1d; }
 .rayetun-mn-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* Toast with an action (e.g. Undo): must be clickable, so re-enable pointer events. */
+.rayetun-mn-toast.has-action { pointer-events: auto; display: inline-flex; align-items: center; gap: 16px; }
+.rayetun-mn-toast-action {
+	background: transparent;
+	border: 0;
+	color: #a5b4fc; /* indigo-300, readable on the dark slate toast */
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1;
+	cursor: pointer;
+	padding: 2px 2px;
+}
+.rayetun-mn-toast-action:hover,
+.rayetun-mn-toast-action:focus { color: #c7d2fe; text-decoration: underline; outline: none; }
 
 /* ── Premium Search + Sort Toolbar ────────────────────────── */
 .rayetun-mn-toolbar {
