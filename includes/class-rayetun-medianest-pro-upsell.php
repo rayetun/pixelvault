@@ -137,6 +137,11 @@ class RayetunMediaNest_Pro_Upsell {
 				'icon'  => self::icon( '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>' ),
 			),
 			array(
+				'title' => __( 'Auto-Assign Rules', 'pixelvault' ),
+				'desc'  => __( 'File uploads into folders automatically by name, type, size or uploader, then apply your rules to existing media in one click.', 'pixelvault' ),
+				'icon'  => self::icon( '<path d="M3 6h18M7 12h10M11 18h2"/>' ),
+			),
+			array(
 				'title' => __( 'Activity Log', 'pixelvault' ),
 				'desc'  => __( 'A full audit trail of who did what to your library, exportable to CSV.', 'pixelvault' ),
 				'icon'  => self::icon( '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/>' ),
@@ -163,6 +168,7 @@ class RayetunMediaNest_Pro_Upsell {
 			array( __( 'Document Library block', 'pixelvault' ), true ),
 			array( __( 'Content Folders for Posts & Pages', 'pixelvault' ), true ),
 			array( __( 'Content Folders for custom post types & WooCommerce', 'pixelvault' ), false ),
+			array( __( 'Auto-assign rules (name / type / size / uploader → folder)', 'pixelvault' ), false ),
 			array( __( 'Asset metadata & rights tracking', 'pixelvault' ), false ),
 			array( __( 'Folder access control (login / role / password)', 'pixelvault' ), false ),
 			array( __( 'Email & password-gated downloads', 'pixelvault' ), false ),
