@@ -142,6 +142,11 @@ class RayetunMediaNest_Pro_Upsell {
 				'icon'  => self::icon( '<path d="M3 6h18M7 12h10M11 18h2"/>' ),
 			),
 			array(
+				'title' => __( 'WooCommerce Image Folders', 'pixelvault' ),
+				'desc'  => __( 'Auto-file product images into Media Library folders that mirror your shop categories, kept in sync as your catalog changes.', 'pixelvault' ),
+				'icon'  => self::icon( '<circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L23 6H6"/>' ),
+			),
+			array(
 				'title' => __( 'Activity Log', 'pixelvault' ),
 				'desc'  => __( 'A full audit trail of who did what to your library, exportable to CSV.', 'pixelvault' ),
 				'icon'  => self::icon( '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/>' ),
@@ -169,6 +174,7 @@ class RayetunMediaNest_Pro_Upsell {
 			array( __( 'Content Folders for Posts & Pages', 'pixelvault' ), true ),
 			array( __( 'Content Folders for custom post types & WooCommerce', 'pixelvault' ), false ),
 			array( __( 'Auto-assign rules (name / type / size / uploader → folder)', 'pixelvault' ), false ),
+			array( __( 'WooCommerce product-image auto-foldering', 'pixelvault' ), false ),
 			array( __( 'Asset metadata & rights tracking', 'pixelvault' ), false ),
 			array( __( 'Folder access control (login / role / password)', 'pixelvault' ), false ),
 			array( __( 'Email & password-gated downloads', 'pixelvault' ), false ),
