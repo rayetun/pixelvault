@@ -449,7 +449,15 @@
 		q.on( 'remove reset', function () {
 			clearTimeout( q._mnRefreshT );
 			q._mnRefreshT = setTimeout( function () {
-				if ( q.length === 0 ) { forceGridFilter(); }
+				if ( q.length === 0 ) {
+					forceGridFilter();
+					/* An add-on (PixelVault Pro Auto-Assign Rules) may have filed the new
+					   uploads into folders server-side on add_attachment. Refresh the counts
+					   and redraw the sidebar so those assignments show without a page reload. */
+					if ( typeof refreshCounts === 'function' ) {
+						refreshCounts().then( function () { render(); } );
+					}
+				}
 			}, 400 );
 		} );
 		return true;
