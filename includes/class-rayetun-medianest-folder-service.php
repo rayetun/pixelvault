@@ -88,6 +88,110 @@ class RayetunMediaNest_Folder_Service {
 		return array( 'term_id' => $term_id, 'folder_id' => $folder_id );
 	}
 
+	/**
+	 * Find an existing folder by name under a parent (for a given object type).
+	 *
+	 * @param string $name
+	 * @param int    $parent_id Parent folder term ID (0 = root).
+	 * @param string $post_type Object type the folder belongs to.
+	 * @return int Folder term ID, or 0 if none matches.
+	 */
+	public static function find_folder( string $name, int $parent_id = 0, string $post_type = 'attachment' ): int {
+		$name = sanitize_text_field( $name );
+		if ( '' === $name ) {
+			return 0;
+		}
+		$parent_id = absint( $parent_id );
+		$post_type = sanitize_key( $post_type );
+		if ( '' === $post_type ) {
+			$post_type = 'attachment';
+		}
+
+		$terms = get_terms( array(
+			'taxonomy'   => RayetunMediaNest_Taxonomy::TAXONOMY,
+			'name'       => $name,
+			'parent'     => $parent_id,
+			'hide_empty' => false,
+		) );
+		if ( is_wp_error( $terms ) ) {
+			return 0;
+		}
+		foreach ( $terms as $term ) {
+			$folder = RayetunMediaNest_DB::get_folder_by_term_id( (int) $term->term_id );
+			if ( $folder
+				&& (int) $folder->parent_id === $parent_id
+				&& ( isset( $folder->post_type ) ? $folder->post_type : 'attachment' ) === $post_type
+			) {
+				return (int) $term->term_id;
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Find a folder by name under a parent, or create it if it does not exist.
+	 *
+	 * Programmatic primitive for add-ons and importers (auto-foldering, migration).
+	 * Unlike create(), it does NOT run the interactive "create folders" capability
+	 * check, so it is safe in automated contexts (e.g. filing product images when a
+	 * shop manager saves a product). Idempotent: repeated calls return the same folder.
+	 *
+	 * @param string $name
+	 * @param int    $parent_id Parent folder term ID (0 = root).
+	 * @param string $post_type Object type the folder belongs to.
+	 * @return int|WP_Error Folder term ID, or WP_Error on failure.
+	 */
+	public static function ensure_folder( string $name, int $parent_id = 0, string $post_type = 'attachment' ) {
+		$name = sanitize_text_field( $name );
+		if ( '' === $name ) {
+			return new WP_Error( 'invalid_name', __( 'Folder name cannot be empty.', 'pixelvault' ) );
+		}
+		if ( mb_strlen( $name ) > 200 ) {
+			$name = mb_substr( $name, 0, 200 );
+		}
+		$parent_id = absint( $parent_id );
+		$post_type = sanitize_key( $post_type );
+		if ( '' === $post_type ) {
+			$post_type = 'attachment';
+		}
+
+		$existing = self::find_folder( $name, $parent_id, $post_type );
+		if ( $existing > 0 ) {
+			return $existing;
+		}
+
+		$result = wp_insert_term( $name, RayetunMediaNest_Taxonomy::TAXONOMY, array( 'parent' => $parent_id ) );
+		if ( is_wp_error( $result ) && 'term_exists' === $result->get_error_code() ) {
+			// A same-named term exists under a different parent/type: force a unique slug.
+			$result = wp_insert_term(
+				$name,
+				RayetunMediaNest_Taxonomy::TAXONOMY,
+				array( 'parent' => $parent_id, 'slug' => sanitize_title( $name ) . '-' . substr( uniqid(), -6 ) )
+			);
+		}
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$term_id   = absint( $result['term_id'] );
+		$folder_id = RayetunMediaNest_DB::insert_folder( $term_id, array(
+			'parent_id' => $parent_id,
+			'owner_id'  => get_current_user_id(),
+			'post_type' => $post_type,
+		) );
+		if ( false === $folder_id ) {
+			wp_delete_term( $term_id, RayetunMediaNest_Taxonomy::TAXONOMY );
+			return new WP_Error( 'db_insert_failed', __( 'Failed to save folder metadata.', 'pixelvault' ) );
+		}
+
+		do_action( 'rayetun_medianest_folder_created', $term_id, $folder_id, array(
+			'parent_id'    => $parent_id,
+			'post_type'    => $post_type,
+			'programmatic' => true,
+		) );
+		return $term_id;
+	}
+
 	// -------------------------------------------------------------------------
 	// READ
 	// -------------------------------------------------------------------------
