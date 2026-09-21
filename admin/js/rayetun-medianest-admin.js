@@ -1785,7 +1785,7 @@
 				/* Direct watch: target IS .media-frame-content */
 				if(target.classList&&target.classList.contains('media-frame-content')){
 					var modal=target.closest&&target.closest('.media-modal');
-					if(modal&&!target.querySelector('#rayetun-mn-modal-panel')){
+					if(modal&&!target.querySelector('.rayetun-mn-modal-panel')){
 						scheduleInjectModalPanel(modal);
 					}
 					return;
@@ -1797,7 +1797,7 @@
 					if(!fc)return;
 					var modal=fc.closest&&fc.closest('.media-modal');
 					if(!modal)return;
-					if(!fc.querySelector('#rayetun-mn-modal-panel')){
+					if(!fc.querySelector('.rayetun-mn-modal-panel')){
 						scheduleInjectModalPanel(modal);
 					}
 				});
@@ -2023,17 +2023,21 @@
 	}
 
 	function injectModalPanel(modal){
+		/* Only inject into the VISIBLE modal. The product editor keeps several media
+		   frames in the DOM at once (the featured-image frame and the gallery frame),
+		   so injecting into hidden ones — and, previously, deleting the single global
+		   panel to move it between them — made the frames ping-pong over one panel and
+		   the sidebar blink. Each frame now gets its OWN panel (class, not a shared id)
+		   and we never touch another frame's panel. */
+		if(getComputedStyle(modal).display==='none')return;
 		var content=modal.querySelector('.media-frame-content');
 		if(!content)return;
-		if(content.querySelector('#rayetun-mn-modal-panel'))return;
-
-		var stale=document.getElementById('rayetun-mn-modal-panel');
-		if(stale)stale.remove();
+		if(content.querySelector('.rayetun-mn-modal-panel'))return;
 
 		var PANEL_W=190;
 
 		var mp=document.createElement('div');
-		mp.id='rayetun-mn-modal-panel';
+		mp.className='rayetun-mn-modal-panel';
 		mp.style.cssText=['position:absolute','left:0','top:0',
 			'width:'+PANEL_W+'px','z-index:10','background:#fff',
 			'border-right:1px solid #dcdcde','overflow:hidden',
@@ -2106,7 +2110,7 @@
 					}
 				});
 				m.removedNodes.forEach(function(n){
-					if(n.id==='rayetun-mn-modal-panel')scheduleInjectModalPanel(modal);
+					if(n.nodeType===1&&n.classList&&n.classList.contains('rayetun-mn-modal-panel'))scheduleInjectModalPanel(modal);
 				});
 			});
 		});

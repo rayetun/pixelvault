@@ -874,7 +874,7 @@ div.rayetun-mn-modal-header {
 
 /* Our panel itself — JS sets position:absolute left:0 top:0 width:190px height:Xpx inline.
    These CSS rules provide visual styling as fallback/polish. */
-#rayetun-mn-modal-panel {
+.rayetun-mn-modal-panel {
 	position: absolute;
 	left: 5px!important;
 	top: 15px!important;
@@ -888,7 +888,7 @@ div.rayetun-mn-modal-header {
 	box-sizing: border-box;
 	padding-bottom: 20px!important;
 }
-#rayetun-mn-modal-panel .rayetun-mn-modal-header span{
+.rayetun-mn-modal-panel .rayetun-mn-modal-header span{
 	font-size: 15px;
 	font-weight: 600;
 	color: #1d2327;
