@@ -242,7 +242,7 @@ class RayetunMediaNest_Settings {
 					'saved'           => __( 'Saved!', 'pixelvault' ),
 					'error'           => __( 'Save failed. Please try again.', 'pixelvault' ),
 					'detecting'       => __( 'Scanning…', 'pixelvault' ),
-					'noPlugins'       => __( 'No compatible plugins detected. Supported sources: FileBird, Real Media Library, WP Media Folder, Enhanced Media Library.', 'pixelvault' ),
+					'noPlugins'       => __( 'No compatible plugins detected. Supported sources: FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, Wicked Folders.', 'pixelvault' ),
 					'detectError'     => __( 'Could not scan for plugins. Please refresh and try again.', 'pixelvault' ),
 					'importing'       => __( 'Importing…', 'pixelvault' ),
 					'importDone'      => __( 'Done', 'pixelvault' ),
@@ -595,7 +595,7 @@ class RayetunMediaNest_Settings {
 									// Tools group — tab='' so the Tools sidebar tab never hides when these are toggled.
 									// The tab itself is always visible; individual sections inside it reflect feature state.
 									array( 'key' => 'feature_import_export',     'tab' => '',            'label' => __( 'Import / Export', 'pixelvault' ),    'active' => (bool) $settings['feature_import_export'],         'desc' => __( 'Export folder structure as JSON and reimport it on any site.', 'pixelvault' ) ),
-									array( 'key' => 'feature_competitor_import', 'tab' => '',            'label' => __( 'Competitor Import', 'pixelvault' ),  'active' => (bool) $settings['feature_competitor_import'],     'desc' => __( 'One-click migration from FileBird, Real Media Library, and WP Media Folder.', 'pixelvault' ) ),
+									array( 'key' => 'feature_competitor_import', 'tab' => '',            'label' => __( 'Competitor Import', 'pixelvault' ),  'active' => (bool) $settings['feature_competitor_import'],     'desc' => __( 'One-click migration from FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, and Wicked Folders.', 'pixelvault' ) ),
 									array( 'key' => 'feature_zip_import',        'tab' => '',            'label' => __( 'ZIP File Import', 'pixelvault' ),    'active' => (bool) $settings['feature_zip_import'],            'desc' => __( 'Upload a .zip archive — all media inside is extracted into a folder.', 'pixelvault' ) ),
 									array( 'key' => 'feature_media_usage_map',   'tab' => '',            'label' => __( 'Media Usage Map', 'pixelvault' ),    'active' => (bool) $settings['feature_media_usage_map'],       'desc' => __( 'See every post and page that references any media file.', 'pixelvault' ) ),
 									array( 'key' => 'feature_gallery',           'tab' => '',            'label' => __( 'Folder Gallery', 'pixelvault' ),     'active' => (bool) $settings['feature_gallery'],               'desc' => __( 'Display any folder as a responsive gallery via Gutenberg block or shortcode.', 'pixelvault' ) ),
@@ -925,7 +925,7 @@ class RayetunMediaNest_Settings {
 							<div class="rayetun-mn-info-box" style="margin-bottom:20px">
 								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
 								<div>
-									<p><?php esc_html_e( 'If you are switching from FileBird, Real Media Library, WP Media Folder, or Enhanced Media Library, PixelVault can copy your existing folder structure and file assignments automatically. Your original plugin data is not modified.', 'pixelvault' ); ?></p>
+									<p><?php esc_html_e( 'If you are switching from FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, or Wicked Folders, PixelVault can copy your existing folder structure and file assignments automatically. Your original plugin data is not modified.', 'pixelvault' ); ?></p>
 								</div>
 							</div>
 							<div id="mn-tools-migrate-area">

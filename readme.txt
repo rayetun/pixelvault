@@ -93,7 +93,7 @@ Bulk-organise your existing media library in one click via the import icon at th
 Choose **Unassigned only** to leave already-organised files untouched, or **All files** to reassign everything. PixelVault previews the result before making any changes.
 
 **🚚 Import from Other Plugins**
-One-click migration from FileBird, Real Media Library, WP Media Folder, and Enhanced Media Library. Folder hierarchy and all file assignments are copied automatically. Go to **Settings → Tools → Import from Another Plugin**. The original plugin's data is never modified.
+One-click migration from FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, and Wicked Folders. Folder hierarchy and all file assignments are copied automatically. Go to **Settings → Tools → Import from Another Plugin**. The original plugin's data is never modified.
 
 **💾 Export and Import**
 Back up your entire folder structure as a JSON file and restore it on any WordPress site — no SQL required.

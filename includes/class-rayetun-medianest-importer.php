@@ -16,6 +16,12 @@
  *   Enhanced Media Lib — user-defined taxonomy slugs in option 'wpuxss_eml_taxonomies'
  *                        (default slug 'media_category'); eml_media=1 marks media taxonomies
  *
+ *   HappyFiles         — taxonomy 'happyfiles_category' (hierarchical, on attachment)
+ *
+ *   Wicked Folders     — taxonomy 'wf_attachment_folders' (hierarchical; pattern
+ *                        'wf_{post_type}_folders'). Only term-based folders import;
+ *                        Wicked's virtual "dynamic folders" are not terms and are skipped.
+ *
  * REST endpoints:
  *   GET  /rayetun-medianest/v1/migrate/detect  — list plugins that have data
  *   POST /rayetun-medianest/v1/migrate/run     — import one source
@@ -50,7 +56,7 @@ class RayetunMediaNest_Importer {
 				'source' => array(
 					'type'     => 'string',
 					'required' => true,
-					'enum'     => array( 'filebird', 'rml', 'wpmf', 'eml' ),
+					'enum'     => array( 'filebird', 'rml', 'wpmf', 'eml', 'happyfiles', 'wicked' ),
 				),
 			),
 		) );
@@ -76,6 +82,12 @@ class RayetunMediaNest_Importer {
 		$check = self::detect_eml();
 		if ( $check ) { $available['eml'] = $check; }
 
+		$check = self::detect_taxonomy( 'happyfiles_category', 'HappyFiles' );
+		if ( $check ) { $available['happyfiles'] = $check; }
+
+		$check = self::detect_taxonomy( 'wf_attachment_folders', 'Wicked Folders' );
+		if ( $check ) { $available['wicked'] = $check; }
+
 		return rest_ensure_response( $available );
 	}
 
@@ -96,6 +108,12 @@ class RayetunMediaNest_Importer {
 				break;
 			case 'eml':
 				$result = self::migrate_eml();
+				break;
+			case 'happyfiles':
+				$result = self::migrate_taxonomy( 'happyfiles_category' );
+				break;
+			case 'wicked':
+				$result = self::migrate_taxonomy( 'wf_attachment_folders' );
 				break;
 			default:
 				return new WP_Error( 'invalid_source', __( 'Unknown source plugin.', 'pixelvault' ), array( 'status' => 400 ) );
