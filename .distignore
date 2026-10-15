@@ -11,11 +11,12 @@
 # WordPress.org listing assets (handled by the asset-update workflow, not shipped in the plugin)
 .wordpress-org
 
-# Local / OS / editor cruft
+# Local / OS / editor / AI-tooling cruft
 .DS_Store
 Thumbs.db
 .idea
 .vscode
+.claude
 *.log
 
 # Build & dependency tooling (not used at runtime)
