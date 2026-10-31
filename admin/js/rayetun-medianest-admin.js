@@ -812,6 +812,7 @@
 		menu.appendChild(mkI(II.download,'Download all','',function(){downloadFolder(tid,folder.name);}));
 		menu.appendChild(el('div',{className:'rayetun-mn-context-sep'}));
 		menu.appendChild(mkI(II.copy,'Copy gallery shortcode','',function(){copyGalleryShortcode(folder);}));
+		menu.appendChild(mkI(II.copy,'Copy document library shortcode','',function(){copyDoclibShortcode(folder);}));
 		if(_features.zipImport!==false){menu.appendChild(mkI(II.zip,'Import ZIP to folder','',function(){showZipImportModal(folder);}));}
 		menu.appendChild(el('div',{className:'rayetun-mn-context-sep'}));
 		// Delete — grayed out when locked
@@ -847,19 +848,25 @@
 		menu.style.left=left+'px';menu.style.top=top+'px';
 	}
 
-	/* Copy [medianest_gallery] shortcode for this folder to clipboard */
-	function copyGalleryShortcode(folder){
-		var sc='[medianest_gallery folder_id="'+folder.term_id+'" columns="3"]';
-		/* Modern Clipboard API with legacy execCommand fallback */
+	/* Copy a shortcode string to the clipboard (modern Clipboard API + legacy fallback). */
+	function copyShortcodeText(sc){
 		if(navigator.clipboard&&navigator.clipboard.writeText){
 			navigator.clipboard.writeText(sc).then(function(){
-				showToast('Shortcode copied \u2014 paste it into any post or page');
+				showToast('Shortcode copied. Paste it into any post or page.');
 			}).catch(function(){
 				legacyCopy(sc);
 			});
 		}else{
 			legacyCopy(sc);
 		}
+	}
+	/* Copy the gallery shortcode for this folder. */
+	function copyGalleryShortcode(folder){
+		copyShortcodeText('[pixelvault_gallery folder_id="'+folder.term_id+'" columns="3"]');
+	}
+	/* Copy the Document Library shortcode for this folder (search + folder browsing). */
+	function copyDoclibShortcode(folder){
+		copyShortcodeText('[pixelvault_document_library root="'+folder.term_id+'"]');
 	}
 
 	function legacyCopy(text){
@@ -868,7 +875,7 @@
 		document.body.appendChild(ta);ta.focus();ta.select();
 		try{
 			document.execCommand('copy');
-			showToast('Shortcode copied \u2014 paste it into any post or page');
+			showToast('Shortcode copied. Paste it into any post or page.');
 		}catch(e){
 			/* Last resort: show the shortcode in a prompt so user can manually copy */
 			window.prompt('Copy this shortcode:',text);

@@ -1007,3 +1007,19 @@
 	.rayetun-mn-stats-grid { grid-template-columns: 1fr 1fr; }
 	.rayetun-mn-topbar-right .rayetun-mn-badge-free { display: none; }
 }
+
+/* ── Shortcodes reference (Tools tab) ──────────────────────────────── */
+.rayetun-mn-shortcodes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.rayetun-mn-shortcode { margin: 0; }
+.rayetun-mn-sc-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rayetun-mn-sc-code {
+	flex: 1 1 auto; min-width: 0; background: #f6f7f7; border: 1px solid #e2e4e7; border-radius: 6px;
+	padding: 8px 11px; font-family: Consolas, Monaco, "Courier New", monospace; font-size: 13px;
+	color: #1e1e1e; overflow-x: auto; white-space: nowrap;
+}
+.rayetun-mn-copy-sc {
+	flex: 0 0 auto; background: var(--mn-primary, #4f46e5); color: #fff; border: 0; border-radius: 6px;
+	padding: 8px 15px; font-size: 13px; font-weight: 600; cursor: pointer; line-height: 1.2;
+}
+.rayetun-mn-copy-sc:hover { background: var(--mn-primary-h, #4338ca); }
+.rayetun-mn-sc-desc { margin: 7px 0 0; font-size: 13px; color: var(--mn-muted, #646970); line-height: 1.5; }

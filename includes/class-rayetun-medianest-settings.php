@@ -242,6 +242,7 @@ class RayetunMediaNest_Settings {
 					'saved'           => __( 'Saved!', 'pixelvault' ),
 					'error'           => __( 'Save failed. Please try again.', 'pixelvault' ),
 					'detecting'       => __( 'Scanning…', 'pixelvault' ),
+					'copied'          => __( 'Copied!', 'pixelvault' ),
 					'noPlugins'       => __( 'No compatible plugins detected. Supported sources: FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, Wicked Folders.', 'pixelvault' ),
 					'detectError'     => __( 'Could not scan for plugins. Please refresh and try again.', 'pixelvault' ),
 					'importing'       => __( 'Importing…', 'pixelvault' ),
@@ -872,6 +873,38 @@ class RayetunMediaNest_Settings {
 						<div class="rayetun-mn-panel-header">
 							<h2><?php esc_html_e( 'Tools', 'pixelvault' ); ?></h2>
 							<p><?php esc_html_e( 'Import, migration, and utility tools for your media library.', 'pixelvault' ); ?></p>
+						</div>
+
+						<!-- ── Shortcodes reference (always available) ── -->
+						<?php
+						$mn_shortcodes = array(
+							array(
+								'code' => '[pixelvault_document_library]',
+								'desc' => __( 'A searchable, browsable file library with a folder tree and per-file downloads. Add root="12" to start inside a specific folder.', 'pixelvault' ),
+							),
+							array(
+								'code' => '[pixelvault_gallery folder_id="12" columns="3"]',
+								'desc' => __( 'A responsive image gallery of a folder, with a lightbox.', 'pixelvault' ),
+							),
+						);
+						?>
+						<div class="rayetun-mn-tools-section">
+							<h3 class="rayetun-mn-section-title" style="margin-top:0"><?php esc_html_e( 'Shortcodes', 'pixelvault' ); ?></h3>
+							<div class="rayetun-mn-info-box" style="margin-bottom:16px">
+								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() ); ?></div>
+								<div><p><?php esc_html_e( 'Place PixelVault on any page with a shortcode, including in the Classic Editor, page builders, widgets, and theme templates. Tip: right-click a folder in the Media Library and choose "Copy document library shortcode" (or "Copy gallery shortcode") to get one with the folder ID already filled in.', 'pixelvault' ); ?></p></div>
+							</div>
+							<ul class="rayetun-mn-shortcodes">
+								<?php foreach ( $mn_shortcodes as $mn_sc ) : ?>
+								<li class="rayetun-mn-shortcode">
+									<div class="rayetun-mn-sc-row">
+										<code class="rayetun-mn-sc-code"><?php echo esc_html( $mn_sc['code'] ); ?></code>
+										<button type="button" class="rayetun-mn-copy-sc" data-sc="<?php echo esc_attr( $mn_sc['code'] ); ?>"><?php esc_html_e( 'Copy', 'pixelvault' ); ?></button>
+									</div>
+									<p class="rayetun-mn-sc-desc"><?php echo esc_html( $mn_sc['desc'] ); ?></p>
+								</li>
+								<?php endforeach; ?>
+							</ul>
 						</div>
 
 						<?php

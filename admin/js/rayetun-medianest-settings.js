@@ -554,6 +554,26 @@
 		loadMigrateDetect();
 	} );
 
+	// Copy a shortcode from the Shortcodes reference.
+	$( document ).on( 'click', '.rayetun-mn-copy-sc', function () {
+		var $btn = $( this );
+		var sc   = $btn.attr( 'data-sc' ) || '';
+		var label = $btn.text();
+		function flash() { $btn.text( strings.copied || 'Copied!' ); setTimeout( function () { $btn.text( label ); }, 1500 ); }
+		function legacy() {
+			var ta = document.createElement( 'textarea' );
+			ta.value = sc; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;';
+			document.body.appendChild( ta ); ta.select();
+			try { document.execCommand( 'copy' ); flash(); } catch ( e ) { window.prompt( 'Copy this shortcode:', sc ); }
+			document.body.removeChild( ta );
+		}
+		if ( navigator.clipboard && navigator.clipboard.writeText ) {
+			navigator.clipboard.writeText( sc ).then( flash ).catch( legacy );
+		} else {
+			legacy();
+		}
+	} );
+
 	// Import button for a specific plugin.
 	$( document ).on( 'click', '.mn-migrate-run-btn', function () {
 		var $btn    = $( this );

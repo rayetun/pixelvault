@@ -16,6 +16,11 @@ class RayetunMediaNest_Gallery {
 
 	public static function register() {
 		add_shortcode( 'pixelvault_gallery', array( __CLASS__, 'render_shortcode' ) );
+		// Back-compat: the plugin was named MediaNest before the rename to PixelVault,
+		// and earlier builds' "Copy gallery shortcode" produced [medianest_gallery].
+		// Register it as an alias so any such shortcode already pasted on a page renders
+		// correctly instead of printing as raw text.
+		add_shortcode( 'medianest_gallery', array( __CLASS__, 'render_shortcode' ) );
 		add_action( 'init',             array( __CLASS__, 'register_block' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_frontend' ) );
 	}
