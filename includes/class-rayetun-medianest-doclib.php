@@ -606,11 +606,13 @@ class RayetunMediaNest_DocLib {
 			 * Pro) can echo extra per-file information here, such as the file's
 			 * description, caption, date, dimensions or custom metadata. The add-on is
 			 * responsible for escaping its own output. Enrich the file data via the
-			 * rayetun_medianest_doclib_file filter, then read it from $f here.
+			 * rayetun_medianest_doclib_file filter, then read it from $f here; read the
+			 * resolved block/shortcode options from $a to honour display toggles.
 			 *
 			 * @param array $f File data (see the rayetun_medianest_doclib_file filter).
+			 * @param array $a Resolved Document Library options (merged with defaults).
 			 */
-			do_action( 'rayetun_medianest_doclib_file_meta', $f );
+			do_action( 'rayetun_medianest_doclib_file_meta', $f, $a );
 			echo '</span>';
 			if ( $a['show_size'] && $f['size'] ) {
 				printf( '<span class="pv-doclib__file-size">%s</span>', esc_html( $f['size'] ) );
