@@ -107,6 +107,22 @@
 .pv-doclib__tree-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pv-doclib__tree-count { font-size: 12px; color: var(--pv-muted); background: #f0f0f1; border-radius: 10px; padding: 1px 8px; }
 
+/* Collapsible tree: toggle caret + show/hide child branches */
+.pv-doclib li.pv-doclib__tree-item { display: flex; flex-wrap: wrap; align-items: center; }
+.pv-doclib ul.pv-doclib__tree ul { flex: 0 0 100%; }
+.pv-doclib button.pv-doclib__tree-btn { width: auto; flex: 1 1 auto; min-width: 0; }
+.pv-doclib button.pv-doclib__tree-toggle {
+	flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+	width: 20px; height: 30px; padding: 0; margin: 0; background: none; border: 0; box-shadow: none;
+	cursor: pointer; color: var(--pv-muted); border-radius: 4px; font: inherit; text-transform: none;
+}
+.pv-doclib button.pv-doclib__tree-toggle:hover { color: var(--pv-text); background: #f3f4f6; }
+.pv-doclib button.pv-doclib__tree-toggle svg { width: 14px; height: 14px; transition: transform .15s ease; }
+.pv-doclib li.pv-doclib__tree-item[aria-expanded="true"] > button.pv-doclib__tree-toggle svg { transform: rotate(90deg); }
+.pv-doclib li.pv-doclib__tree-item[aria-expanded="false"] > ul.pv-doclib__tree { display: none; }
+/* Leaf folders (no toggle) align with their toggled siblings */
+.pv-doclib li.pv-doclib__tree-item:not([aria-expanded]) > button.pv-doclib__tree-btn { margin-left: 20px; }
+
 /* ── Main ────────────────────────────────────────────────── */
 .pv-doclib__main { flex: 1 1 0%; min-width: 0; max-width: 100%; }
 .pv-doclib__files-wrap { min-width: 0; }
@@ -150,6 +166,7 @@
 .pv-doclib--minimal .pv-doclib__file:hover { background: color-mix(in srgb, var(--pv-accent) 6%, transparent); }
 .pv-doclib__file-icon { color: var(--pv-accent); }
 .pv-doclib__file-icon svg { width: 46px; height: 46px; }
+.pv-doclib__file-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; max-width: 100%; }
 .pv-doclib__file-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .pv-doclib__file-size { font-size: 12px; color: var(--pv-muted); }
 .pv-doclib__file-dl { display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: color-mix(in srgb, var(--pv-accent) 10%, transparent); color: var(--pv-accent); border-radius: 6px; padding: 5px 12px; text-decoration: none; font-size: 13px; font-weight: 600; }
@@ -161,6 +178,7 @@
 .pv-doclib.pv-layout-list .pv-doclib__file { flex-direction: row; text-align: left; align-items: center; gap: 12px; margin-bottom: var(--pv-gap); min-width: 0; }
 .pv-doclib.pv-layout-list .pv-doclib__file-icon { flex: 0 0 auto; }
 .pv-doclib.pv-layout-list .pv-doclib__file-icon svg { width: 28px; height: 28px; }
+.pv-doclib.pv-layout-list .pv-doclib__file-main { flex: 1 1 auto; align-items: flex-start; }
 .pv-doclib.pv-layout-list .pv-doclib__file-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pv-doclib.pv-layout-list .pv-doclib__file-size { flex: 0 0 auto; white-space: nowrap; }
 .pv-doclib.pv-layout-list .pv-doclib__file-dl { flex: 0 0 auto; margin-left: auto; }

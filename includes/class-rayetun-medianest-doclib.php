@@ -28,6 +28,9 @@ class RayetunMediaNest_DocLib {
 		add_action( 'init', array( __CLASS__, 'register_block' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_rest' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_download' ) );
+		// Shortcode parity with the block, so Classic Editor, page builders, widgets
+		// and theme templates can place the Document Library (search + folder browsing).
+		add_shortcode( 'pixelvault_document_library', array( __CLASS__, 'render_shortcode' ) );
 	}
 
 	// ── "Download all" (frontend-safe folder ZIP) ────────────────────────────────
@@ -345,6 +348,56 @@ class RayetunMediaNest_DocLib {
 
 	// ── Render ────────────────────────────────────────────────────────────────
 
+	/**
+	 * Shortcode entry point: [pixelvault_document_library root="12" columns="4" ...].
+	 * Normalizes string attributes to the block's typed options and renders the same
+	 * output as the block. Accepts every schema key (dashes or underscores), plus the
+	 * friendly aliases root / folder / id for the root folder.
+	 *
+	 * @param array|string $atts
+	 * @return string
+	 */
+	public static function render_shortcode( $atts ) {
+		$atts     = is_array( $atts ) ? $atts : array();
+		$defaults = self::defaults();
+		$types    = array();
+		foreach ( self::schema() as $c ) { $types[ $c['key'] ] = $c['type']; }
+
+		$aliases    = array( 'root' => 'root_folder_id', 'folder' => 'root_folder_id', 'id' => 'root_folder_id' );
+		$normalized = $defaults;
+
+		foreach ( $atts as $key => $val ) {
+			$key = str_replace( '-', '_', sanitize_key( (string) $key ) );
+			if ( isset( $aliases[ $key ] ) ) { $key = $aliases[ $key ]; }
+			if ( ! array_key_exists( $key, $defaults ) ) { continue; }
+			$t = isset( $types[ $key ] ) ? $types[ $key ] : 'string';
+			if ( 'toggle' === $t ) {
+				$normalized[ $key ] = self::shortcode_truthy( $val );
+			} elseif ( in_array( $t, array( 'range', 'folder' ), true ) ) {
+				$normalized[ $key ] = (int) $val;
+			} else {
+				$normalized[ $key ] = sanitize_text_field( (string) $val );
+			}
+		}
+
+		// Blocks auto-enqueue their view script/style; a shortcode must do it itself.
+		if ( wp_style_is( 'rayetun-medianest-doclib', 'registered' ) ) {
+			wp_enqueue_style( 'rayetun-medianest-doclib' );
+		}
+		if ( wp_script_is( 'rayetun-medianest-doclib-view', 'registered' ) ) {
+			wp_enqueue_script( 'rayetun-medianest-doclib-view' );
+		}
+
+		return self::render_block( $normalized );
+	}
+
+	/** Interpret a shortcode attribute as a boolean (default true unless clearly falsey). */
+	private static function shortcode_truthy( $v ): bool {
+		if ( is_bool( $v ) ) { return $v; }
+		$v = strtolower( trim( (string) $v ) );
+		return ! in_array( $v, array( '', '0', 'false', 'no', 'off' ), true );
+	}
+
 	public static function render_block( $atts ) {
 		$a = wp_parse_args( (array) $atts, self::defaults() );
 
@@ -382,7 +435,7 @@ class RayetunMediaNest_DocLib {
 
 			<?php if ( $a['show_sidebar'] ) : ?>
 				<aside class="pv-doclib__sidebar" role="tree" aria-label="<?php esc_attr_e( 'Folders', 'pixelvault' ); ?>">
-					<?php self::render_tree( $tree, $current, (bool) $a['show_counts'] ); ?>
+					<?php self::render_tree( $tree, $current, (bool) $a['show_counts'], self::ancestor_set( $current, $root_id ) ); ?>
 				</aside>
 			<?php endif; ?>
 
@@ -437,18 +490,28 @@ class RayetunMediaNest_DocLib {
 
 	// ── Render helpers ─────────────────────────────────────────────────────────
 
-	private static function render_tree( array $nodes, int $current, bool $show_counts ) {
+	private static function render_tree( array $nodes, int $current, bool $show_counts, array $open = array() ) {
 		echo '<ul class="pv-doclib__tree" role="group">';
 		foreach ( $nodes as $n ) {
 			$tid      = (int) $n->term_id;
 			$has_kids = ! empty( $n->children );
 			$is_cur   = $tid === $current;
 			$count    = $show_counts ? self::folder_count( $tid ) : 0;
+			// Folders on the path to the current folder start expanded; the rest start
+			// collapsed. A toggle lets visitors expand or collapse any branch.
+			$expanded = $has_kids && isset( $open[ $tid ] );
 			printf(
 				'<li class="pv-doclib__tree-item" role="treeitem"%s%s>',
-				$has_kids ? ' aria-expanded="false"' : '',
+				$has_kids ? ' aria-expanded="' . ( $expanded ? 'true' : 'false' ) . '"' : '',
 				$is_cur ? ' aria-current="true"' : ''
 			);
+			if ( $has_kids ) {
+				printf(
+					'<button type="button" class="pv-doclib__tree-toggle" data-pv-treetoggle aria-label="%s">%s</button>',
+					esc_attr__( 'Expand or collapse folder', 'pixelvault' ),
+					self::icon( 'chevron' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG
+				);
+			}
 			printf(
 				'<button type="button" class="pv-doclib__tree-btn%s" data-folder="%d">%s<span class="pv-doclib__tree-name">%s</span>%s</button>',
 				$is_cur ? ' is-active' : '',
@@ -458,11 +521,30 @@ class RayetunMediaNest_DocLib {
 				( $show_counts && $count ) ? '<span class="pv-doclib__tree-count">' . esc_html( (string) $count ) . '</span>' : ''
 			);
 			if ( $has_kids ) {
-				self::render_tree( $n->children, $current, $show_counts );
+				self::render_tree( $n->children, $current, $show_counts, $open );
 			}
 			echo '</li>';
 		}
 		echo '</ul>';
+	}
+
+	/**
+	 * Term IDs on the path from the root to the current folder (inclusive). Used to
+	 * expand just the branch that leads to the selected folder in the sidebar tree.
+	 *
+	 * @return array<int,bool> Keyed by term ID for O(1) lookup.
+	 */
+	private static function ancestor_set( int $current, int $root_id ): array {
+		$set   = array();
+		$tid   = $current;
+		$guard = 0;
+		while ( $tid && $guard++ < 50 ) {
+			$set[ $tid ] = true;
+			if ( $root_id && $tid === $root_id ) { break; }
+			$f   = RayetunMediaNest_Folder_Service::get_one( $tid );
+			$tid = ( $f && isset( $f->parent_id ) ) ? (int) $f->parent_id : 0;
+		}
+		return $set;
 	}
 
 	private static function render_breadcrumb( int $current, int $root_id ) {
@@ -517,7 +599,19 @@ class RayetunMediaNest_DocLib {
 		foreach ( $files as $f ) {
 			echo '<li class="pv-doclib__file" role="listitem">';
 			printf( '<span class="pv-doclib__file-icon" aria-hidden="true">%s</span>', self::file_icon( $f['mime'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG
+			echo '<span class="pv-doclib__file-main">';
 			printf( '<span class="pv-doclib__file-name" title="%s">%s</span>', esc_attr( $f['name'] ), esc_html( $f['name'] ) );
+			/**
+			 * Fires inside a file tile, right after the file name. Add-ons (PixelVault
+			 * Pro) can echo extra per-file information here, such as the file's
+			 * description, caption, date, dimensions or custom metadata. The add-on is
+			 * responsible for escaping its own output. Enrich the file data via the
+			 * rayetun_medianest_doclib_file filter, then read it from $f here.
+			 *
+			 * @param array $f File data (see the rayetun_medianest_doclib_file filter).
+			 */
+			do_action( 'rayetun_medianest_doclib_file_meta', $f );
+			echo '</span>';
 			if ( $a['show_size'] && $f['size'] ) {
 				printf( '<span class="pv-doclib__file-size">%s</span>', esc_html( $f['size'] ) );
 			}
@@ -696,6 +790,7 @@ class RayetunMediaNest_DocLib {
 		$icons = array(
 			'folder'   => '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M2 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>',
 			'download' => '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M3 14a1 1 0 011 1v1h12v-1a1 1 0 112 0v1a2 2 0 01-2 2H4a2 2 0 01-2-2v-1a1 1 0 011-1z"/><path d="M9 3a1 1 0 112 0v7.6l2.3-2.3a1 1 0 011.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L9 10.6V3z"/></svg>',
+			'chevron'  => '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5l5 5-5 5"/></svg>',
 			'grid'     => '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M3 3h6v6H3V3zm8 0h6v6h-6V3zM3 11h6v6H3v-6zm8 0h6v6h-6v-6z"/></svg>',
 			'list'     => '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M4 4h12v3H4V4zm0 5h12v3H4V9zm0 5h12v3H4v-3z"/></svg>',
 			'image'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5L5 20"/></svg>',

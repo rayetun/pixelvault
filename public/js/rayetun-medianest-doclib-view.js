@@ -115,8 +115,17 @@
 			btn.addEventListener( 'click', function () { setLayout( root, btn.getAttribute( 'data-layout' ) ); } );
 		} );
 
-		/* Delegated clicks: folder navigation (reset to page 1) OR pagination. */
+		/* Delegated clicks: expand/collapse a tree branch, folder navigation, or pagination. */
 		root.addEventListener( 'click', function ( e ) {
+			var treeToggle = e.target.closest && e.target.closest( '[data-pv-treetoggle]' );
+			if ( treeToggle && root.contains( treeToggle ) ) {
+				e.preventDefault();
+				var item = treeToggle.closest( '.pv-doclib__tree-item' );
+				if ( item ) {
+					item.setAttribute( 'aria-expanded', item.getAttribute( 'aria-expanded' ) === 'true' ? 'false' : 'true' );
+				}
+				return;
+			}
 			var folderBtn = e.target.closest && e.target.closest( '[data-folder]' );
 			if ( folderBtn && root.contains( folderBtn ) ) {
 				e.preventDefault();
