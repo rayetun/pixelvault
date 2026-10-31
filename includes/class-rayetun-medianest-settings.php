@@ -921,7 +921,7 @@ class RayetunMediaNest_Settings {
 
 						<!-- ── Folder Structure Export / Import (JSON) ── -->
 						<div class="rayetun-mn-tools-section" data-feature-section="feature_import_export" <?php echo $settings['feature_import_export'] ? '' : 'style="display:none"'; ?>>
-							<h3 class="rayetun-mn-section-title"><?php esc_html_e( 'Folder Structure Backup', 'pixelvault' ); ?></h3>
+							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'Folder Structure Backup', 'pixelvault' ); ?></h3>
 							<?php self::callout(
 								'<p>' . esc_html__( 'Export your entire folder structure (names, hierarchy, colours, and icons) as a JSON file. Restore it on another site or keep it as a backup. Your media files are never included or modified.', 'pixelvault' ) . '</p>',
 								__( 'How folder backup works', 'pixelvault' )
