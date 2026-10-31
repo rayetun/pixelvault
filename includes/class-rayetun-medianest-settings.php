@@ -543,42 +543,47 @@ class RayetunMediaNest_Settings {
 						</div>
 
 						<!-- Stat cards -->
+						<?php
+						$stat_cards = array(
+							array( 'id' => 'mn-stat-total-media', 'color' => '#4f46e5', 'icon' => self::svg_icon( 'media' ),  'number' => number_format_i18n( $stats['total_media'] ),   'label' => __( 'Total Media', 'pixelvault' ) ),
+							array( 'id' => 'mn-stat-folders',     'color' => '#0ea5e9', 'icon' => self::svg_icon( 'folder' ), 'number' => number_format_i18n( $stats['total_folders'] ), 'label' => __( 'Folders', 'pixelvault' ) ),
+							array( 'id' => 'mn-stat-missing-alt', 'color' => '#f59e0b', 'icon' => self::svg_icon( 'alt' ),    'number' => number_format_i18n( $stats['missing_alt'] ),   'label' => __( 'Missing Alt Text', 'pixelvault' ) ),
+							array( 'id' => 'mn-stat-large',       'color' => '#ef4444', 'icon' => self::svg_icon( 'large' ),  'number' => number_format_i18n( $stats['large_files'] ),   'label' => __( 'Large Files', 'pixelvault' ) ),
+							array( 'id' => 'mn-stat-unused',      'color' => '#8b5cf6', 'icon' => self::svg_icon( 'unused' ), 'number' => number_format_i18n( $stats['unused'] ),        'label' => __( 'Unused Files', 'pixelvault' ) ),
+						);
+
+						/**
+						 * Filter the Dashboard stat tiles (the number cards at the top of the Dashboard).
+						 *
+						 * Add-ons (e.g. PixelVault Pro) can append their own tiles so the Dashboard
+						 * summarises Pro data too, instead of users hunting through individual tabs.
+						 * Each entry is an associative array:
+						 *   'number' (string, already formatted for display),
+						 *   'label'  (string),
+						 *   'icon'   (SVG markup — restricted to the tags allowed by the escaper below),
+						 *   'color'  (hex accent, optional; defaults to the brand indigo),
+						 *   'id'     (optional DOM id, for live JS count updates).
+						 *
+						 * @param array $stat_cards Card definitions.
+						 * @param array $stats      Raw computed stats (total_media, total_folders, missing_alt, large_files, unused).
+						 */
+						$stat_cards = (array) apply_filters( 'rayetun_medianest_dashboard_stats', $stat_cards, $stats );
+						?>
 						<div class="rayetun-mn-stats-grid">
-							<div class="rayetun-mn-stat-card">
-								<div class="rayetun-mn-stat-icon" style="--card-color:#4f46e5"><?php echo wp_kses( self::svg_icon( 'media' ), self::svg_allowed_tags() );?></div>
-								<div class="rayetun-mn-stat-body">
-									<div class="rayetun-mn-stat-number" id="mn-stat-total-media"><?php echo esc_html( number_format_i18n( $stats['total_media'] ) ); ?></div>
-									<div class="rayetun-mn-stat-label"><?php esc_html_e( 'Total Media', 'pixelvault' ); ?></div>
+							<?php foreach ( $stat_cards as $card ) :
+								if ( ! is_array( $card ) ) {
+									continue;
+								}
+								$card_color = ( ! empty( $card['color'] ) ) ? $card['color'] : '#4f46e5';
+								?>
+								<div class="rayetun-mn-stat-card">
+									<div class="rayetun-mn-stat-icon" style="--card-color:<?php echo esc_attr( $card_color ); ?>"><?php echo wp_kses( (string) ( $card['icon'] ?? '' ), self::svg_allowed_tags() ); ?></div>
+									<div class="rayetun-mn-stat-body">
+										<div class="rayetun-mn-stat-number"<?php echo ! empty( $card['id'] ) ? ' id="' . esc_attr( $card['id'] ) . '"' : ''; ?>><?php echo esc_html( (string) ( $card['number'] ?? '' ) ); ?></div>
+										<div class="rayetun-mn-stat-label"><?php echo esc_html( (string) ( $card['label'] ?? '' ) ); ?></div>
+									</div>
 								</div>
-							</div>
-							<div class="rayetun-mn-stat-card">
-								<div class="rayetun-mn-stat-icon" style="--card-color:#0ea5e9"><?php echo wp_kses( self::svg_icon( 'folder' ), self::svg_allowed_tags() );?></div>
-								<div class="rayetun-mn-stat-body">
-									<div class="rayetun-mn-stat-number" id="mn-stat-folders"><?php echo esc_html( number_format_i18n( $stats['total_folders'] ) ); ?></div>
-									<div class="rayetun-mn-stat-label"><?php esc_html_e( 'Folders', 'pixelvault' ); ?></div>
-								</div>
-							</div>
-							<div class="rayetun-mn-stat-card">
-								<div class="rayetun-mn-stat-icon" style="--card-color:#f59e0b"><?php echo wp_kses( self::svg_icon( 'alt' ), self::svg_allowed_tags() );?></div>
-								<div class="rayetun-mn-stat-body">
-									<div class="rayetun-mn-stat-number" id="mn-stat-missing-alt"><?php echo esc_html( number_format_i18n( $stats['missing_alt'] ) ); ?></div>
-									<div class="rayetun-mn-stat-label"><?php esc_html_e( 'Missing Alt Text', 'pixelvault' ); ?></div>
-								</div>
-							</div>
-							<div class="rayetun-mn-stat-card">
-								<div class="rayetun-mn-stat-icon" style="--card-color:#ef4444"><?php echo wp_kses( self::svg_icon( 'large' ), self::svg_allowed_tags() );?></div>
-								<div class="rayetun-mn-stat-body">
-									<div class="rayetun-mn-stat-number" id="mn-stat-large"><?php echo esc_html( number_format_i18n( $stats['large_files'] ) ); ?></div>
-									<div class="rayetun-mn-stat-label"><?php esc_html_e( 'Large Files', 'pixelvault' ); ?></div>
-								</div>
-							</div>
-							<div class="rayetun-mn-stat-card">
-								<div class="rayetun-mn-stat-icon" style="--card-color:#8b5cf6"><?php echo wp_kses( self::svg_icon( 'unused' ), self::svg_allowed_tags() );?></div>
-								<div class="rayetun-mn-stat-body">
-									<div class="rayetun-mn-stat-number" id="mn-stat-unused"><?php echo esc_html( number_format_i18n( $stats['unused'] ) ); ?></div>
-									<div class="rayetun-mn-stat-label"><?php esc_html_e( 'Unused Files', 'pixelvault' ); ?></div>
-								</div>
-							</div>
+							<?php endforeach; ?>
 						</div>
 
 						<!-- Feature status -->

@@ -47,6 +47,7 @@ add_action( 'rayetun_medianest_folder_deleted', function ( $term_id, $folder ) {
 | `rayetun_medianest_settings_defaults` | `$defaults` | Register default option values |
 | `rayetun_medianest_settings_tabs` | `$tabs, $settings` | Add sidebar tabs to the settings page |
 | `rayetun_medianest_dashboard_features` | `$features, $settings` | Add cards to the dashboard "Active Features" grid |
+| `rayetun_medianest_dashboard_stats` | `$stat_cards, $stats` | Add number tiles to the top of the Dashboard. Each card: `number` (formatted string), `label`, `icon` (SVG, restricted tags), `color` (hex, optional), `id` (optional DOM id). Lets add-ons summarise their own data on the Dashboard. |
 | `rayetun_medianest_smart_folders` | `$defs` | Register custom dynamic (smart) folders |
 | `rayetun_medianest_smart_folder_counts` | `$counts` | Provide the count for a custom smart folder |
 | `rayetun_medianest_smart_folder_query_args` | `$args, $type` | Filter the media grid when a custom smart folder is active |
