@@ -30,6 +30,7 @@ Turn any media folder into a browsable, downloadable **document library** on the
 * ♿ **Accessibility-first**: full keyboard navigation (WAI-ARIA tree pattern), screen-reader friendly
 * 📱 **Fully responsive**: grid and list layouts adapt to mobile
 * 🔒 **Respects folder visibility**: restricted folders stay hidden from guests
+* 🧩 **Block or shortcode**: insert it with the block, or use `[pixelvault_document_library]` in the Classic Editor, page builders, widgets, and theme templates
 
 Perfect for knowledge bases, press kits, resource centres, download portals, and product documentation.
 
@@ -183,6 +184,10 @@ Yes. The folder panel works inside Elementor's media modal, in both the Divi bac
 
 The Document Library block turns any folder into a front-end file browser your visitors can search, navigate, and download from (including a Download-all ZIP). It is a Gutenberg block, so add it on any post or page from the block inserter, pick a folder, and choose a design preset. It is keyboard-accessible and fully responsive, and it respects your folder visibility rules, so restricted folders stay hidden from guests. Requires WordPress 6.5 or newer.
 
+= 🧩 Is there a shortcode for the Document Library (search and folder browsing)? =
+
+Yes. Use `[pixelvault_document_library]` on any page or post, including in the Classic Editor, page builders, widgets, and theme templates. It renders the same searchable file browser with the folder tree and downloads as the block. To start inside a specific folder, pass its ID: `[pixelvault_document_library root="12"]`. You can also set options, for example `columns="4"`, `layout="list"`, `show_search="false"`, or `per_page="30"`.
+
 = 💬 Get Support =
 
 Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/pixelvault/). We aim to respond within 24 hours on business days.
@@ -216,6 +221,8 @@ PixelVault bundles the following open-source library:
 * New: ↩️ **Undo for folder moves**. Filed a file, or a bulk selection, into the wrong folder? An "Undo" button now appears so you can reverse it instantly. Covers drag-and-drop, "Add to folder", bulk move, and remove-from-folder.
 * New: 🚚 **More importers**. You can now import your existing folders from **HappyFiles** and **Wicked Folders**, in addition to FileBird, Real Media Library, WP Media Folder, and Enhanced Media Library. Go to Settings → Tools → Import from Another Plugin.
 * New: a **"Go Pro" link** in the plugin's row on the Plugins screen, for quick access to the optional PixelVault Pro add-on. It is a simple link (no third-party code) and hides itself when Pro is active.
+* New: 📄 **Document Library shortcode**. Add the searchable, browsable Document Library on any page with `[pixelvault_document_library]`, so it works in the Classic Editor, page builders, widgets and theme templates, not just the block editor. Point it at a folder with `[pixelvault_document_library root="12"]`.
+* Improve: 📂 **collapsible folders in the Document Library** front end. Folders with subfolders now have an expand and collapse toggle, so visitors can browse large folder trees without clutter.
 * Improve: newly uploaded files now appear in their folder, with updated folder counts, straight away, without a page reload.
 * Fix: the folder sidebar in the media picker no longer flickers when more than one media window is open at once (for example, setting a WooCommerce product image and its gallery).
 * Developer: new `RayetunMediaNest_Folder_Service::ensure_folder()` and `find_folder()` helpers for finding or creating folders programmatically (used by the importers and by add-ons).
@@ -320,7 +327,7 @@ PixelVault bundles the following open-source library:
 == Upgrade Notice ==
 
 = 1.4.0 =
-Undo for folder moves, HappyFiles and Wicked Folders importers, instant folder updates after upload, and a media-picker sidebar fix.
+Undo for folder moves, HappyFiles and Wicked Folders importers, a [pixelvault_document_library] shortcode, collapsible front-end folders, instant folder updates after upload, and a media-picker sidebar fix.
 
 = 1.3.1 =
 Fixes garbled icons on the Save/Cancel buttons in the Content Folders sidebar.
