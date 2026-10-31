@@ -83,6 +83,7 @@ class RayetunMediaNest_Admin {
 				'version'        => RAYETUN_MEDIANEST_VERSION,
 				'isMediaLibrary' => $is_media_library,
 				'isElementor'    => $is_elementor,
+				'proActive'      => RayetunMediaNest::pro_is_active(),
 				'caps'           => array(
 					'createFolders'   => current_user_can( 'medianest_create_folders' ),
 					'editAnyFolder'   => current_user_can( 'medianest_edit_any_folder' ),
@@ -165,6 +166,7 @@ class RayetunMediaNest_Admin {
 				'version'        => RAYETUN_MEDIANEST_VERSION,
 				'isMediaLibrary' => false,
 				'isElementor'    => true,
+				'proActive'      => RayetunMediaNest::pro_is_active(),
 				'caps'           => array(
 					'createFolders'   => current_user_can( 'medianest_create_folders' ),
 					'editAnyFolder'   => current_user_can( 'medianest_edit_any_folder' ),
@@ -240,6 +242,7 @@ class RayetunMediaNest_Admin {
 				'version'        => RAYETUN_MEDIANEST_VERSION,
 				'isMediaLibrary' => false,
 				'isElementor'    => false,
+				'proActive'      => RayetunMediaNest::pro_is_active(),
 				'caps'           => array(
 					'createFolders'   => current_user_can( 'medianest_create_folders' ),
 					'editAnyFolder'   => current_user_can( 'medianest_edit_any_folder' ),
