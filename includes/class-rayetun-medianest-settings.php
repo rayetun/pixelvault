@@ -890,10 +890,11 @@ class RayetunMediaNest_Settings {
 						?>
 						<div class="rayetun-mn-tools-section">
 							<h3 class="rayetun-mn-section-title" style="margin-top:0"><?php esc_html_e( 'Shortcodes', 'pixelvault' ); ?></h3>
-							<div class="rayetun-mn-info-box" style="margin-bottom:16px">
-								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() ); ?></div>
-								<div><p><?php esc_html_e( 'Place PixelVault on any page with a shortcode, including in the Classic Editor, page builders, widgets, and theme templates. Tip: right-click a folder in the Media Library and choose "Copy document library shortcode" (or "Copy gallery shortcode") to get one with the folder ID already filled in.', 'pixelvault' ); ?></p></div>
-							</div>
+							<?php self::callout(
+								'<p>' . esc_html__( 'Place PixelVault on any page with a shortcode, including in the Classic Editor, page builders, widgets, and theme templates. Tip: right-click a folder in the Media Library and choose "Copy document library shortcode" (or "Copy gallery shortcode") to get one with the folder ID already filled in.', 'pixelvault' ) . '</p>',
+								__( 'How shortcodes work', 'pixelvault' ),
+								true
+							); ?>
 							<ul class="rayetun-mn-shortcodes">
 								<?php foreach ( $mn_shortcodes as $mn_sc ) : ?>
 								<li class="rayetun-mn-shortcode">
@@ -921,12 +922,10 @@ class RayetunMediaNest_Settings {
 						<!-- ── Folder Structure Export / Import (JSON) ── -->
 						<div class="rayetun-mn-tools-section" data-feature-section="feature_import_export" <?php echo $settings['feature_import_export'] ? '' : 'style="display:none"'; ?>>
 							<h3 class="rayetun-mn-section-title"><?php esc_html_e( 'Folder Structure Backup', 'pixelvault' ); ?></h3>
-							<div class="rayetun-mn-info-box" style="margin-bottom:16px">
-								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-								<div>
-									<p><?php esc_html_e( 'Export your entire folder structure (names, hierarchy, colours, and icons) as a JSON file. Restore it on another site or keep it as a backup. Your media files are never included or modified.', 'pixelvault' ); ?></p>
-								</div>
-							</div>
+							<?php self::callout(
+								'<p>' . esc_html__( 'Export your entire folder structure (names, hierarchy, colours, and icons) as a JSON file. Restore it on another site or keep it as a backup. Your media files are never included or modified.', 'pixelvault' ) . '</p>',
+								__( 'How folder backup works', 'pixelvault' )
+							); ?>
 							<div class="rayetun-mn-tools-actions">
 								<button type="button" class="rayetun-mn-save-btn" id="mn-export-structure-btn"><?php esc_html_e( 'Export Folders (JSON)', 'pixelvault' ); ?></button>
 								<label class="rayetun-mn-save-btn rayetun-mn-btn-secondary" for="mn-import-structure-file"><?php esc_html_e( 'Import Folders (JSON)', 'pixelvault' ); ?></label>
@@ -938,12 +937,10 @@ class RayetunMediaNest_Settings {
 						<!-- ── Folder Templates ── -->
 						<div class="rayetun-mn-tools-section">
 							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'Folder Templates', 'pixelvault' ); ?></h3>
-							<div class="rayetun-mn-info-box" style="margin-bottom:16px">
-								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-								<div>
-									<p><?php esc_html_e( 'Save your current folder structure as a reusable template, then apply it on this or any site to recreate the same folders in one click. Templates store names, hierarchy, colours, and icons only — never your files.', 'pixelvault' ); ?></p>
-								</div>
-							</div>
+							<?php self::callout(
+								'<p>' . esc_html__( 'Save your current folder structure as a reusable template, then apply it on this or any site to recreate the same folders in one click. Templates store names, hierarchy, colours, and icons only, never your files.', 'pixelvault' ) . '</p>',
+								__( 'How folder templates work', 'pixelvault' )
+							); ?>
 							<div class="rayetun-mn-tools-actions" style="margin-bottom:16px">
 								<input type="text" id="mn-template-name" class="rayetun-mn-number-input" style="width:220px" placeholder="<?php esc_attr_e( 'Template name…', 'pixelvault' ); ?>">
 								<button type="button" class="rayetun-mn-save-btn" id="mn-template-save-btn"><?php esc_html_e( 'Save Current Structure', 'pixelvault' ); ?></button>
@@ -955,12 +952,10 @@ class RayetunMediaNest_Settings {
 						<!-- ── Import from competitors ── -->
 						<div class="rayetun-mn-tools-section" data-feature-section="feature_competitor_import" <?php echo $settings['feature_competitor_import'] ? '' : 'style="display:none"'; ?>>
 							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'Import from Another Plugin', 'pixelvault' ); ?></h3>
-							<div class="rayetun-mn-info-box" style="margin-bottom:20px">
-								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-								<div>
-									<p><?php esc_html_e( 'If you are switching from FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, or Wicked Folders, PixelVault can copy your existing folder structure and file assignments automatically. Your original plugin data is not modified.', 'pixelvault' ); ?></p>
-								</div>
-							</div>
+							<?php self::callout(
+								'<p>' . esc_html__( 'If you are switching from FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, or Wicked Folders, PixelVault can copy your existing folder structure and file assignments automatically. Your original plugin data is not modified.', 'pixelvault' ) . '</p>',
+								__( 'How importing works', 'pixelvault' )
+							); ?>
 							<div id="mn-tools-migrate-area">
 								<button type="button" class="rayetun-mn-save-btn" id="mn-tools-detect-btn"><?php esc_html_e( 'Scan for Importable Plugins', 'pixelvault' ); ?></button>
 							</div>
@@ -969,23 +964,19 @@ class RayetunMediaNest_Settings {
 						<!-- ── ZIP Import info ── -->
 						<div class="rayetun-mn-tools-section" data-feature-section="feature_zip_import" <?php echo $settings['feature_zip_import'] ? '' : 'style="display:none"'; ?>>
 							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'ZIP File Import', 'pixelvault' ); ?></h3>
-							<div class="rayetun-mn-info-box">
-								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-								<div>
-									<p><?php esc_html_e( 'To import a ZIP archive into a folder, right-click any folder in the Media Library sidebar and choose "Import ZIP to folder". All images, videos, audio files, and PDFs inside the archive will be extracted and added to that folder automatically.', 'pixelvault' ); ?></p>
-								</div>
-							</div>
+							<?php self::callout(
+								'<p>' . esc_html__( 'To import a ZIP archive into a folder, right-click any folder in the Media Library sidebar and choose "Import ZIP to folder". All images, videos, audio files, and PDFs inside the archive will be extracted and added to that folder automatically.', 'pixelvault' ) . '</p>',
+								__( 'How ZIP import works', 'pixelvault' )
+							); ?>
 						</div>
 
 						<!-- ── Media Usage info ── -->
 						<div class="rayetun-mn-tools-section" data-feature-section="feature_media_usage_map" <?php echo $settings['feature_media_usage_map'] ? '' : 'style="display:none"'; ?>>
 							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'Media Usage Map', 'pixelvault' ); ?></h3>
-							<div class="rayetun-mn-info-box">
-								<div class="rayetun-mn-info-box-icon"><?php echo wp_kses( self::svg_icon( 'info' ), self::svg_allowed_tags() );?></div>
-								<div>
-									<p><?php esc_html_e( 'To find where any file is used, right-click an image in the Media Library and choose "Where is this used?". PixelVault will show you every post, page, or custom post type that references the file — as a featured image or in the content.', 'pixelvault' ); ?></p>
-								</div>
-							</div>
+							<?php self::callout(
+								'<p>' . esc_html__( 'To find where any file is used, right-click an image in the Media Library and choose "Where is this used?". PixelVault will show you every post, page, or custom post type that references the file, as a featured image or in the content.', 'pixelvault' ) . '</p>',
+								__( 'How the usage map works', 'pixelvault' )
+							); ?>
 						</div>
 					</div><!-- /tools -->
 
