@@ -225,9 +225,10 @@ PixelVault bundles the following open-source library:
 * Improve: 📂 **collapsible folders in the Document Library** front end. Folders with subfolders now have an expand and collapse toggle, so visitors can browse large folder trees without clutter.
 * Improve: 🧩 **easier shortcode discovery**. Right-click any folder to "Copy document library shortcode" or "Copy gallery shortcode" (with the folder ID pre-filled), and find a Shortcodes reference with copy buttons under Settings → Tools.
 * Improve: newly uploaded files now appear in their folder, with updated folder counts, straight away, without a page reload.
+* Improve: a more consistent, polished settings interface — unified, collapsible "how it works" help across every tab and tidier spacing. When PixelVault Pro is active, the Media Library now shows a "Pro" badge instead of "Free".
 * Fix: the "Copy gallery shortcode" option copied a shortcode tag that was no longer registered, so it printed as plain text on the page. It now copies `[pixelvault_gallery]`, and the old tag keeps working for any pages that already use it.
 * Fix: the folder sidebar in the media picker no longer flickers when more than one media window is open at once (for example, setting a WooCommerce product image and its gallery).
-* Developer: new `RayetunMediaNest_Folder_Service::ensure_folder()` and `find_folder()` helpers for finding or creating folders programmatically (used by the importers and by add-ons).
+* Developer: new `RayetunMediaNest_Folder_Service::ensure_folder()` and `find_folder()` helpers for finding or creating folders programmatically (used by the importers and by add-ons), plus a new `rayetun_medianest_dashboard_stats` filter so add-ons can add tiles to the dashboard overview.
 * Performance: verified responsive folder browsing and filtering with libraries of 10,000 or more media files.
 
 = 1.3.1 =
