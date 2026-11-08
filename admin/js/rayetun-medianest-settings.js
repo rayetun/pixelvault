@@ -228,6 +228,25 @@
 		}
 	} );
 
+	// ── Contextual Pro upsell card ────────────────────────────────────────────
+
+	// CTA jumps to the "Upgrade to Pro" tab (same mechanism as the Quick Action cards).
+	$( document ).on( 'click', '.rayetun-mn-procard-cta[data-qa-tab]', function () {
+		var target = $( this ).data( 'qa-tab' );
+		if ( target ) { activateTab( target ); }
+	} );
+
+	// Dismiss: hide immediately and remember it per-user so it never returns.
+	$( document ).on( 'click', '.rayetun-mn-procard-dismiss', function () {
+		var $card = $( this ).closest( '.rayetun-mn-procard' );
+		$card.css( { opacity: 0, transform: 'translateY(-6px)' } );
+		window.setTimeout( function () { $card.remove(); }, 180 );
+		$.post( AJAX, {
+			action: 'rayetun_mn_dismiss_pro_card',
+			nonce : NONCE
+		} );
+	} );
+
 	// ── Folder structure export (JSON download) ──────────────────────────────
 
 	$( document ).on( 'click', '#mn-export-structure-btn', function () {

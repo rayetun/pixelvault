@@ -142,6 +142,13 @@ Full REST API and documented action/filter hooks.
 
 A full list of PHP and JavaScript hooks with examples ships in `HOOKS.md` inside the plugin.
 
+= 🧩 More free plugins by the same developer =
+
+PixelVault is part of a family of free WordPress plugins built by the same independent developer:
+
+* **RayEtun Media Protection** — watermark your images and PDFs, protect downloadable files, and control who can access them. A natural companion to PixelVault: organise your media here, then watermark and protect it. [View on WordPress.org](https://wordpress.org/plugins/rayetun-media-protection/)
+* **PinSpot – Interactive Image Hotspots** — turn any image into an interactive map with clickable hotspots, great for product tours, galleries, and infographics. [View on WordPress.org](https://wordpress.org/plugins/pinspot/)
+
 == Installation ==
 
 1. Upload the plugin folder to `/wp-content/plugins/`.

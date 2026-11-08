@@ -19,6 +19,9 @@ class RayetunMediaNest_Settings {
 
 	const OPTION_KEY = 'rayetun_medianest_settings';
 
+	/** Per-user meta flag: the dashboard "Upgrade to Pro" teaser has been dismissed. */
+	const PRO_CARD_META = '_rayetun_mn_pro_card_dismissed';
+
 	/** Holds the hook suffix returned by add_submenu_page(). */
 	private static $page_hook = '';
 
@@ -135,6 +138,7 @@ class RayetunMediaNest_Settings {
 		add_action( 'wp_ajax_rayetun_mn_save_permissions', array( __CLASS__, 'handle_save_permissions' ) );
 		add_action( 'wp_ajax_rayetun_mn_get_stats',        array( __CLASS__, 'handle_get_stats' ) );
 		add_action( 'wp_ajax_rayetun_mn_toggle_feature',   array( __CLASS__, 'handle_toggle_feature' ) );
+		add_action( 'wp_ajax_rayetun_mn_dismiss_pro_card', array( __CLASS__, 'handle_dismiss_pro_card' ) );
 	}
 
 	// ── Menu page ─────────────────────────────────────────────────────────────
@@ -369,6 +373,37 @@ class RayetunMediaNest_Settings {
 		wp_send_json_success( array( 'feature' => $key, 'value' => $value ) );
 	}
 
+	// ── Contextual Pro upsell card ─────────────────────────────────────────────
+
+	/**
+	 * Whether to show the dashboard "Upgrade to Pro" teaser card. Shown only when Pro
+	 * is inactive AND the current user has not dismissed it. Honours the same master
+	 * switch (`rayetun_medianest_show_pro_upsell`) as the Upgrade tab, so turning the
+	 * upsell off hides both. Evaluated at render time, by which point Pro has booted.
+	 */
+	private static function show_pro_card(): bool {
+		if ( RayetunMediaNest::pro_is_active() ) {
+			return false;
+		}
+		if ( get_user_meta( get_current_user_id(), self::PRO_CARD_META, true ) ) {
+			return false;
+		}
+		return (bool) apply_filters( 'rayetun_medianest_show_pro_upsell', true );
+	}
+
+	/**
+	 * AJAX: remember that this user dismissed the Pro teaser card (per-user, so it never
+	 * returns for them and never nags). No-op if Pro is active.
+	 */
+	public static function handle_dismiss_pro_card() {
+		check_ajax_referer( 'rayetun_mn_settings', 'nonce' );
+		if ( ! current_user_can( 'medianest_manage_folders' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'pixelvault' ) ), 403 );
+		}
+		update_user_meta( get_current_user_id(), self::PRO_CARD_META, 1 );
+		wp_send_json_success();
+	}
+
 	// ── Stats helper ──────────────────────────────────────────────────────────
 
 	private static function get_stats(): array {
@@ -542,6 +577,31 @@ class RayetunMediaNest_Settings {
 							<p><?php esc_html_e( 'Overview of your media library and active features.', 'pixelvault' ); ?></p>
 						</div>
 
+						<?php if ( self::show_pro_card() ) : ?>
+							<!-- Contextual Pro upsell: a single, dismissible teaser at the top of the
+							     Dashboard that jumps to the "Upgrade to Pro" tab. Shown only when Pro is
+							     inactive and not yet dismissed. No Freemius/third-party code here — a
+							     feature teaser and an in-page tab switch only; it lives on our own
+							     screen, never admin-wide. -->
+							<div class="rayetun-mn-procard">
+								<button type="button" class="rayetun-mn-procard-dismiss" aria-label="<?php esc_attr_e( 'Dismiss', 'pixelvault' ); ?>" title="<?php esc_attr_e( 'Dismiss', 'pixelvault' ); ?>">
+									<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+								</button>
+								<span class="rayetun-mn-procard-badge">
+									<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 5.8L21 8.6l-4.5 4 1.4 6.4L12 15.8 6.1 19l1.4-6.4L3 8.6l6.6-.8z"/></svg>
+									<?php esc_html_e( 'Pro', 'pixelvault' ); ?>
+								</span>
+								<div class="rayetun-mn-procard-text">
+									<div class="rayetun-mn-procard-title"><?php esc_html_e( 'Do more with PixelVault Pro', 'pixelvault' ); ?></div>
+									<p><?php esc_html_e( 'Add folder access control, gated downloads, asset metadata & rights, expiring share links, an activity log and premium front-end blocks — all from the library you already use.', 'pixelvault' ); ?></p>
+								</div>
+								<button type="button" class="rayetun-mn-procard-cta" data-qa-tab="pro_upsell">
+									<?php esc_html_e( 'See what’s in Pro', 'pixelvault' ); ?>
+									<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+								</button>
+							</div>
+						<?php endif; ?>
+
 						<!-- Stat cards -->
 						<?php
 						$stat_cards = array(
@@ -708,7 +768,27 @@ class RayetunMediaNest_Settings {
 								</a>
 							</div>
 						</div>
-					</div><!-- /dashboard -->
+					<!-- More from RayEtun (cross-promo for the author's other free plugins) -->
+							<h3 class="rayetun-mn-section-title" style="margin-top:32px"><?php esc_html_e( 'More from RayEtun', 'pixelvault' ); ?></h3>
+							<div class="rayetun-mn-xp-grid">
+								<a href="https://wordpress.org/plugins/rayetun-media-protection/" target="_blank" rel="noopener" class="rayetun-mn-xp-card">
+									<span class="rayetun-mn-xp-icon" style="--xp:#0ea5e9">🛡️</span>
+									<span class="rayetun-mn-xp-body">
+										<span class="rayetun-mn-xp-name">RayEtun Media Protection</span>
+										<span class="rayetun-mn-xp-desc"><?php esc_html_e( 'Watermark images & PDFs, protect downloadable files, and control who can access them — a natural companion to PixelVault.', 'pixelvault' ); ?></span>
+									</span>
+									<span class="rayetun-mn-xp-cta"><?php esc_html_e( 'Get it free', 'pixelvault' ); ?> &rarr;</span>
+								</a>
+								<a href="https://wordpress.org/plugins/pinspot/" target="_blank" rel="noopener" class="rayetun-mn-xp-card">
+									<span class="rayetun-mn-xp-icon" style="--xp:#f59e0b">📍</span>
+									<span class="rayetun-mn-xp-body">
+										<span class="rayetun-mn-xp-name">PinSpot — Interactive Image Hotspots</span>
+										<span class="rayetun-mn-xp-desc"><?php esc_html_e( 'Turn any image into an interactive map with clickable hotspots — great for product tours, galleries and infographics.', 'pixelvault' ); ?></span>
+									</span>
+									<span class="rayetun-mn-xp-cta"><?php esc_html_e( 'Get it free', 'pixelvault' ); ?> &rarr;</span>
+								</a>
+							</div>
+						</div><!-- /dashboard -->
 
 					<!-- ── General Tab ─────────────────────────────────────── -->
 					<div class="rayetun-mn-panel" data-panel="general" style="display:none">
