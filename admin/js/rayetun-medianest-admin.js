@@ -737,6 +737,8 @@
 			var tree=buildTree(state.folders,0);
 			if(!tree.length){menu.appendChild(el('div',{className:'rayetun-mn-img-menu-item'},'No folders yet'));}
 			else{
+				var foldersWrap=el('div',{className:'rayetun-mn-img-menu-folders'});
+				var folderBtns=[];
 				(function addI(items,depth){items.forEach(function(f){
 					var b=el('button',{className:'rayetun-mn-img-menu-item',style:{paddingLeft:(10+depth*14)+'px'}});
 					b.innerHTML=iF(f.color||'#646970')+'<span>'+f.name+'</span>';
@@ -762,9 +764,22 @@
 							}
 						}).catch(console.error);
 					});})(f);
-					menu.appendChild(b);
+					foldersWrap.appendChild(b);
+					folderBtns.push({btn:b,name:(f.name||'').toLowerCase()});
 					if(f.children&&f.children.length)addI(f.children,depth+1);
 				});})(tree,0);
+				/* Quick filter — appears only once the list is long enough to be awkward to scan. */
+				if(folderBtns.length>8){
+					var fFilter=el('input',{type:'text',className:'rayetun-mn-img-menu-filter',placeholder:'Filter folders…'});
+					fFilter.addEventListener('click',function(ev){ev.stopPropagation();});
+					fFilter.addEventListener('keydown',function(ev){ev.stopPropagation();});
+					fFilter.addEventListener('input',function(){
+						var q=fFilter.value.toLowerCase();
+						folderBtns.forEach(function(o){o.btn.style.display=(!q||o.name.indexOf(q)!==-1)?'':'none';});
+					});
+					menu.appendChild(fFilter);
+				}
+				menu.appendChild(foldersWrap);
 			}
 			document.body.appendChild(menu);imgMenu=menu;
 			/* Measure actual size so the menu always fits the viewport. */
@@ -1694,7 +1709,7 @@
 			sfHdr.appendChild(sfChev);
 			sfHdr.appendChild(el('span',null,'Quick Filters'));
 			/* Total non-zero issues badge */
-			var sfTotal=state.smartFolders.reduce(function(s,f){return s+f.count;},0);
+			var sfTotal=state.smartFolders.reduce(function(s,f){return s+(f.pro?0:(f.count||0));},0);
 			if(sfTotal>0&&!state.smartExpanded){
 				var sfBadge=el('span',{className:'rayetun-mn-count is-nonzero'},String(sfTotal));
 				sfHdr.appendChild(sfBadge);
@@ -1709,28 +1724,38 @@
 			/* Rows — only when expanded */
 			if(state.smartExpanded){
 				state.smartFolders.forEach(function(folder){
+					var isProRow=!!folder.pro;
 					var id='smart:'+folder.slug;
-					var isActive=state.activeFolderId===id;
+					var isActive=!isProRow&&state.activeFolderId===id;
 					var row=el('div',{
-						className:'rayetun-mn-smart-row'+(isActive?' is-active':''),
+						className:'rayetun-mn-smart-row'+(isActive?' is-active':'')+(isProRow?' is-pro':''),
 						title:folder.description
 					});
-					row.addEventListener('click',function(){setActive(id);});
 					var ico=el('span',{className:'rayetun-mn-smart-icon'});
 					ico.innerHTML=folder.icon;
 					var name=el('span',{className:'rayetun-mn-smart-name'},folder.label);
-					var cnt=el('span',{className:'rayetun-mn-count'+(folder.count>0?' is-nonzero':'')},
-						folder.count>0?String(folder.count):'0');
-					row.appendChild(ico);row.appendChild(name);row.appendChild(cnt);
-					/* "Edit Alt Texts" action button — appears whenever missing_alt is active, the
-					   alt editor is enabled, and the user can edit others' media (REST requirement) */
-					if(ALT_EDITOR_ON && CAN_BULK_ALT && folder.slug==='missing_alt' && isActive){
-						var altBtn=el('button',{
-							className:'rayetun-mn-smart-action-btn',
-							title:'Open Bulk Alt Text Editor'
-						},'✏️');
-						altBtn.addEventListener('click',function(e){e.stopPropagation();openAltEditor();});
-						row.appendChild(altBtn);
+					row.appendChild(ico);row.appendChild(name);
+					if(isProRow){
+						/* Non-functional upsell teaser: route to the upgrade screen, never filter. */
+						row.addEventListener('click',function(){
+							if(folder.upgradeUrl)window.location.href=folder.upgradeUrl;
+						});
+						row.appendChild(el('span',{className:'rayetun-mn-smart-pro',title:'PixelVault Pro'},'Pro'));
+					}else{
+						row.addEventListener('click',function(){setActive(id);});
+						var cnt=el('span',{className:'rayetun-mn-count'+(folder.count>0?' is-nonzero':'')},
+							folder.count>0?String(folder.count):'0');
+						row.appendChild(cnt);
+						/* "Edit Alt Texts" action button — appears whenever missing_alt is active, the
+						   alt editor is enabled, and the user can edit others' media (REST requirement) */
+						if(ALT_EDITOR_ON && CAN_BULK_ALT && folder.slug==='missing_alt' && isActive){
+							var altBtn=el('button',{
+								className:'rayetun-mn-smart-action-btn',
+								title:'Open Bulk Alt Text Editor'
+							},'✏️');
+							altBtn.addEventListener('click',function(e){e.stopPropagation();openAltEditor();});
+							row.appendChild(altBtn);
+						}
 					}
 					sf.appendChild(row);
 				});

@@ -131,7 +131,49 @@ class RayetunMediaNest_Smart_Folders {
 			);
 		}
 
+		// Pro feature teasers — appended only when the Pro add-on is NOT active, as a
+		// non-blocking upsell. These are not functional filters: the sidebar renders them
+		// dimmed with a small "Pro" badge and links them to the upgrade screen (it never
+		// applies a smart filter for them). Honours the same master switch as the dashboard
+		// upsell card, so turning upsells off hides these too.
+		if ( ! RayetunMediaNest::pro_is_active() && apply_filters( 'rayetun_medianest_show_pro_upsell', true ) ) {
+			foreach ( self::pro_teasers() as $teaser ) {
+				$result[] = $teaser;
+			}
+		}
+
 		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Locked Pro smart-folder teasers. Label and icon mirror the real Pro smart folders
+	 * (PixelVault_Pro_Expiry / PixelVault_Pro_Duplicates), so a row looks identical once Pro
+	 * is active — only the "Pro" badge and reduced opacity distinguish the teaser.
+	 *
+	 * @return array[]
+	 */
+	private static function pro_teasers(): array {
+		$url = esc_url_raw( admin_url( 'upload.php?page=rayetun-medianest&tab=pro_upsell' ) );
+		return array(
+			array(
+				'slug'        => 'pvpro_expired',
+				'label'       => __( 'Expired', 'pixelvault' ),
+				'icon'        => '&#9203;', /* ⏳ hourglass */
+				'description' => __( 'Assets past their expiry date — a PixelVault Pro feature.', 'pixelvault' ),
+				'count'       => 0,
+				'pro'         => true,
+				'upgradeUrl'  => $url,
+			),
+			array(
+				'slug'        => 'duplicates',
+				'label'       => __( 'Duplicates', 'pixelvault' ),
+				'icon'        => '&#10697;', /* ⧉ overlapping squares */
+				'description' => __( 'Files that are byte-for-byte identical — a PixelVault Pro feature.', 'pixelvault' ),
+				'count'       => 0,
+				'pro'         => true,
+				'upgradeUrl'  => $url,
+			),
+		);
 	}
 
 	// ── Count helpers ─────────────────────────────────────────────────────────

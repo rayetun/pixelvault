@@ -949,6 +949,30 @@ div.rayetun-mn-modal-header {
 .rayetun-mn-img-menu-item:hover { background: #f0f6fc; color: #4f46e5; }
 .rayetun-mn-img-menu-sep { height: 1px; background: #f0f0f1; margin: 3px 0; }
 
+/* Keep a long folder list inside the viewport: the list scrolls while the
+   actions above it (Remove / Where is this used? / filter) stay put. */
+.rayetun-mn-img-menu-folders {
+	max-height: 46vh;
+	overflow-y: auto;
+	margin: 0 -4px;
+	padding: 0 4px;
+}
+.rayetun-mn-img-menu-filter {
+	width: 100%;
+	box-sizing: border-box;
+	margin: 2px 0 5px;
+	padding: 5px 8px;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+	font-size: 13px;
+	line-height: 1.4;
+}
+.rayetun-mn-img-menu-filter:focus {
+	border-color: #4f46e5;
+	outline: none;
+	box-shadow: 0 0 0 1px #4f46e5;
+}
+
 /* Drag ghost */
 .attachment.is-dragging { opacity: 0.45; outline: 2px solid #4f46e5; }
 .rayetun-mn-divider { height:1px; background:#f0f0f1; margin:4px 0; flex-shrink:0; }
@@ -1460,6 +1484,25 @@ select.rayetun-mn-sort-select:focus {
 .rayetun-mn-smart-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rayetun-mn-count.is-nonzero { background: #fee2e2; color: #b91c1c; font-weight: 600; }
 .rayetun-mn-smart-row.is-active .rayetun-mn-count.is-nonzero { background: rgba(185,28,28,.12); color: #b91c1c; }
+
+/* Pro feature teaser (shown only when the Pro add-on is inactive) — a subtle, non-blocking
+   upsell row: dimmed, with a small "Pro" badge, that links to the upgrade screen. */
+.rayetun-mn-smart-row.is-pro { opacity: .6; }
+.rayetun-mn-smart-row.is-pro:hover { opacity: 1; background: #faf5ff; }
+.rayetun-mn-smart-row.is-pro .rayetun-mn-smart-icon { filter: grayscale(1); }
+.rayetun-mn-smart-pro {
+	flex-shrink: 0;
+	font-size: 9px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+	color: #6d28d9;
+	background: #ede9fe;
+	border: 1px solid #ddd6fe;
+	padding: 2px 6px;
+	border-radius: 9px;
+}
 
 /* ══════════════════════════════════════════════════════════════
    BULK ALT TEXT EDITOR MODAL
