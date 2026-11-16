@@ -73,12 +73,16 @@ class RayetunMediaNest_Counts {
 
 		// Per-folder counts via term relationship table.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- cached below with wp_cache_set; no WP API for bulk term counts on custom taxonomy.
+		// COUNT is unaffected by the LEFT JOIN: the meta_key filter yields at most one
+		// postmeta row per attachment, so each object is still counted once.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT tt.term_id, COUNT( tr.object_id ) AS cnt
+				'SELECT tt.term_id, COUNT( tr.object_id ) AS cnt,
+				        COALESCE( SUM( CAST( pm.meta_value AS UNSIGNED ) ), 0 ) AS sz
 				 FROM %i tt
 				 JOIN %i tr ON tt.term_taxonomy_id = tr.term_taxonomy_id
 				 JOIN %i p  ON tr.object_id = p.ID
+				 LEFT JOIN %i pm ON pm.post_id = p.ID AND pm.meta_key = %s
 				 WHERE tt.taxonomy = %s
 				   AND p.post_type = %s
 				   AND p.post_status = %s
@@ -86,6 +90,8 @@ class RayetunMediaNest_Counts {
 				$wpdb->term_taxonomy,
 				$wpdb->term_relationships,
 				$wpdb->posts,
+				$wpdb->postmeta,
+				RayetunMediaNest_Smart_Folders::FILESIZE_KEY,
 				RayetunMediaNest_Taxonomy::TAXONOMY,
 				'attachment',
 				'inherit'
@@ -93,8 +99,10 @@ class RayetunMediaNest_Counts {
 		);
 
 		$counts = array();
+		$sizes  = array();
 		foreach ( $rows as $row ) {
 			$counts[ (int) $row->term_id ] = (int) $row->cnt;
+			$sizes[  (int) $row->term_id ] = (int) $row->sz;
 		}
 
 		// Total attachments.
@@ -130,6 +138,31 @@ class RayetunMediaNest_Counts {
 
 		$counts['uncategorized'] = max( 0, $total - $assigned );
 		$counts['total']         = $total;
+
+		// Library-wide storage total (bytes) for the "All Files" hover readout.
+		// Summed once from the cached _rmn_filesize postmeta so multi-folder files are
+		// not double-counted (unlike the per-folder sizes, which mirror count semantics).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- cached below with wp_cache_set.
+		$total_size = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COALESCE( SUM( CAST( pm.meta_value AS UNSIGNED ) ), 0 )
+				 FROM %i pm
+				 JOIN %i p ON p.ID = pm.post_id
+				 WHERE pm.meta_key = %s
+				   AND p.post_type = %s
+				   AND p.post_status = %s',
+				$wpdb->postmeta,
+				$wpdb->posts,
+				RayetunMediaNest_Smart_Folders::FILESIZE_KEY,
+				'attachment',
+				'inherit'
+			)
+		);
+
+		// Parallel to the per-term counts; the sidebar reads these for the hover readout.
+		// String keys never collide with the integer term_id keys above.
+		$counts['sizes']      = $sizes;
+		$counts['total_size'] = $total_size;
 
 		wp_cache_set( self::CACHE_KEY, $counts, self::CACHE_GROUP, 120 );
 		return $counts;

@@ -568,6 +568,15 @@
 		return node;
 	}
 
+	/* Human-readable byte size (mirrors RayetunMediaNest_Analytics::format_bytes). */
+	function fmtBytes( bytes ) {
+		bytes = parseInt( bytes, 10 ) || 0;
+		if ( bytes >= 1073741824 ) return ( bytes / 1073741824 ).toFixed(2) + ' GB';
+		if ( bytes >= 1048576 )    return ( bytes / 1048576 ).toFixed(1) + ' MB';
+		if ( bytes >= 1024 )       return Math.round( bytes / 1024 ) + ' KB';
+		return bytes + ' B';
+	}
+
 	/* ── Inline input ── */
 	function mkInput( ph, onOK, onCancel, extraCls ) {
 		var row=el('div',{className:'rayetun-mn-new-folder-row'+(extraCls?' '+extraCls:'')});
@@ -1499,9 +1508,14 @@
 		var isEmpty=count===0;
 		var isLocked=!!(folder.is_locked&&parseInt(folder.is_locked,10)>0);
 
+		/* Hover readout: file count + total storage for this folder (native tooltip). */
+		var size=(state.counts.sizes&&state.counts.sizes[tid])||0;
+		var rowTitle=folder.name+(count>0?(' - '+count+' file'+(count!==1?'s':'')+(size>0?' · '+fmtBytes(size):'')):'');
+
 		var li=el('li',{className:'rayetun-mn-item',role:'none'});
 		var row=el('div',{
 			className:'rayetun-mn-row'+(isAct?' is-active':'')+(isEmpty?' is-empty':'')+(isLocked?' is-locked':''),
+			title:rowTitle,
 			'data-mn-term':tid,tabindex:'0',role:'treeitem','aria-selected':isAct?'true':'false'
 		});
 
@@ -1655,7 +1669,9 @@
 
 		/* ── Root rows: All Files + Uncategorized ── */
 		var allAct=state.activeFolderId===null;
-		var ar=el('div',{className:'rayetun-mn-root-item'+(allAct?' is-active':''),tabindex:'0',role:'treeitem','aria-selected':allAct?'true':'false',
+		var allCnt=state.counts.total||0;
+		var allTitle=(s.allFiles||'All Files')+(allCnt>0?(' - '+allCnt+' file'+(allCnt!==1?'s':'')+(state.counts.total_size>0?' · '+fmtBytes(state.counts.total_size):'')):'');
+		var ar=el('div',{className:'rayetun-mn-root-item'+(allAct?' is-active':''),title:allTitle,tabindex:'0',role:'treeitem','aria-selected':allAct?'true':'false',
 			onClick:function(){setActive(null);},onKeydown:function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();setActive(null);}}});
 		ar.innerHTML=II.files+'<span class="rayetun-mn-root-label">'+(s.allFiles||'All Files')+'</span>';
 		if(SHOW_COUNTS&&state.counts.total>0)ar.appendChild(el('span',{className:'rayetun-mn-root-count'},String(state.counts.total)));
