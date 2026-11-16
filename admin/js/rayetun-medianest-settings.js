@@ -333,6 +333,10 @@
 
 	var analyticsLoaded = false;
 
+	/* Storage-by-Folder view state (persists while the Analytics tab is open). */
+	var folderView = { sort: 'size', dir: 'desc', filter: '', showAll: false };
+	var ROOT_LIMIT = 12;
+
 	function loadAnalytics() {
 		var $inner = $( '#mn-analytics-inner' );
 		$inner.html(
@@ -350,6 +354,7 @@
 			success: function ( data ) {
 				analyticsLoaded = true;
 				$inner.html( renderAnalytics( data ) );
+				initFolderSection( data, $inner );
 			},
 			error: function () {
 				$inner.html(
@@ -387,7 +392,6 @@
 		var largestFile= ( d.top_files && d.top_files.length ) ? parseInt( d.top_files[0].file_size, 10 ) : 0;
 
 		var maxType   = ( d.by_type   && d.by_type.length   ) ? parseInt( d.by_type[0].total_size,   10 ) || 1 : 1;
-		var maxFolder = ( d.by_folder && d.by_folder.length ) ? parseInt( d.by_folder[0].total_size, 10 ) || 1 : 1;
 
 		var typeColors = {
 			Images : '#4f46e5',
@@ -474,30 +478,198 @@
 			html += '</tbody></table>';
 		}
 
-		/* ── Storage by folder — table ── */
+		/* ── Storage by folder — toolbar + container; filled by initFolderSection() ── */
 		if ( d.by_folder && d.by_folder.length ) {
 			html += '<h3 class="mn-an-section-title">Storage by Folder</h3>';
-			html += '<table class="mn-an-table"><thead><tr>' +
-			        '<th>Folder</th>' +
-			        '<th style="width:70px">Files</th>' +
-			        '<th style="width:100px">Total Size</th>' +
-			        '<th style="width:160px">Distribution</th>' +
-			        '</tr></thead><tbody>';
-			$( d.by_folder ).each( function ( i, f ) {
-				var pct = maxFolder > 0 ? Math.round( parseInt( f.total_size, 10 ) / maxFolder * 100 ) : 0;
-				html += '<tr>' +
-				        '<td>' + escHtml( f.name ) + '</td>' +
-				        '<td>' + parseInt( f.count, 10 ).toLocaleString() + '</td>' +
-				        '<td><strong>' + escHtml( fmtBytes( f.total_size ) ) + '</strong></td>' +
-				        '<td><div class="mn-an-bar-wrap">' +
-				               '<div class="mn-an-bar-fill" style="width:' + pct + '%;background:#4f46e5"></div>' +
-				             '</div></td>' +
-				        '</tr>';
-			} );
-			html += '</tbody></table>';
+			html += '<div style="margin:0 0 8px">' +
+			        '<input type="text" id="mn-an-folder-filter" placeholder="Filter folders…" ' +
+			        'style="width:220px;max-width:100%;padding:5px 9px;border:1px solid #dcdcde;border-radius:4px;font-size:13px" /></div>';
+			html += '<div id="mn-an-folders"></div>';
 		}
 
 		return html;
+	}
+
+	/**
+	 * Storage-by-Folder controller: builds the rolled-up tree (collapsed by default,
+	 * Top-N roots), a flat path-aware filter view, and sortable columns. Rebinds its
+	 * own controls; safe to call once per analytics load.
+	 */
+	function initFolderSection( d, $root ) {
+		var $host = $root.find( '#mn-an-folders' );
+		if ( ! $host.length || ! d.by_folder || ! d.by_folder.length ) { return; }
+
+		var libSize = parseInt( d.total_storage, 10 ) || 0;
+
+		/* term_id → node map, nest children, keep roots. */
+		var fmap = {};
+		$( d.by_folder ).each( function ( i, f ) {
+			fmap[ f.term_id ] = {
+				term_id:   parseInt( f.term_id, 10 ),
+				parent:    parseInt( f.parent, 10 ) || 0,
+				name:      f.name,
+				rollCount: parseInt( f.roll_count, 10 ) || 0,
+				rollSize:  parseInt( f.roll_size, 10 ) || 0,
+				ownSize:   parseInt( f.total_size, 10 ) || 0,
+				children:  []
+			};
+		} );
+		var roots = [];
+		Object.keys( fmap ).forEach( function ( k ) {
+			var n = fmap[ k ];
+			if ( n.parent && fmap[ n.parent ] ) { fmap[ n.parent ].children.push( n ); }
+			else { roots.push( n ); }
+		} );
+		function pathOf( n ) {
+			var parts = [], p = n.parent, g = 0;
+			while ( p && fmap[ p ] && g < 100 ) { parts.unshift( fmap[ p ].name ); p = fmap[ p ].parent; g++; }
+			return parts;
+		}
+		var emptyCount = 0;
+		$( d.by_folder ).each( function ( i, f ) {
+			if ( ( parseInt( f.roll_size, 10 ) || 0 ) === 0 ) { emptyCount++; }
+		} );
+
+		function cmp( a, b ) {
+			var r;
+			if ( folderView.sort === 'name' )      { r = String( a.name ).localeCompare( String( b.name ) ); }
+			else if ( folderView.sort === 'files' ) { r = a.rollCount - b.rollCount; }
+			else                                    { r = a.rollSize - b.rollSize; }
+			return folderView.dir === 'desc' ? -r : r;
+		}
+		function hasStoredKids( n ) { return ( n.children || [] ).some( function ( c ) { return c.rollSize > 0; } ); }
+		function sizeCell( n ) {
+			var ownNote = ( hasStoredKids( n ) && n.ownSize > 0 && n.ownSize !== n.rollSize )
+				? ' <span style="color:#94a3b8;font-weight:400">(' + escHtml( fmtBytes( n.ownSize ) ) + ' here)</span>' : '';
+			return '<strong>' + escHtml( fmtBytes( n.rollSize ) ) + '</strong>' + ownNote;
+		}
+		function barCell( size ) {
+			var pct = libSize > 0 ? Math.min( 100, Math.round( size / libSize * 100 ) ) : 0;
+			return '<div class="mn-an-bar-wrap"><div class="mn-an-bar-fill" style="width:' + pct + '%;background:#4f46e5"></div></div>' +
+			       '<span style="font-size:11px;color:#64748b;margin-left:6px">' + pct + '%</span>';
+		}
+		function arrow( col ) {
+			if ( folderView.sort !== col ) { return ''; }
+			return folderView.dir === 'desc' ? ' ▾' : ' ▴';
+		}
+		function headHtml() {
+			return '<thead><tr>' +
+			       '<th class="mn-an-sort" data-sort="name" style="cursor:pointer">Folder' + arrow( 'name' ) + '</th>' +
+			       '<th class="mn-an-sort" data-sort="files" style="width:70px;cursor:pointer">Files' + arrow( 'files' ) + '</th>' +
+			       '<th class="mn-an-sort" data-sort="size" style="width:110px;cursor:pointer">Size' + arrow( 'size' ) + '</th>' +
+			       '<th style="width:170px">% of Library</th>' +
+			       '</tr></thead>';
+		}
+
+		function render() {
+			var q = folderView.filter.trim().toLowerCase();
+			var body = '';
+
+			if ( q ) {
+				/* Flat, path-aware filter view across all depths. */
+				var matches = [];
+				Object.keys( fmap ).forEach( function ( k ) {
+					var n = fmap[ k ];
+					if ( n.rollSize > 0 && String( n.name ).toLowerCase().indexOf( q ) !== -1 ) { matches.push( n ); }
+				} );
+				matches.sort( cmp );
+				if ( ! matches.length ) {
+					body = '<tr><td colspan="4" style="color:#94a3b8;padding:12px">No folders match “' + escHtml( folderView.filter ) + '”.</td></tr>';
+				} else {
+					matches.forEach( function ( n ) {
+						var path  = pathOf( n );
+						var crumb = path.length ? '<span style="color:#94a3b8;font-weight:400">' + escHtml( path.join( ' / ' ) ) + ' / </span>' : '';
+						body += '<tr>' +
+						        '<td style="padding-left:8px">' + crumb + escHtml( n.name ) + '</td>' +
+						        '<td>' + n.rollCount.toLocaleString() + '</td>' +
+						        '<td>' + sizeCell( n ) + '</td>' +
+						        '<td>' + barCell( n.rollSize ) + '</td>' +
+						        '</tr>';
+					} );
+				}
+				$host.html( '<table class="mn-an-table">' + headHtml() + '<tbody>' + body + '</tbody></table>' );
+				return;
+			}
+
+			/* Tree view (collapsed by default), capped to Top-N roots. */
+			var sortedRoots = roots.filter( function ( n ) { return n.rollSize > 0; } ).sort( cmp );
+			var shown = sortedRoots, hiddenRoots = 0;
+			if ( ! folderView.showAll && sortedRoots.length > ROOT_LIMIT ) {
+				shown = sortedRoots.slice( 0, ROOT_LIMIT );
+				hiddenRoots = sortedRoots.length - ROOT_LIMIT;
+			}
+
+			( function walk( nodes, depth ) {
+				nodes.filter( function ( n ) { return n.rollSize > 0; } ).sort( cmp ).forEach( function ( n ) {
+					var kids    = ( n.children || [] ).filter( function ( c ) { return c.rollSize > 0; } );
+					var hasKids = kids.length > 0;
+					var pad     = 8 + depth * 16;
+					var caret   = hasKids
+						? '<span class="mn-an-caret is-collapsed" data-term="' + n.term_id + '" role="button" tabindex="0" aria-label="Toggle subfolders" style="cursor:pointer;display:inline-block;width:14px;color:#64748b">▸</span>'
+						: '<span style="display:inline-block;width:14px"></span>';
+					var rowStyle = depth > 0 ? ' style="display:none"' : '';
+					body += '<tr data-term="' + n.term_id + '" data-parent="' + n.parent + '"' + rowStyle + '>' +
+					        '<td style="padding-left:' + pad + 'px">' + caret + escHtml( n.name ) + '</td>' +
+					        '<td>' + n.rollCount.toLocaleString() + '</td>' +
+					        '<td>' + sizeCell( n ) + '</td>' +
+					        '<td>' + barCell( n.rollSize ) + '</td>' +
+					        '</tr>';
+					if ( hasKids ) { walk( kids, depth + 1 ); }
+				} );
+			} )( shown, 0 );
+
+			var foot = '';
+			if ( hiddenRoots > 0 ) {
+				foot = '<p style="margin:8px 2px 0"><a href="#" id="mn-an-showall" style="font-size:13px">Show all ' + sortedRoots.length + ' folders</a></p>';
+			} else if ( folderView.showAll && sortedRoots.length > ROOT_LIMIT ) {
+				foot = '<p style="margin:8px 2px 0"><a href="#" id="mn-an-showless" style="font-size:13px">Show fewer</a></p>';
+			}
+			var note = emptyCount > 0
+				? '<p style="color:#94a3b8;font-size:12px;margin:6px 2px 0">' + emptyCount + ' folder' + ( emptyCount !== 1 ? 's' : '' ) + ' use no storage (hidden).</p>'
+				: '';
+			$host.html( '<table class="mn-an-table">' + headHtml() + '<tbody>' + body + '</tbody></table>' + foot + note );
+		}
+
+		/* Caret expand/collapse — delegated on the host, survives re-renders. */
+		function setVisible( parentTid, visible ) {
+			$host.find( 'tr[data-parent="' + parentTid + '"]' ).each( function () {
+				var $r = $( this );
+				$r.toggle( visible );
+				var childTid = $r.attr( 'data-term' );
+				if ( ! visible ) { setVisible( childTid, false ); }
+				else {
+					var $c = $r.find( '.mn-an-caret' );
+					setVisible( childTid, ! ( $c.length && $c.hasClass( 'is-collapsed' ) ) );
+				}
+			} );
+		}
+		function toggleCaret( $c ) {
+			var collapsed = $c.toggleClass( 'is-collapsed' ).hasClass( 'is-collapsed' );
+			$c.text( collapsed ? '▸' : '▾' );
+			setVisible( $c.attr( 'data-term' ), ! collapsed );
+		}
+
+		$host.off( '.mnfs' );
+		$host.on( 'click.mnfs', '.mn-an-caret', function () { toggleCaret( $( this ) ); } );
+		$host.on( 'keydown.mnfs', '.mn-an-caret', function ( e ) {
+			if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); toggleCaret( $( this ) ); }
+		} );
+		$host.on( 'click.mnfs', '.mn-an-sort', function () {
+			var col = $( this ).attr( 'data-sort' );
+			if ( folderView.sort === col ) { folderView.dir = folderView.dir === 'desc' ? 'asc' : 'desc'; }
+			else { folderView.sort = col; folderView.dir = ( col === 'name' ) ? 'asc' : 'desc'; }
+			render();
+		} );
+		$host.on( 'click.mnfs', '#mn-an-showall', function ( e ) { e.preventDefault(); folderView.showAll = true; render(); } );
+		$host.on( 'click.mnfs', '#mn-an-showless', function ( e ) { e.preventDefault(); folderView.showAll = false; render(); } );
+
+		/* Filter input lives outside $host so it keeps focus across re-renders. */
+		$root.find( '#mn-an-folder-filter' ).off( 'input.mnfs' ).on( 'input.mnfs', function () {
+			folderView.filter = this.value || '';
+			render();
+		} );
+
+		render();
 	}
 
 	// Trigger analytics load if analytics tab was the initially restored/URL tab.

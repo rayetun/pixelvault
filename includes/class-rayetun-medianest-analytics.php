@@ -269,14 +269,23 @@ class RayetunMediaNest_Analytics {
 		}, $rows ?: array() );
 	}
 
-	/** Storage breakdown per MediaNest folder. */
+	/**
+	 * Storage breakdown per MediaNest folder, with parent links and rolled-up
+	 * (subfolder-inclusive) totals for the hierarchical Analytics view.
+	 *
+	 * Each row carries its own `count`/`size` (aliased `total_size` for back-compat)
+	 * plus `roll_count`/`roll_size` = own totals + those of all descendant folders.
+	 * A file filed in more than one subfolder is counted once per filing (same
+	 * semantics as the per-folder counts) — an at-a-glance overview, not a
+	 * deduplicated disk measurement.
+	 */
 	private static function query_by_folder(): array {
 		global $wpdb;
 		$taxonomy = RayetunMediaNest_Taxonomy::TAXONOMY;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- cached by get_data().
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT t.term_id, t.name,
+				"SELECT t.term_id, tt.parent, t.name,
 				        COUNT( DISTINCT tr.object_id )                          AS file_count,
 				        COALESCE( SUM( CAST( pm.meta_value AS UNSIGNED ) ), 0 ) AS total_size
 				 FROM {$wpdb->terms} t
@@ -286,21 +295,61 @@ class RayetunMediaNest_Analytics {
 				   ON tt.term_taxonomy_id = tr.term_taxonomy_id
 				 LEFT JOIN {$wpdb->postmeta} pm
 				   ON tr.object_id = pm.post_id AND pm.meta_key = '_rmn_filesize'
-				 GROUP BY t.term_id, t.name
-				 ORDER BY total_size DESC",
+				 GROUP BY t.term_id, tt.parent, t.name",
 				$taxonomy
 			),
 			ARRAY_A
 		);
 
-		return array_map( static function ( $row ) {
-			return array(
-				'term_id'    => (int) $row['term_id'],
-				'name'       => $row['name'],
-				'count'      => (int) $row['file_count'],
-				'total_size' => (int) $row['total_size'],
+		$rows = $rows ?: array();
+
+		// Own totals keyed by term_id.
+		$nodes = array();
+		foreach ( $rows as $row ) {
+			$tid = (int) $row['term_id'];
+			$nodes[ $tid ] = array(
+				'term_id' => $tid,
+				'parent'  => (int) $row['parent'],
+				'name'    => (string) $row['name'],
+				'count'   => (int) $row['file_count'],
+				'size'    => (int) $row['total_size'],
 			);
-		}, $rows ?: array() );
+		}
+
+		// Roll each folder's own totals up into every ancestor (guarded against cycles).
+		$roll_count = array();
+		$roll_size  = array();
+		foreach ( $nodes as $tid => $node ) {
+			$roll_count[ $tid ] = 0;
+			$roll_size[ $tid ]  = 0;
+		}
+		foreach ( $nodes as $tid => $node ) {
+			$roll_count[ $tid ] += $node['count'];
+			$roll_size[ $tid ]  += $node['size'];
+			$p     = $node['parent'];
+			$guard = 0;
+			while ( $p && isset( $nodes[ $p ] ) && $guard < 100 ) {
+				$roll_count[ $p ] += $node['count'];
+				$roll_size[ $p ]  += $node['size'];
+				$p = $nodes[ $p ]['parent'];
+				$guard++;
+			}
+		}
+
+		$out = array();
+		foreach ( $nodes as $tid => $node ) {
+			$node['roll_count'] = $roll_count[ $tid ];
+			$node['roll_size']  = $roll_size[ $tid ];
+			$node['total_size'] = $node['size']; // Back-compat: own size.
+			$out[] = $node;
+		}
+
+		// Default order: largest rolled footprint first (client re-nests into a tree).
+		usort( $out, static function ( $a, $b ) {
+			return $b['roll_size'] <=> $a['roll_size'];
+		} );
+
+		return $out;
 	}
 
 	/** Number of attachments that have no _rmn_filesize entry yet. */
