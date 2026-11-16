@@ -5,7 +5,7 @@ Tags:              media library, media folders, document library, file manager,
 Requires at least: 6.5
 Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        1.4.0
+Stable tag:        1.5.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -224,6 +224,13 @@ PixelVault bundles the following open-source library:
 
 == Changelog ==
 
+= 1.5.0 =
+* New: 📊 **Storage by Folder, reimagined**. The Analytics tab now shows folder storage as a collapsible, rolled-up tree — each folder's total includes its subfolders — with a "% of Library" column, a quick filter box, and sortable Folder, Files and Size columns. Folders that use no storage are tucked away so the biggest consumers stand out.
+* New: 💾 **Folder sizes at a glance**. Hover any folder in the Media Library sidebar (or "All Files") to see its file count and total storage.
+* New: 🔎 **Filter in "Add to folder"**. The right-click "Add to folder" menu now scrolls within the screen and gains a quick filter box once you have more than a handful of folders, so filing into a large folder tree stays fast.
+* Improve: the Media Library sidebar now previews the Pro-only "Expired" and "Duplicates" smart folders — clearly marked as Pro — when PixelVault Pro is not active, so you can see what the add-on adds. They make way for the real folders once Pro is active.
+* Improve: the dashboard now shows contextual suggestions for the optional PixelVault Pro add-on and related tools. These are simple links — no third-party code — and can be switched off with the `rayetun_medianest_show_pro_upsell` filter.
+
 = 1.4.0 =
 * New: ↩️ **Undo for folder moves**. Filed a file, or a bulk selection, into the wrong folder? An "Undo" button now appears so you can reverse it instantly. Covers drag-and-drop, "Add to folder", bulk move, and remove-from-folder.
 * New: 🚚 **More importers**. You can now import your existing folders from **HappyFiles** and **Wicked Folders**, in addition to FileBird, Real Media Library, WP Media Folder, and Enhanced Media Library. Go to Settings → Tools → Import from Another Plugin.
@@ -335,6 +342,9 @@ PixelVault bundles the following open-source library:
 * No external services, no data collection.
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+A rebuilt "Storage by Folder" analytics view with rolled-up folder sizes, filtering and sorting; folder storage sizes on hover in the Media Library sidebar; and a filterable "Add to folder" menu.
 
 = 1.4.0 =
 Undo for folder moves, HappyFiles and Wicked Folders importers, a [pixelvault_document_library] shortcode, collapsible front-end folders, instant folder updates after upload, and a media-picker sidebar fix.
