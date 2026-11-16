@@ -1,7 +1,7 @@
 === PixelVault – Media Library Folders, Document Library & File Manager ===
 Contributors:      rayetun
 Donate link:       https://wise.com/pay/me/mdrayhanu2
-Tags:              media library, media folders, document library, file manager, asset manager
+Tags:              media library folder, folders, document library, media folder, content folders
 Requires at least: 6.5
 Tested up to:      7.1
 Requires PHP:      7.4
@@ -9,42 +9,26 @@ Stable tag:        1.5.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Organize your media library with nested drag-and-drop folders, then publish any folder as a downloadable front-end Document Library.
+Organize media library, posts & pages into nested drag-and-drop virtual folders — and publish any folder as a downloadable Document Library.
 
 == Description ==
 
-📁 **PixelVault** is the free way to **organize your WordPress media library** with unlimited, drag-and-drop **media folders**, and now to **present** those folders as a downloadable **Document Library** on the front end. Sort images, videos, PDFs, audio, and documents into nested, colour-coded folders right inside the Media Library, then publish any folder as a browsable **asset manager** for your visitors.
+📁 **PixelVault** is the free way to **organize your WordPress media library** with unlimited, drag-and-drop **media folders** — and the same folder tree now organizes your **Posts and Pages** too. Sort images, videos, PDFs, audio, and documents into nested, colour-coded folders right inside the Media Library, then publish any folder as a browsable, downloadable **Document Library** — a tidy **asset manager** for your visitors.
 
 Stop scrolling through hundreds of unsorted attachments. PixelVault lets you **categorize media into folders and subfolders**, filter instantly, and find any file in seconds — a proper **file manager** for your WordPress media.
 
 Folders are **virtual** — physical files never move, no URLs change, nothing breaks, and standard WordPress export/import keeps working without any special steps.
 
-= 🆕 Document Library block (new in 1.2.0) =
+= 💡 Use Cases for PixelVault =
 
-Turn any media folder into a browsable, downloadable **document library** on the front end, no page builder required. The **PixelVault Document Library** Gutenberg block renders a folder as an accessible file browser with a sidebar folder tree, breadcrumb navigation, in-library search, pagination, and per-file downloads.
+Wondering how PixelVault fits your workflow? A few ways people organize with it:
 
-* 🗂️ **Folder tree and breadcrumb**: visitors browse nested folders without page reloads
-* 🔍 **Search and pagination**: find files fast inside large folders
-* ⬇️ **Per-file download plus Download-all ZIP**: grab one file or the whole folder in a click
-* 🎨 **Three design presets** (Cards, Compact, Minimal), with an accent colour and a framed option
-* ♿ **Accessibility-first**: full keyboard navigation (WAI-ARIA tree pattern), screen-reader friendly
-* 📱 **Fully responsive**: grid and list layouts adapt to mobile
-* 🔒 **Respects folder visibility**: restricted folders stay hidden from guests
-* 🧩 **Block or shortcode**: insert it with the block, or use `[pixelvault_document_library]` in the Classic Editor, page builders, widgets, and theme templates
-
-Perfect for knowledge bases, press kits, resource centres, download portals, and product documentation.
-
-= 🗂️ Content Folders for Posts & Pages (new in 1.3.0) =
-
-Folders aren't just for media any more. Enable **Content Folders** and the same folder tree appears on your **Posts** and **Pages** list screens, so you can organise content the way you organise files — without touching public categories or tags.
-
-* 📂 **Nested folders on the Posts and Pages screens** — a sidebar with create, rename, delete, and unlimited subfolders
-* 🖱️ **Drag-and-drop filing** — drag selected rows onto a folder, or use "Add to folder"
-* ⚡ **Instant folder filtering** — click a folder to filter the list, no page reload
-* 🧩 **One shared tree** — a "Client campaign" folder can hold both its images and its landing pages
-* 🔒 **Private and admin-only** — folders never appear on the front end and never affect your categories, tags, URLs, or SEO
-
-Content Folders keep your editorial workflow tidy — group drafts, campaigns, seasonal pages, or client work — separately from the public taxonomy your visitors see.
+* **Photographers and creators** — file hundreds of shots into nested folders by client, shoot, or year, and find any image in seconds.
+* **Agencies and freelancers** — keep each client's images, PDFs, and landing pages together in one shared folder tree, away from the public taxonomy.
+* **Publishers and bloggers** — group drafts, campaigns, and seasonal posts into Content Folders without touching categories, tags, or URLs.
+* **E-commerce teams** — sort product imagery by collection or season so the right assets are always a click away.
+* **Knowledge bases and resource centres** — publish any folder as a searchable, downloadable Document Library for your visitors.
+* **Documentation and press kits** — hand clients or the public a browsable file library with per-file and Download-all-ZIP access.
 
 = ✨ Core Features =
 
@@ -110,6 +94,33 @@ Granular folder access per WordPress user role: control who can create, edit, an
 * 🎛️ **Elementor** — folder panel works inside the Elementor media modal
 * 🏗️ **Divi** — folder panel works in the Divi backend builder and the Divi Front End Builder
 * 🌍 **Universal compatibility** — PixelVault hooks into WordPress's native media modal, so it works with any theme or page builder
+
+= 📚 Document Library block =
+
+Turn any media folder into a browsable, downloadable **document library** on the front end, no page builder required. The **PixelVault Document Library** Gutenberg block renders a folder as an accessible file browser with a sidebar folder tree, breadcrumb navigation, in-library search, pagination, and per-file downloads.
+
+* 🗂️ **Folder tree and breadcrumb**: visitors browse nested folders without page reloads
+* 🔍 **Search and pagination**: find files fast inside large folders
+* ⬇️ **Per-file download plus Download-all ZIP**: grab one file or the whole folder in a click
+* 🎨 **Three design presets** (Cards, Compact, Minimal), with an accent colour and a framed option
+* ♿ **Accessibility-first**: full keyboard navigation (WAI-ARIA tree pattern), screen-reader friendly
+* 📱 **Fully responsive**: grid and list layouts adapt to mobile
+* 🔒 **Respects folder visibility**: restricted folders stay hidden from guests
+* 🧩 **Block or shortcode**: insert it with the block, or use `[pixelvault_document_library]` in the Classic Editor, page builders, widgets, and theme templates
+
+Perfect for knowledge bases, press kits, resource centres, download portals, and product documentation.
+
+= 🗂️ Content Folders for Posts & Pages =
+
+Folders aren't just for media any more. Enable **Content Folders** and the same folder tree appears on your **Posts** and **Pages** list screens, so you can organise content the way you organise files — without touching public categories or tags.
+
+* 📂 **Nested folders on the Posts and Pages screens** — a sidebar with create, rename, delete, and unlimited subfolders
+* 🖱️ **Drag-and-drop filing** — drag selected rows onto a folder, or use "Add to folder"
+* ⚡ **Instant folder filtering** — click a folder to filter the list, no page reload
+* 🧩 **One shared tree** — a "Client campaign" folder can hold both its images and its landing pages
+* 🔒 **Private and admin-only** — folders never appear on the front end and never affect your categories, tags, URLs, or SEO
+
+Content Folders keep your editorial workflow tidy — group drafts, campaigns, seasonal pages, or client work — separately from the public taxonomy your visitors see.
 
 = 🏛️ Architecture: Virtual Taxonomy =
 
@@ -179,9 +190,9 @@ All folder data is removed cleanly on uninstall: taxonomy terms, term relationsh
 
 Yes. Full CRUD is available at `/wp-json/rayetun-medianest/v1/folders`. Authenticate with a standard `X-WP-Nonce` header.
 
-= 🚚 Can I import my folders from FileBird, Real Media Library, WP Media Folder, or Enhanced Media Library? =
+= 🚚 Can I import my folders from FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, or Wicked Folders? =
 
-Yes — all four are supported. Go to **Settings → Tools → Import from Another Plugin**, scan for importable plugins, and click Import. The original plugin's data is never modified or deleted.
+Yes — all six are supported. Go to **Settings → Tools → Import from Another Plugin**, scan for importable plugins, and click Import. The original plugin's data is never modified or deleted.
 
 = 🧩 Does it work with Elementor, Divi, and Gutenberg? =
 
@@ -205,7 +216,7 @@ Post in the [WordPress.org support forum](https://wordpress.org/support/plugin/p
 2. Folder sidebar in the WordPress Media Library — unlimited nested folders with colour coding.
 3. Right-click context menu — rename, delete, lock, download ZIP, import ZIP, and more.
 4. Storage Analytics — per-folder breakdown, file-type chart, and top-10 largest files.
-5. Import from another plugin — one-click migration from FileBird, Real Media Library, WP Media Folder, and Enhanced Media Library.
+5. Import from another plugin — one-click migration from FileBird, Real Media Library, WP Media Folder, Enhanced Media Library, HappyFiles, and Wicked Folders.
 6. Media Usage Map — see every post and page that references a file.
 7. Bulk Alt Text Editor — batch-edit missing alt text across your entire library.
 8. Import Existing Media — auto-organize your existing media into folders by a chosen rule (By Year, By Month, By File Type)
