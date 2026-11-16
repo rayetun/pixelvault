@@ -72,9 +72,9 @@ class RayetunMediaNest_Counts {
 		global $wpdb;
 
 		// Per-folder counts via term relationship table.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- cached below with wp_cache_set; no WP API for bulk term counts on custom taxonomy.
 		// COUNT is unaffected by the LEFT JOIN: the meta_key filter yields at most one
 		// postmeta row per attachment, so each object is still counted once.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- cached below with wp_cache_set; no WP API for bulk term counts on custom taxonomy.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT tt.term_id, COUNT( tr.object_id ) AS cnt,
